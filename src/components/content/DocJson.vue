@@ -154,4 +154,16 @@ export default {
   border-top: 1px solid #ddd;
   padding-top: 5px;
 }
+.api-param-code {
+  margin-top: 16px;
+  max-height: 500px;
+  overflow: auto;
+  .code {
+    margin-bottom: 1em;
+    pre {
+      margin-bottom: 0;
+      border-radius: 4px;
+    }
+  }
+}
 </style>

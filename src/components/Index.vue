@@ -98,8 +98,8 @@ export default {
           this.apiData = res.data.data;
           this.currentApiData = {};
           // 更新url
-          const url = `${window.location.protocol}//${
-            window.location.host
+          const url = `${window.location.protocol}//${window.location.host}${
+            window.location.pathname
           }?version=${version ? version : ""}`;
           setCurrentUrl(url);
         })

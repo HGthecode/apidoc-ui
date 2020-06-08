@@ -202,19 +202,22 @@ export default {
     },
     renderHeaderData(headerData) {
       const data = cloneDeep(headerData);
-      // 赋值全局Auth
-      this.globalAuthKey =
-        this.config && this.config.global_auth_key
-          ? this.config.global_auth_key
-          : "Authorization";
-      this.globalAuthToken = ls.get("globalAuth");
-      const headers = data.map(item => {
-        if (item.name === this.globalAuthKey) {
-          item.default = this.globalAuthToken;
-        }
-        return item;
-      });
-      return headers;
+      if (data && data.length) {
+        // 赋值全局Auth
+        this.globalAuthKey =
+          this.config && this.config.global_auth_key
+            ? this.config.global_auth_key
+            : "Authorization";
+        this.globalAuthToken = ls.get("globalAuth");
+
+        const headers = data.map(item => {
+          if (item.name === this.globalAuthKey) {
+            item.default = this.globalAuthToken;
+          }
+          return item;
+        });
+        return headers;
+      }
     }
   }
 };
@@ -230,6 +233,15 @@ export default {
 }
 .api-param-code {
   margin-top: 16px;
+  max-height: 500px;
+  overflow: auto;
+  .code {
+    margin-bottom: 1em;
+    pre {
+      margin-bottom: 0;
+      border-radius: 4px;
+    }
+  }
 }
 .api-param-empty {
   border: 1px solid #ddd;
