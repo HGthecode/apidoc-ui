@@ -183,6 +183,7 @@ export default {
           headers[item.name] = item.default;
         });
       }
+      this.globalAuthToken = ls.get("globalAuth");
       if (this.globalAuthToken) {
         headers[this.globalAuthKey] = this.globalAuthToken;
       }
@@ -202,14 +203,13 @@ export default {
     },
     renderHeaderData(headerData) {
       const data = cloneDeep(headerData);
+      // 赋值全局Auth
+      this.globalAuthKey =
+        this.config && this.config.global_auth_key
+          ? this.config.global_auth_key
+          : "Authorization";
+      this.globalAuthToken = ls.get("globalAuth");
       if (data && data.length) {
-        // 赋值全局Auth
-        this.globalAuthKey =
-          this.config && this.config.global_auth_key
-            ? this.config.global_auth_key
-            : "Authorization";
-        this.globalAuthToken = ls.get("globalAuth");
-
         const headers = data.map(item => {
           if (item.name === this.globalAuthKey) {
             item.default = this.globalAuthToken;
@@ -218,6 +218,7 @@ export default {
         });
         return headers;
       }
+      return [];
     }
   }
 };
