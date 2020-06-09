@@ -169,13 +169,15 @@ export default {
             />
           </div>
         </div>
-        <Menu
-          style="width: 100%"
-          mode="inline"
-          {...{ on: { click: this.handleClick } }}
-        >
-          {menuTree}
-        </Menu>
+        <div class="doc-menu-box">
+          <Menu
+            style="width: 100%"
+            mode="inline"
+            {...{ on: { click: this.handleClick } }}
+          >
+            {menuTree}
+          </Menu>
+        </div>
       </div>
     );
   }
@@ -199,6 +201,13 @@ export default {
   .doc-menu-header {
     padding: 10px;
     border-bottom: 1px solid #ddd;
+  }
+  .doc-menu-box {
+    width: 100%;
+    height: calc(100vh - 100px);
+    overflow: hidden;
+    overflow-y: auto;
+    padding-bottom: 50px;
   }
 }
 /deep/ .ant-menu-sub.ant-menu-inline > .ant-menu-item {
