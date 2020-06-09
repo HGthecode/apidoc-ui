@@ -27,10 +27,10 @@ export default {
       default: ""
     }
   },
-  model: {
-    prop: "data",
-    event: "update"
-  },
+  // model: {
+  //   prop: "data",
+  //   event: "update"
+  // },
   watch: {
     data() {
       this.value = this.data;
@@ -63,7 +63,7 @@ export default {
     updateData() {
       //修改前回调
       this.$emit("change", this.value);
-      this.$emit("update", this.value);
+      // this.$emit("update", this.value);
       this.editable = false;
     },
     onBlur() {

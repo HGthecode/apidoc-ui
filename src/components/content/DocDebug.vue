@@ -11,8 +11,12 @@
           :pagination="false"
           :data-source="headerData"
         >
-          <template slot="headerValue" slot-scope="text">
-            <TableInput style="width:350px;" :data="text" />
+          <template slot="headerValue" slot-scope="text, record">
+            <TableInput
+              style="width:350px;"
+              :data="text"
+              @change="onHeaderCellChange(record.name, 'default', $event)"
+            />
           </template>
         </Table>
       </div>
@@ -178,15 +182,16 @@ export default {
       var json = eval("(" + string + ")");
       const method = this.apiData.method.toLowerCase();
       const headers = {};
+      this.globalAuthToken = ls.get("globalAuth");
+      if (this.globalAuthToken) {
+        headers[this.globalAuthKey] = this.globalAuthToken;
+      }
       if (this.headerData && this.headerData.length) {
         this.headerData.forEach(item => {
           headers[item.name] = item.default;
         });
       }
-      this.globalAuthToken = ls.get("globalAuth");
-      if (this.globalAuthToken) {
-        headers[this.globalAuthKey] = this.globalAuthToken;
-      }
+
       sendRequest(this.apiData.url, json, method, headers)
         .then(res => {
           this.returnData = res;
@@ -219,6 +224,14 @@ export default {
         return headers;
       }
       return [];
+    },
+    onHeaderCellChange(key, dataIndex, value) {
+      const dataSource = [...this.headerData];
+      const target = dataSource.find(item => item.name === key);
+      if (target) {
+        target[dataIndex] = value;
+        this.headerData = dataSource;
+      }
     }
   }
 };

@@ -86,9 +86,14 @@ export default {
       if (menu.children && menu.children.length) {
         menu.children.forEach(item => itemArr.push(this.renderItem(item)));
       }
+      let controller = "";
+      if (menu.controller) {
+        controller = <b style="margin-right:10px;">{menu.controller}</b>;
+      }
       return (
         <MenuSubMenu {...{ key: menu.id }}>
           <span slot="title">
+            {controller}
             <span>{menu.title}</span>
           </span>
           {itemArr}
@@ -125,6 +130,7 @@ export default {
                   {menu.method}
                 </Tag>
                 {menu.title}
+                <span style="margin-left:10px;">{menu.url}</span>
               </div>
             </span>
           </MenuItem>
@@ -181,6 +187,7 @@ export default {
   .action-title-tag {
     width: 50px;
     text-align: center;
+    padding: 0 3px;
   }
   .doc-menu-url {
     padding: 2px 10px;
