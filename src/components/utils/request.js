@@ -16,10 +16,12 @@ service.interceptors.request.use(
       apiConfig &&
       apiConfig.auth &&
       apiConfig.auth.with_auth &&
-      apiConfig.auth.headers_key
+      apiConfig.auth.headers_key &&
+      config.url === "/apidoc/data"
     ) {
       config.headers[apiConfig.auth.headers_key] = token;
     }
+
     return config;
   },
   error => {

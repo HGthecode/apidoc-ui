@@ -24,7 +24,38 @@
     <div v-if="apiData.param && apiData.param.length">
       <h2>请求参数Parameters</h2>
       <div class="api-param-textarea">
+        <div v-if="apiData.paramType === 'formdata'" class="param-box">
+          <Form :label-col="{ span: 5 }" :wrapper-col="{ span: 12 }">
+            <FormItem
+              v-for="item in apiData.param"
+              :key="item.name"
+              :label="item.name"
+            >
+              <div v-if="item.type == 'file'">
+                <Upload
+                  :file-list="fileList[item.name]"
+                  :remove="
+                    file => {
+                      fileHandleRemove(file, item.name);
+                    }
+                  "
+                  :before-upload="
+                    file => {
+                      fileBeforeUpload(file, item.name);
+                      return false;
+                    }
+                  "
+                  :name="item.name"
+                >
+                  <Button> Select File </Button>
+                </Upload>
+              </div>
+              <Input v-else v-model="formdata[item.name]" />
+            </FormItem>
+          </Form>
+        </div>
         <TextArea
+          v-else
           v-model="parameters"
           :auto-size="{ minRows: 5, maxRows: 20 }"
         />
@@ -62,7 +93,15 @@
 
 <script>
 import Vue from "vue";
-import { Input, Button, Alert, Empty, Table } from "ant-design-vue";
+import {
+  Input,
+  Button,
+  Alert,
+  Empty,
+  Table,
+  Form,
+  Upload
+} from "ant-design-vue";
 import VueHighlightJS from "vue-highlight.js";
 import "highlight.js/styles/atom-one-dark.css";
 import javascript from "highlight.js/lib/languages/javascript";
@@ -81,12 +120,16 @@ Vue.use(VueHighlightJS, {
 
 export default {
   components: {
+    Input,
     TextArea: Input.TextArea,
     Button,
     Alert,
     Empty,
     Table,
-    TableInput
+    TableInput,
+    Form,
+    FormItem: Form.Item,
+    Upload
   },
   props: {
     apiData: {
@@ -116,7 +159,9 @@ export default {
           dataIndex: "desc"
         }
       ],
-      headerData: []
+      headerData: [],
+      fileList: {},
+      formdata: {}
     };
   },
   watch: {
@@ -129,6 +174,20 @@ export default {
 
   created() {
     this.parameters = this.renderParamsCode(this.apiData.param);
+
+    if (this.apiData.paramType == "formdata") {
+      let fileList = {};
+      let formdata = {};
+      this.apiData.param.forEach(item => {
+        if (item.type === "file") {
+          fileList[item.name] = [];
+        } else {
+          formdata[item.name] = "";
+        }
+      });
+      this.fileList = fileList;
+      this.formdata = formdata;
+    }
     this.headerData = this.renderHeaderData(this.apiData.header);
   },
   methods: {
@@ -163,9 +222,17 @@ export default {
             arrayCode += valueIndentContent + "],\n";
             value = arrayCode;
             type = "array";
+          } else if (item.type == "tree" && item.params && item.params.length) {
+            let arrayCode = indentContent + "[\n";
+            arrayCode += valueIndentContent + "{\n";
+            arrayCode += this.renderParamsCode(item.params, indent + 4);
+            arrayCode += valueIndentContent + "}\n";
+            arrayCode += valueIndentContent + "],\n";
+            value = arrayCode;
+            type = "tree";
           }
           let desc = `,\n`;
-          if (type === "array" || type == "object") {
+          if (type === "array" || type == "object" || type == "tree") {
             desc = "";
           }
           code += `${valueIndentContent}"${item.name}": ${value}${desc}`;
@@ -178,8 +245,30 @@ export default {
     },
 
     excute() {
-      const string = this.parameters;
-      var json = eval("(" + string + ")");
+      let json = {};
+      if (this.apiData.paramType == "formdata") {
+        const formData = new FormData();
+        // let formData = new FormData($( "#myform" )[0]);
+        this.apiData.param.forEach(item => {
+          if (item.type === "file") {
+            const fileList = this.fileList[item.name];
+            console.log(fileList);
+
+            if (fileList && fileList.length) {
+              formData.append(item.name, fileList[0]);
+            }
+          } else {
+            formData.append(item.name, this.formdata[item.name]);
+          }
+        });
+        json = formData;
+      } else {
+        const string = this.parameters;
+        json = eval("(" + string + ")");
+      }
+      console.log(json, this.formdata);
+      debugger;
+
       const method = this.apiData.method.toLowerCase();
       const headers = {};
       this.globalAuthToken = ls.get("globalAuth");
@@ -190,6 +279,9 @@ export default {
         this.headerData.forEach(item => {
           headers[item.name] = item.default;
         });
+      }
+      if (this.apiData.paramType === "formdata") {
+        headers["Content-Type"] = "application/x-www-form-urlencoded";
       }
 
       sendRequest(this.apiData.url, json, method, headers)
@@ -232,6 +324,23 @@ export default {
         target[dataIndex] = value;
         this.headerData = dataSource;
       }
+    },
+    fileBeforeUpload(file, name) {
+      const fileList =
+        this.fileList[name] && this.fileList[name].length
+          ? this.fileList[name]
+          : [];
+
+      this.fileList[name] = [...fileList, file];
+
+      return false;
+    },
+    fileHandleRemove(file, name) {
+      let fileList = this.fileList[name];
+      const index = fileList.indexOf(file);
+      const newFileList = fileList.slice();
+      newFileList.splice(index, 1);
+      this.fileList[name] = newFileList;
     }
   }
 };

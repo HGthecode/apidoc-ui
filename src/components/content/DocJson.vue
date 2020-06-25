@@ -125,9 +125,17 @@ export default {
             arrayCode += valueIndentContent + "],\n";
             value = arrayCode;
             type = "array";
+          } else if (item.type == "tree" && item.params && item.params.length) {
+            let arrayCode = indentContent + "[    //" + item.desc + "\n";
+            arrayCode += valueIndentContent + "{\n";
+            arrayCode += this.renderParamsCode(item.params, indent + 4);
+            arrayCode += valueIndentContent + "}\n";
+            arrayCode += valueIndentContent + "],\n";
+            value = arrayCode;
+            type = "tree";
           }
           let desc = `,  // ${item.desc}\n`;
-          if (type === "array" || type == "object") {
+          if (type === "array" || type == "object" || type === "tree") {
             desc = "";
           }
           code += `${valueIndentContent}${item.name}: ${value}${desc}`;
