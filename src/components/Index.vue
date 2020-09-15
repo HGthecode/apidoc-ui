@@ -132,7 +132,7 @@ export default {
         // 密码验证方法
         PasswordModal({
           success: () => {
-            that.getApiList(...option);
+            window.location.reload();
           }
         });
       } else {

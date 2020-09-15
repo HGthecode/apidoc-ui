@@ -266,8 +266,6 @@ export default {
         const string = this.parameters;
         json = eval("(" + string + ")");
       }
-      console.log(json, this.formdata);
-      debugger;
 
       const method = this.apiData.method.toLowerCase();
       const headers = {};
