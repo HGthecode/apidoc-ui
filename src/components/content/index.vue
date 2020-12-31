@@ -126,7 +126,8 @@ export default {
 
 <style lang="less" scoped>
 .doc-content {
-  max-width: 700px;
+  max-width: 740px;
+  margin: 0 auto;
   .title-label {
     color: #333;
   }

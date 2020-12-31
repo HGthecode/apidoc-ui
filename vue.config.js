@@ -3,7 +3,6 @@ const vueConfig = {
   publicPath: "",
   //静态资源打包到该文件夹
   assetsDir: "static",
-  // outputDir: "",
   productionSourceMap: false,
 
   configureWebpack: {
@@ -13,17 +12,6 @@ const vueConfig = {
       chunkFilename: `static/js/[name].${Timestamp}.js`
     }
   },
-  // css: {
-  //   loaderOptions: {
-  //     less: {
-  //       globalVars: {
-  //         "main-color": "#1989fa",
-  //         red: "#f44",
-  //         green: "#07c160"
-  //       }
-  //     }
-  //   }
-  // },
   devServer: {
     port: 9998
   }

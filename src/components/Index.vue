@@ -79,13 +79,15 @@ export default {
   },
   methods: {
     getApiList(version = "", cacheFileName = "", reload = false) {
+      let versionText = "";
       if (
         !version &&
         this.config &&
         this.config.versions &&
         this.config.versions.length
       ) {
-        version = this.config.versions[0].folder;
+        version = this.config.versions[0].title;
+        versionText = this.config.versions[0].title;
       }
       this.loading = true;
       sendRequest(
@@ -95,6 +97,9 @@ export default {
       )
         .then(res => {
           this.loading = false;
+          if (!(res.data.data && res.data.data.version)) {
+            res.data.data.version = versionText;
+          }
           this.apiData = res.data.data;
           this.currentApiData = {};
           // 更新url

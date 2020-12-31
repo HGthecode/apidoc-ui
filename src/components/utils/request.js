@@ -3,8 +3,8 @@ import { ls } from "./cache";
 
 // 创建实例
 const service = axios.create({
-  baseURL: "",
-  timeout: 50000
+  baseURL: "http://tp.test.com",
+  timeout: 30 * 60 * 1000
 });
 
 // 请求拦截器

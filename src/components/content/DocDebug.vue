@@ -63,7 +63,9 @@
     </div>
 
     <div class="api-debug-action">
-      <Button type="primary" block @click="excute">执行 Excute</Button>
+      <Button type="primary" :loading="loading" block @click="excute"
+        >执行 Excute</Button
+      >
     </div>
 
     <div>
@@ -161,7 +163,8 @@ export default {
       ],
       headerData: [],
       fileList: {},
-      formdata: {}
+      formdata: {},
+      loading: false
     };
   },
   watch: {
@@ -245,10 +248,10 @@ export default {
     },
 
     excute() {
+      this.loading = true;
       let json = {};
       if (this.apiData.paramType == "formdata") {
         const formData = new FormData();
-        // let formData = new FormData($( "#myform" )[0]);
         this.apiData.param.forEach(item => {
           if (item.type === "file") {
             const fileList = this.fileList[item.name];
@@ -284,9 +287,11 @@ export default {
 
       sendRequest(this.apiData.url, json, method, headers)
         .then(res => {
+          this.loading = false;
           this.returnData = res;
         })
         .catch(err => {
+          this.loading = false;
           if (err.response) {
             this.returnData = err.response;
           } else {

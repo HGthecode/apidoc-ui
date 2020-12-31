@@ -1,7 +1,9 @@
 <template>
   <div class="header">
     <div class="logo-box">
-      <div class="logo">API</div>
+      <div class="logo">
+        <img src="/logo.png" alt="" />
+      </div>
       <div class="logo-text">
         {{ config && config.title ? config.title : "Api Doc" }}
       </div>
@@ -21,7 +23,7 @@
           <SelectOption
             v-for="(item, index) in config.versions"
             :key="index"
-            :value="item.folder"
+            :value="item.title"
           >
             {{ item.title }}
           </SelectOption>
@@ -162,34 +164,12 @@ export default {
   .logo-box {
     padding: 4px 0;
     overflow: hidden;
-
     .logo {
       float: left;
-      width: 28px;
-      height: 32px;
-      border-radius: 4px;
-      background: @logoBackground;
-      border: 2px solid @logoColor;
-      text-align: center;
-      color: @logoTextColor;
-      position: relative;
-      font-size: 12px;
-      font-weight: bold;
-      &::before,
-      &::after {
-        content: "";
-        width: 10px;
-        height: 2px;
-        background: @logoColor;
-        position: absolute;
-        top: 18px;
-        left: 2px;
-      }
-      &::after {
-        width: 20px;
-        top: 22px;
+      & > img {
       }
     }
+
     .logo-text {
       float: left;
       line-height: 32px;
