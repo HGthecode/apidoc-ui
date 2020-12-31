@@ -2,6 +2,7 @@
   <div>
     <div class="api-home-content">
       <h1>{{ apiData.title }}</h1>
+      <div v-if="config.desc" class="desc">{{ config.desc }}</div>
       <div class="version">Version：{{ apiData.version }}</div>
       <div>{{ apiData.copyright }}</div>
     </div>
@@ -12,6 +13,10 @@
 export default {
   props: {
     apiData: {
+      type: Object,
+      default: () => {}
+    },
+    config: {
       type: Object,
       default: () => {}
     }
@@ -25,6 +30,9 @@ export default {
   padding: 100px 0;
   h1 {
     font-size: 40px;
+  }
+  .desc {
+    margin-bottom: 20px;
   }
   .version {
     font-size: 18px;

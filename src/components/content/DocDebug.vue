@@ -329,12 +329,12 @@ export default {
       }
     },
     fileBeforeUpload(file, name) {
-      const fileList =
-        this.fileList[name] && this.fileList[name].length
-          ? this.fileList[name]
-          : [];
+      // const fileList =
+      //   this.fileList[name] && this.fileList[name].length
+      //     ? this.fileList[name]
+      //     : [];
 
-      this.fileList[name] = [...fileList, file];
+      this.fileList[name] = [file];
 
       return false;
     },

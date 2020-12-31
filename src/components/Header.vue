@@ -2,7 +2,7 @@
   <div class="header">
     <div class="logo-box">
       <div class="logo">
-        <img src="/logo.png" alt="" />
+        <img :src="logoPath" alt="" />
       </div>
       <div class="logo-text">
         {{ config && config.title ? config.title : "Api Doc" }}
@@ -110,7 +110,8 @@ export default {
     return {
       isGlobalAuth: false,
       currentVersion: "",
-      currentCache: ""
+      currentCache: "",
+      logoPath: "./logo.png"
     };
   },
   watch: {

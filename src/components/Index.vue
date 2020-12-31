@@ -27,7 +27,7 @@
               :apiData="currentApiData"
               :responses="apiData.responses"
             />
-            <DocHome v-else :apiData="apiData" />
+            <DocHome v-else :apiData="apiData" :config="config" />
           </Card>
         </pane>
       </splitpanes>
