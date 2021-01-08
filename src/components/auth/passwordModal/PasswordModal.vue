@@ -24,8 +24,8 @@
 
 <script>
 import { Modal, Button, Input, message } from "ant-design-vue";
-import { sendRequest } from "../../utils/request";
-import { ls } from "../../utils/cache";
+import { verifyAuth } from "@/api/app";
+import { ls } from "@/utils/cache";
 
 import md5 from "js-md5";
 export default {
@@ -62,7 +62,7 @@ export default {
       this.login({ password: md5(this.password) });
     },
     login(values) {
-      sendRequest("/apidoc/auth", values, "post")
+      verifyAuth(values)
         .then(res => {
           if (res && res.data && res.data.token) {
             ls.set("token", res.data.token);

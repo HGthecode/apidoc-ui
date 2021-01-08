@@ -28,7 +28,7 @@
 
 <script>
 import { Modal, Button, Input, message } from "ant-design-vue";
-import { ls } from "../../utils/cache";
+import { ls } from "@/utils/cache";
 export default {
   components: {
     Modal,

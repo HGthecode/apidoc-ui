@@ -1,27 +1,37 @@
 <template>
-  <div>
+  <div :class="[`layout-size_${currentSize}`]">
     <Header
       ref="header"
       :config="config"
       :apiData="apiData"
+      :device="device"
       @onVersionChange="getApiList"
+      @showSideMenu="onShowSideMenu"
     />
     <div class="spin-box" v-if="loading">
       <Spin tip="Loading..." :spinning="loading"> </Spin>
     </div>
     <div v-else>
       <splitpanes style="height: calc(100vh - 50px)">
-        <pane size="20" min-size="20" max-size="40">
+        <pane v-if="device != 'mobile'" size="20" min-size="20" max-size="40">
           <Card
             :bordered="false"
             style="height:100%"
             :bodyStyle="{ padding: 0 }"
           >
-            <DocMenu :apiData="apiData.list" @change="menuChange" />
+            <DocMenu
+              :apiData="apiData.list"
+              :groups="apiData.groups"
+              @change="menuChange"
+            />
           </Card>
         </pane>
-        <pane size="70">
-          <Card :bordered="false" style="height:100%;overflow: auto;">
+        <pane :size="device != 'mobile' ? 70 : 100">
+          <Card
+            :bordered="false"
+            style="height:100%;overflow: auto;"
+            :bodyStyle="{ padding: device == 'mobile' ? '10px' : '24px' }"
+          >
             <DocApiContent
               v-if="currentApiData && currentApiData.title"
               :apiData="currentApiData"
@@ -31,6 +41,21 @@
           </Card>
         </pane>
       </splitpanes>
+      <Drawer
+        v-if="device == 'mobile'"
+        :title="config && config.title ? config.title : 'Api Doc'"
+        placement="left"
+        :visible="visible.sideMenu"
+        width="80%"
+        :bodyStyle="{ padding: 0 }"
+        @close="onSideMenuClose"
+      >
+        <DocMenu
+          :apiData="apiData.list"
+          :groups="apiData.groups"
+          @change="menuChange"
+        />
+      </Drawer>
     </div>
   </div>
 </template>
@@ -39,15 +64,16 @@
 import Vue from "vue";
 import { Splitpanes, Pane } from "splitpanes";
 import "splitpanes/dist/splitpanes.css";
-import { Card, Spin } from "ant-design-vue";
+import { Card, Spin, Drawer } from "ant-design-vue";
 import DocMenu from "./Menu";
 import DocApiContent from "./content";
 import DocHome from "./DocHome";
 import VueClipboard from "vue-clipboard2";
-import { sendRequest } from "./utils/request";
-import { ls } from "./utils/cache";
-import { setCurrentUrl, getUrlQuery } from "./utils/utils";
+import { ls } from "@/utils/cache";
+import { setCurrentUrl, getUrlQuery } from "@/utils/utils";
 import PasswordModal from "./auth/passwordModal";
+import responsiveMixin from "@/utils/responsive";
+import { getConfig, getData } from "@/api/app";
 
 import Header from "./Header";
 import "./index.less";
@@ -61,14 +87,19 @@ export default {
     DocMenu,
     DocApiContent,
     DocHome,
-    Header
+    Header,
+    Drawer
   },
+  mixins: [responsiveMixin],
   data() {
     return {
       loading: true,
       apiData: {},
       currentApiData: {},
-      config: {}
+      config: {},
+      visible: {
+        sideMenu: false
+      }
     };
   },
   created() {
@@ -79,28 +110,23 @@ export default {
   },
   methods: {
     getApiList(version = "", cacheFileName = "", reload = false) {
-      let versionText = "";
-      if (
-        !version &&
-        this.config &&
-        this.config.versions &&
-        this.config.versions.length
-      ) {
+      const { config } = this;
+      if (!version && config && config.versions && config.versions.length) {
         version = this.config.versions[0].title;
-        versionText = this.config.versions[0].title;
       }
       this.loading = true;
-      sendRequest(
-        "/apidoc/data",
-        { version: version, cacheFileName: cacheFileName, reload: reload },
-        "get"
-      )
+      getData({
+        version: version,
+        cacheFileName: cacheFileName,
+        reload: reload
+      })
         .then(res => {
           this.loading = false;
-          if (!(res.data.data && res.data.data.version)) {
-            res.data.data.version = versionText;
-          }
-          this.apiData = res.data.data;
+          const json = {
+            ...res.data.data,
+            version: version
+          };
+          this.apiData = json;
           this.currentApiData = {};
           // 更新url
           const url = `${window.location.protocol}//${window.location.host}${
@@ -121,9 +147,13 @@ export default {
       this.currentApiData = currentApiData;
     },
     getConfig(option) {
-      sendRequest("/apidoc/config", {}, "get")
+      getConfig()
         .then(res => {
-          this.config = res.data;
+          if (res.data && res.data.title) {
+            this.config = res.data;
+          } else if (res.data && res.data.data) {
+            this.config = res.data.data;
+          }
           ls.set("config", this.config);
           this.verifyAuth(option);
         })
@@ -143,6 +173,13 @@ export default {
       } else {
         that.getApiList(...option);
       }
+    },
+    // 显示移动端侧边栏
+    onShowSideMenu() {
+      this.visible.sideMenu = true;
+    },
+    onSideMenuClose() {
+      this.visible.sideMenu = false;
     }
   }
 };

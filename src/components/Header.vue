@@ -1,10 +1,20 @@
 <template>
-  <div class="header">
+  <div :class="['header', device]">
     <div class="logo-box">
+      <div
+        v-if="device == 'mobile'"
+        class="header-menu-button"
+        @click="onShowMenuClick"
+      >
+        <Icon type="menu" />
+      </div>
       <div class="logo">
         <img :src="logoPath" alt="" />
       </div>
-      <div class="logo-text">
+      <div
+        v-if="!(device == 'mobile' && config && config.with_cache)"
+        class="logo-text"
+      >
         {{ config && config.title ? config.title : "Api Doc" }}
       </div>
     </div>
@@ -14,10 +24,12 @@
         class="select-version"
         v-if="config && config.versions && config.versions.length"
       >
-        <span>Select Version </span>
+        <span v-if="device != 'mobile'">Select Version </span>
         <Select
           v-model="currentVersion"
-          style="width: 120px"
+          :style="{
+            width: device == 'mobile' ? '80px' : '120px'
+          }"
           @change="onVersionChange"
         >
           <SelectOption
@@ -41,7 +53,9 @@
       >
         <Select
           v-model="currentCache"
-          style="width: 170px"
+          :style="{
+            width: device == 'mobile' ? '100px' : '170px'
+          }"
           @change="onCacheChange"
         >
           <SelectOption
@@ -63,10 +77,10 @@
             icon="safety-certificate"
             type="primary"
             @click="showGlobalAuth"
-            >Authorize</Button
+            ><span v-if="device != 'mobile'">Authorize</span></Button
           >
           <Button v-else icon="safety-certificate" @click="showGlobalAuth"
-            >Authorize</Button
+            ><span v-if="device != 'mobile'">Authorize</span></Button
           >
         </Tooltip>
 
@@ -76,7 +90,7 @@
           </template>
 
           <Button icon="reload" @click="reloadData" style="margin-left:8px;"
-            >Reload</Button
+            ><span v-if="device != 'mobile'">Reload</span></Button
           >
         </Tooltip>
       </div>
@@ -85,16 +99,17 @@
 </template>
 
 <script>
-import { Select, Tooltip, Button } from "ant-design-vue";
+import { Select, Tooltip, Button, Icon } from "ant-design-vue";
 import GlobalAuthModal from "./auth/globalAuthModal";
-import { ls } from "./utils/cache";
+import { ls } from "@/utils/cache";
 
 export default {
   components: {
     Select,
     SelectOption: Select.Option,
     Tooltip,
-    Button
+    Button,
+    Icon
   },
   props: {
     config: {
@@ -104,6 +119,10 @@ export default {
     apiData: {
       type: Object,
       default: () => {}
+    },
+    device: {
+      type: String,
+      default: "xl"
     }
   },
   data() {
@@ -147,14 +166,14 @@ export default {
     },
     reloadData() {
       this.$emit("onVersionChange", this.currentVersion, "", true);
+    },
+    onShowMenuClick() {
+      this.$emit("showSideMenu");
     }
   }
 };
 </script>
 <style lang="less" scoped>
-@logoColor: #1890ff;
-@logoTextColor: #f74455;
-@logoBackground: #fff;
 .header {
   width: 100%;
   height: 40px;
@@ -162,6 +181,16 @@ export default {
   border-bottom: 1px solid #ddd;
   display: flex;
   padding: 0 30px;
+  &.mobile {
+    padding: 0 10px;
+  }
+  .header-menu-button {
+    float: left;
+    text-align: center;
+    font-size: 20px;
+    padding-right: 15px;
+    padding-left: 5px;
+  }
   .logo-box {
     padding: 4px 0;
     overflow: hidden;

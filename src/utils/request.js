@@ -3,10 +3,10 @@ import { ls } from "./cache";
 
 // 创建实例
 const service = axios.create({
-  baseURL: "http://tp.test.com",
+  baseURL:
+    process.env.NODE_ENV === "development" ? "http://demo.apidoc.com" : "",
   timeout: 30 * 60 * 1000
 });
-
 // 请求拦截器
 service.interceptors.request.use(
   config => {

@@ -1,10 +1,10 @@
 <template>
   <div>
     <div class="api-home-content">
-      <h1>{{ apiData.title }}</h1>
+      <h1>{{ config.title }}</h1>
       <div v-if="config.desc" class="desc">{{ config.desc }}</div>
       <div class="version">Version：{{ apiData.version }}</div>
-      <div>{{ apiData.copyright }}</div>
+      <div>{{ config.copyright }}</div>
     </div>
   </div>
 </template>
@@ -16,6 +16,7 @@ export default {
       type: Object,
       default: () => {}
     },
+
     config: {
       type: Object,
       default: () => {}

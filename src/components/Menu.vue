@@ -1,10 +1,11 @@
 <script>
-import { Menu, Tag, Input } from "ant-design-vue";
+import { Menu, Tag, Input, Select } from "ant-design-vue";
 import cloneDeep from "lodash/cloneDeep";
 function hasKeyword(item, keyword) {
   if (
     item.title.indexOf(keyword) > -1 ||
-    (item.url && item.url.indexOf(keyword) > -1)
+    (item.url && item.url.indexOf(keyword) > -1) ||
+    (item.tag && item.tag.indexOf(keyword) > -1)
   ) {
     return true;
   }
@@ -32,10 +33,16 @@ export default {
     MenuSubMenu: Menu.SubMenu,
     MenuItem: Menu.Item,
     MenuItemGroup: Menu.ItemGroup,
-    InputSearch: Input.Search
+    InputSearch: Input.Search,
+    Select,
+    SelectOption: Select.Option
   },
   props: {
     apiData: {
+      type: Array,
+      default: () => []
+    },
+    groups: {
       type: Array,
       default: () => []
     },
@@ -46,38 +53,45 @@ export default {
   },
   data() {
     return {
+      currentGroupName: null,
       menuData: []
     };
   },
   watch: {
-    apiData(val) {
-      this.menuData = val;
+    apiData() {
+      this.onSearch();
     }
   },
 
   created() {
-    this.menuData = this.apiData;
+    this.onSearch();
   },
   methods: {
-    handleClick(e) {
-      const key = e.key;
-      const keyArr = key.split("-");
-      let data = this.menuData;
-      for (let i = 0; i < keyArr.length; i++) {
-        const index = keyArr[i];
-        if (data[index].children) {
-          data = data[index].children;
-        } else {
-          data = data[index];
-        }
-      }
+    onMenuClick(data) {
       this.$emit("change", data);
     },
     renderItem(menu) {
       if (!menu.hidden) {
-        return menu.children
-          ? this.renderSubMenu(menu)
-          : this.renderMenuItem(menu);
+        if (menu.items) {
+          // 分组
+          return this.renderGroup(menu);
+        }
+        if (menu.children) {
+          return this.renderSubMenu(menu);
+        }
+        return this.renderMenuItem(menu);
+      }
+      return null;
+    },
+    renderGroup(menu) {
+      const itemArr = [];
+      if (menu.items && menu.items.length) {
+        menu.items.forEach(item => itemArr.push(this.renderItem(item)));
+        return (
+          <MenuItemGroup title={menu.title} {...{ key: menu.name }}>
+            {itemArr}
+          </MenuItemGroup>
+        );
       }
       return null;
     },
@@ -123,7 +137,16 @@ export default {
         }
 
         return (
-          <MenuItem {...{ key: menu.id }}>
+          <MenuItem
+            {...{
+              key: menu.id,
+              on: {
+                click: () => {
+                  this.onMenuClick(menu);
+                }
+              }
+            }}
+          >
             <span class="action-title">
               <div>
                 <Tag class="action-title-tag" color={tagColor}>
@@ -142,18 +165,72 @@ export default {
         </MenuItem>
       );
     },
+    handleGroupMenuData(data) {
+      const { groups, currentGroupName } = this;
+      if (!(groups && groups.length)) {
+        return data;
+      }
+      const apiData = cloneDeep(data);
+      if (currentGroupName) {
+        // 指定分组
+        return apiData.filter(p => p.group == currentGroupName);
+      }
+      const groupNames = groups.map(p => p.name);
+      let groupData = groups.map(item => {
+        if (item.name === 0) {
+          item.items = apiData.filter(p => !groupNames.includes(p.group));
+        } else {
+          item.items = apiData.filter(p => p.group == item.name);
+        }
+        return item;
+      });
+      return groupData;
+    },
     onSearch(key) {
       const apiData = cloneDeep(this.apiData);
       if (key) {
         const menuData = filterMenu(apiData, key);
-        this.menuData = menuData;
+        // 分组
+        const groupData = this.handleGroupMenuData(menuData);
+        this.menuData = groupData;
       } else {
         // 无搜索条件,显示所有
-        this.menuData = apiData;
+        const groupData = this.handleGroupMenuData(apiData);
+        this.menuData = groupData;
       }
+    },
+    renderGroupsSelect() {
+      const { groups, currentGroupName } = this;
+      if (!(groups && groups.length)) {
+        return null;
+      }
+      const that = this;
+      const selectOptions = groups.map(item => {
+        return <SelectOption value={item.name}>{item.title}</SelectOption>;
+      });
+      const selectProps = {
+        props: {
+          value: currentGroupName,
+          allowClear: true,
+          placeholder: "选择分组"
+        },
+        on: {
+          change: val => {
+            that.currentGroupName = val;
+            that.onSearch();
+          }
+        },
+        style: {
+          width: "140px",
+          minWidth: "120px",
+          marginRight: "10px"
+        }
+      };
+      return <Select {...selectProps}>{selectOptions}</Select>;
     }
   },
   render() {
+    const { renderGroupsSelect } = this;
     const menuTree = this.menuData.map(item => {
       return this.renderItem(item);
     });
@@ -162,19 +239,17 @@ export default {
       <div class="doc-menu">
         <div class="doc-menu-header">
           <div class="header-search">
+            {renderGroupsSelect()}
             <InputSearch
               allowClear={true}
-              placeholder="请输入搜索关键词"
+              placeholder="请输入关键词"
+              style="flex"
               {...{ on: { search: this.onSearch } }}
             />
           </div>
         </div>
         <div class="doc-menu-box">
-          <Menu
-            style="width: 100%"
-            mode="inline"
-            {...{ on: { click: this.handleClick } }}
-          >
+          <Menu style="width: 100%" mode="inline">
             {menuTree}
           </Menu>
         </div>
@@ -201,6 +276,9 @@ export default {
   .doc-menu-header {
     padding: 10px;
     border-bottom: 1px solid #ddd;
+    .header-search {
+      display: flex;
+    }
   }
   .doc-menu-box {
     width: 100%;

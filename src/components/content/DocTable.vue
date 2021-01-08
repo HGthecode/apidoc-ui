@@ -24,6 +24,7 @@
           :bordered="true"
           :pagination="false"
           :data-source="apiData.param"
+          :scroll="tableScroll"
           childrenColumnName="params"
         >
         </Table>
@@ -59,6 +60,7 @@
         :bordered="true"
         :pagination="false"
         :data-source="apiData.return"
+        :scroll="tableScroll"
         childrenColumnName="params"
       >
       </Table>
@@ -126,10 +128,10 @@ export default {
           title: "类型",
           dataIndex: "type",
           align: "center",
-          width: 150
+          width: 100
         },
         {
-          title: "是否必填",
+          title: "必填",
           dataIndex: "require",
           width: 100,
           align: "center",
@@ -162,7 +164,7 @@ export default {
           title: "类型",
           dataIndex: "type",
           align: "center",
-          width: 150
+          width: 100
         },
         {
           title: "默认值",
@@ -174,7 +176,11 @@ export default {
           title: "说明",
           dataIndex: "desc"
         }
-      ]
+      ],
+      tableScroll: {
+        x: "600px",
+        y: "100%"
+      }
     };
   },
 

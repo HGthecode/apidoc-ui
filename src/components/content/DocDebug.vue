@@ -10,10 +10,11 @@
           :bordered="true"
           :pagination="false"
           :data-source="headerData"
+          :scroll="tableScroll"
         >
           <template slot="headerValue" slot-scope="text, record">
             <TableInput
-              style="width:350px;"
+              :style="{ width: device == 'mobile' ? '200px' : '350px' }"
               :data="text"
               @change="onHeaderCellChange(record.name, 'default', $event)"
             />
@@ -108,11 +109,11 @@ import VueHighlightJS from "vue-highlight.js";
 import "highlight.js/styles/atom-one-dark.css";
 import javascript from "highlight.js/lib/languages/javascript";
 import json from "highlight.js/lib/languages/json";
-import { sendRequest } from "../utils/request";
-import { trim, getIndent } from "../utils/utils";
-import TableInput from "../utils/Input";
+import { sendRequest } from "@/utils/request";
+import { trim, getIndent } from "@/utils/utils";
+import TableInput from "@/utils/Input";
 import cloneDeep from "lodash/cloneDeep";
-import { ls } from "../utils/cache";
+import { ls } from "@/utils/cache";
 Vue.use(VueHighlightJS, {
   languages: {
     javascript,
@@ -137,6 +138,10 @@ export default {
     apiData: {
       type: Object,
       default: () => {}
+    },
+    device: {
+      type: String,
+      default: "xl"
     }
   },
 
@@ -148,12 +153,12 @@ export default {
         {
           title: "Key",
           dataIndex: "name",
-          width: 180
+          width: 150
         },
         {
           title: "Value",
           dataIndex: "default",
-          width: 350,
+          width: this.device == "mobile" ? 150 : 350,
           scopedSlots: { customRender: "headerValue" }
         },
         {
@@ -164,7 +169,12 @@ export default {
       headerData: [],
       fileList: {},
       formdata: {},
-      loading: false
+      loading: false,
+      tableScroll: {
+        x: "600px",
+        y: "100%"
+      },
+      config: {}
     };
   },
   watch: {
@@ -177,6 +187,7 @@ export default {
 
   created() {
     this.parameters = this.renderParamsCode(this.apiData.param);
+    this.config = ls.get("config");
 
     if (this.apiData.paramType == "formdata") {
       let fileList = {};
