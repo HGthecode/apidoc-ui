@@ -15,7 +15,7 @@
     "enquire.js": "^2.1.6",
     "html-loader": "^0.5.5",
     "js-md5": "^0.7.3",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.19",
     "marked": "^1.2.7",
     "nprogress": "^0.2.0",
     "splitpanes": "^2.2.1",
