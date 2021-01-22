@@ -12,7 +12,9 @@
         <img :src="logoPath" alt="" />
       </div>
       <div
-        v-if="!(device == 'mobile' && config && config.with_cache)"
+        v-if="
+          !(device == 'mobile' && config && (config.cache || config.with_cache))
+        "
         class="logo-text"
       >
         {{ config && config.title ? config.title : "Api Doc" }}
@@ -45,7 +47,7 @@
         class="select-log"
         v-if="
           config &&
-            config.with_cache &&
+            (config.cache || config.with_cache) &&
             apiData &&
             apiData.cacheFiles &&
             apiData.cacheFiles.length
@@ -84,7 +86,16 @@
           >
         </Tooltip>
 
-        <Tooltip v-if="config && config.with_cache" placement="bottom">
+        <Tooltip
+          v-if="
+            (config && config.with_cache) ||
+              (config &&
+                config.cache &&
+                config.cache.enable &&
+                config.cache.reload !== false)
+          "
+          placement="bottom"
+        >
           <template slot="title">
             重新生成接口数据
           </template>

@@ -12,16 +12,18 @@ service.interceptors.request.use(
   config => {
     const apiConfig = ls.get("config");
     const token = ls.get("token") || "";
+    const headers_key =
+      apiConfig.auth && apiConfig.auth.headers_key
+        ? apiConfig.auth.headers_key
+        : "apidocToken";
     if (
       apiConfig &&
       apiConfig.auth &&
-      apiConfig.auth.with_auth &&
-      apiConfig.auth.headers_key &&
+      (apiConfig.auth.with_auth || apiConfig.auth.enable) &&
       config.url === "/apidoc/data"
     ) {
-      config.headers[apiConfig.auth.headers_key] = token;
+      config.headers[headers_key] = token;
     }
-
     return config;
   },
   error => {

@@ -1,5 +1,5 @@
 <script>
-import { Menu, Tag, Input, Select } from "ant-design-vue";
+import { Menu, Tag, Input, Select, Icon } from "ant-design-vue";
 import cloneDeep from "lodash/cloneDeep";
 function hasKeyword(item, keyword) {
   if (
@@ -35,7 +35,8 @@ export default {
     MenuItemGroup: Menu.ItemGroup,
     InputSearch: Input.Search,
     Select,
-    SelectOption: Select.Option
+    SelectOption: Select.Option,
+    Icon
   },
   props: {
     apiData: {
@@ -49,16 +50,27 @@ export default {
     sideSize: {
       type: String,
       default: ""
+    },
+    docs: {
+      type: Array,
+      default: () => []
+    },
+    config: {
+      type: Object,
+      default: () => {}
     }
   },
   data() {
     return {
-      currentGroupName: null,
+      currentGroupName: 0,
       menuData: []
     };
   },
   watch: {
     apiData() {
+      this.onSearch();
+    },
+    docs() {
       this.onSearch();
     }
   },
@@ -107,6 +119,7 @@ export default {
       return (
         <MenuSubMenu {...{ key: menu.id }}>
           <span slot="title">
+            <Icon type="folder-open" />
             {controller}
             <span>{menu.title}</span>
           </span>
@@ -139,7 +152,7 @@ export default {
         return (
           <MenuItem
             {...{
-              key: menu.id,
+              key: menu.url,
               on: {
                 click: () => {
                   this.onMenuClick(menu);
@@ -154,6 +167,27 @@ export default {
                 </Tag>
                 {menu.title}
                 <span style="margin-left:10px;">{menu.url}</span>
+              </div>
+            </span>
+          </MenuItem>
+        );
+      } else if (menu && menu.type === "md") {
+        //doc文档
+        return (
+          <MenuItem
+            {...{
+              key: menu.path,
+              on: {
+                click: () => {
+                  this.onMenuClick(menu);
+                }
+              }
+            }}
+          >
+            <span class="action-title">
+              <div>
+                <Icon type="file-text" />
+                {menu.title}
               </div>
             </span>
           </MenuItem>
@@ -186,17 +220,51 @@ export default {
       });
       return groupData;
     },
+    handleDocsData(docsData, key = "") {
+      const { config, currentGroupName } = this;
+      let data = null;
+      if (
+        docsData &&
+        docsData.length &&
+        (!currentGroupName || currentGroupName === "markdown_doc")
+      ) {
+        let items = [];
+        if (key) {
+          items = filterMenu(docsData, key);
+        } else {
+          items = docsData;
+        }
+        // 过滤分组
+        data = {
+          title:
+            config.docs && config.docs.menu_title
+              ? config.docs.menu_title
+              : "文档",
+          items: items
+        };
+      }
+      return data;
+    },
     onSearch(key) {
       const apiData = cloneDeep(this.apiData);
+      const docsData = cloneDeep(this.docs);
+      let menuData = [];
       if (key) {
-        const menuData = filterMenu(apiData, key);
+        const filterData = filterMenu(apiData, key);
         // 分组
-        const groupData = this.handleGroupMenuData(menuData);
-        this.menuData = groupData;
+        const groupData = this.handleGroupMenuData(filterData);
+        menuData = groupData;
       } else {
         // 无搜索条件,显示所有
         const groupData = this.handleGroupMenuData(apiData);
-        this.menuData = groupData;
+        menuData = groupData;
+      }
+
+      const docsList = this.handleDocsData(docsData, key);
+      if (docsList) {
+        this.menuData = [docsList, ...menuData];
+      } else {
+        this.menuData = menuData;
       }
     },
     renderGroupsSelect() {
@@ -274,7 +342,7 @@ export default {
     margin-bottom: 5px;
   }
   .doc-menu-header {
-    padding: 10px;
+    padding: 6px;
     border-bottom: 1px solid #ddd;
     .header-search {
       display: flex;

@@ -14,7 +14,7 @@
         <p>Value:</p>
       </div>
       <Input
-        placeholder="请输入Token"
+        :placeholder="'请输入' + key"
         size="large"
         v-model="token"
         :allowClear="true"

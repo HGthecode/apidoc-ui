@@ -3,7 +3,7 @@
     <div class="doc-header">
       <h1 class="title">{{ apiData.title }}</h1>
       <div class="text-list" style="margin-bottom:10px">
-        <div class="text-list-item">
+        <div v-if="apiData.author" class="text-list-item">
           <span class="text-label">作者：</span>
           <span class="text-value">{{ apiData.author }}</span>
         </div>
@@ -13,10 +13,6 @@
             <Tag v-for="(item, index) in tags" :key="index">{{ item }}</Tag>
           </span>
         </div>
-        <!-- <div class="text-list-item">
-          <span class="text-label">创建时间：</span>
-          <span class="text-value">{{ apiData.author }}</span>
-        </div> -->
       </div>
       <div class="title-sub">
         {{ apiData.desc }}

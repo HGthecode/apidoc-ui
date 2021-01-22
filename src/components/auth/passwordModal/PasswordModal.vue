@@ -64,8 +64,15 @@ export default {
     login(values) {
       verifyAuth(values)
         .then(res => {
+          let token = "";
           if (res && res.data && res.data.token) {
-            ls.set("token", res.data.token);
+            token = res.data.token;
+          } else if (res && res.data && res.data.data) {
+            token = res.data.data;
+          }
+
+          if (token) {
+            ls.set("token", token);
             this.$emit("success");
             this.visible = false;
           } else {
