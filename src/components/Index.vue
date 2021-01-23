@@ -42,7 +42,7 @@
             :bodyStyle="{ padding: device == 'mobile' ? '10px' : '24px' }"
           >
             <DocApiContent
-              v-if="currentApiData && currentApiData.title"
+              v-if="currentApiData && currentApiData.url"
               :apiData="currentApiData"
               :responses="config.responses"
             />
@@ -219,6 +219,7 @@ export default {
       const token = ls.get("token");
       if (
         !token &&
+        this.config &&
         this.config.auth &&
         (this.config.auth.with_auth || this.config.auth.enable)
       ) {

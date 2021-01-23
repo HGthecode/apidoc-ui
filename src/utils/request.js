@@ -3,8 +3,7 @@ import { ls } from "./cache";
 
 // 创建实例
 const service = axios.create({
-  baseURL:
-    process.env.NODE_ENV === "development" ? "http://demo.apidoc.com" : "",
+  baseURL: process.env.NODE_ENV === "development" ? "http://www.test.com" : "",
   timeout: 30 * 60 * 1000
 });
 // 请求拦截器
@@ -13,7 +12,7 @@ service.interceptors.request.use(
     const apiConfig = ls.get("config");
     const token = ls.get("token") || "";
     const headers_key =
-      apiConfig.auth && apiConfig.auth.headers_key
+      apiConfig && apiConfig.auth && apiConfig.auth.headers_key
         ? apiConfig.auth.headers_key
         : "apidocToken";
     if (
