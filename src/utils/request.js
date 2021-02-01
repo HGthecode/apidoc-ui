@@ -3,8 +3,9 @@ import { ls } from "./cache";
 
 // 创建实例
 const service = axios.create({
-  baseURL: process.env.NODE_ENV === "development" ? "http://www.test.com" : "",
-  timeout: 30 * 60 * 1000
+  baseURL:
+    process.env.NODE_ENV === "development" ? "http://demo.apidoc.com" : "",
+  timeout: 1 * 60 * 1000
 });
 // 请求拦截器
 service.interceptors.request.use(

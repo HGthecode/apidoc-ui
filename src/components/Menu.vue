@@ -117,7 +117,7 @@ export default {
         controller = <b style="margin-right:10px;">{menu.controller}</b>;
       }
       return (
-        <MenuSubMenu {...{ key: menu.id }}>
+        <MenuSubMenu {...{ key: menu.controller }}>
           <span slot="title">
             <Icon type="folder-open" />
             {controller}
@@ -194,7 +194,7 @@ export default {
         );
       }
       return (
-        <MenuItem {...{ key: menu.id }}>
+        <MenuItem {...{ key: menu.path }}>
           <span>{menu.title}</span>
         </MenuItem>
       );
