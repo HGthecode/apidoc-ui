@@ -4,12 +4,13 @@
       <h2>请求头Headers</h2>
       <div class="api-param-table">
         <Table
-          :columns="headersColumns"
+          :columns="paramsColumns"
           size="small"
           rowKey="name"
           :bordered="true"
           :pagination="false"
           :data-source="apiData.header"
+          childrenColumnName="params"
         >
         </Table>
       </div>
@@ -91,33 +92,6 @@ export default {
   computed: {},
   data() {
     return {
-      headersColumns: [
-        {
-          title: "名称",
-          dataIndex: "name"
-        },
-        {
-          title: "必填",
-          dataIndex: "require",
-          align: "center",
-          customRender: text => {
-            if (text == 1) {
-              return <Icon type="check" style="color:#1890ff" />;
-            } else {
-              return "";
-            }
-          }
-        },
-        {
-          title: "默认值",
-          align: "center",
-          dataIndex: "default"
-        },
-        {
-          title: "说明",
-          dataIndex: "desc"
-        }
-      ],
       paramsColumns: [
         {
           title: "名称",
