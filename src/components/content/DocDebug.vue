@@ -81,7 +81,12 @@
         <Alert v-else :message="returnData.status" type="error" show-icon />
         <div class="api-param-code">
           <div class="code">
-            <highlight-code lang="javascript">
+            <div
+              v-if="returnString"
+              class="string-code"
+              v-html="returnString"
+            ></div>
+            <highlight-code v-else lang="javascript">
               {{ returnData.data }}
             </highlight-code>
           </div>
@@ -147,6 +152,7 @@ export default {
 
   data() {
     return {
+      returnString: "",
       returnData: {},
       parameters: "",
       headersColumns: [
@@ -259,6 +265,7 @@ export default {
     },
 
     excute() {
+      const that = this;
       this.loading = true;
       let json = {};
       if (this.apiData.paramType == "formdata") {
@@ -299,7 +306,13 @@ export default {
       sendRequest(this.apiData.url, json, method, headers)
         .then(res => {
           this.loading = false;
-          this.returnData = res;
+          if (res.data && typeof res.data === "string") {
+            that.returnString = res.data;
+            that.returnData = res;
+          } else {
+            that.returnString = "";
+            that.returnData = res;
+          }
         })
         .catch(err => {
           this.loading = false;
@@ -401,5 +414,13 @@ export default {
 }
 /deep/ .ant-table-small > .ant-table-content > .ant-table-body {
   margin: 0;
+}
+.string-code {
+  display: block;
+  overflow-x: auto;
+  padding: 0.5em;
+  color: #abb2bf;
+  background: #282c34;
+  border-radius: 4px;
 }
 </style>

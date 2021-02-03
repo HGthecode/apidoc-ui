@@ -3,8 +3,7 @@ import { ls } from "./cache";
 
 // 创建实例
 const service = axios.create({
-  baseURL:
-    process.env.NODE_ENV === "development" ? "http://demo.apidoc.com" : "",
+  baseURL: process.env.NODE_ENV === "development" ? "http://tp.test.com" : "",
   timeout: 1 * 60 * 1000
 });
 // 请求拦截器
