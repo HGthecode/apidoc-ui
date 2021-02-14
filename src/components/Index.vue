@@ -5,7 +5,9 @@
       :config="config"
       :apiData="apiData"
       :device="device"
-      @onVersionChange="getApiList"
+      @cacheChange="getApiList"
+      @reload="getApiList"
+      @appChange="getApiList"
       @showSideMenu="onShowSideMenu"
     />
     <div class="spin-box" v-if="loading">
@@ -32,6 +34,7 @@
               :docs="apiData.docs"
               :config="config"
               @change="menuChange"
+              @showCrud="onShowCrud"
             />
           </Card>
         </pane>
@@ -44,7 +47,7 @@
             <DocApiContent
               v-if="currentApiData && currentApiData.url"
               :apiData="currentApiData"
-              :responses="config.responses"
+              :config="config"
             />
             <DocMdContent
               v-else-if="currentDocData && currentDocData.type === 'md'"
@@ -85,11 +88,12 @@ import DocApiContent from "./content";
 import DocHome from "./DocHome";
 import VueClipboard from "vue-clipboard2";
 import { ls } from "@/utils/cache";
-import { setCurrentUrl, getUrlQuery } from "@/utils/utils";
+import { setCurrentUrl, getUrlQuery, getTreeFirstNode } from "@/utils/utils";
 import PasswordModal from "./auth/passwordModal";
 import responsiveMixin from "@/utils/responsive";
 import { getConfig, getData } from "@/api/app";
 import DocMdContent from "./DocMdContent";
+import CrudModal from "./crud";
 
 import Header from "./Header";
 import "./index.less";
@@ -115,6 +119,7 @@ export default {
       apiData: {},
       currentApiData: {},
       currentDocData: {},
+      currentAppKey: "",
       config: {},
       visible: {
         sideMenu: false
@@ -122,23 +127,53 @@ export default {
       error: {
         status: "",
         message: ""
-      }
+      },
+      clientWidth: 1920
     };
   },
   created() {
     const urlQuery = getUrlQuery();
-    this.getConfig([urlQuery.version]);
+    this.getConfig([urlQuery.appKey]);
+    this.currentAppKey = urlQuery.appKey;
 
     // this.getApiList();
   },
+  mounted() {
+    this.clientWidth = document.body.clientWidth;
+  },
   methods: {
-    getApiList(version = "", cacheFileName = "", reload = false) {
-      const { config, verifyAuth } = this;
-      if (!version && config && config.versions && config.versions.length) {
-        version = this.config.versions[0].title;
+    getApiList(appKey = "", cacheFileName = "", reload = false) {
+      const { verifyAuth } = this;
+      let version = null;
+      if (appKey) {
+        this.currentAppKey = appKey;
+        if (this.config.versions && this.config.versions.length) {
+          version = this.currentAppKey;
+        }
+      } else {
+        // 默认版本/应用
+        if (!this.currentAppKey && this.config.apps) {
+          const firstNodes = getTreeFirstNode(this.config.apps, "items");
+          if (firstNodes && firstNodes.length) {
+            const keys = firstNodes.map(p => p.folder);
+            this.currentAppKey = keys.join("_");
+          }
+        } else if (
+          !this.currentAppKey &&
+          this.config.versions &&
+          this.config.versions.length
+        ) {
+          // 兼容低版本versions
+          const firstNode = this.config.versions[0];
+          if (firstNode) {
+            this.currentAppKey = firstNode["title"];
+            version = this.currentAppKey;
+          }
+        }
       }
       this.loading = true;
       getData({
+        appKey: this.currentAppKey,
         version: version,
         cacheFileName: cacheFileName,
         reload: reload
@@ -147,7 +182,7 @@ export default {
           this.loading = false;
           const json = {
             ...res.data.data,
-            version: version
+            appKey: this.currentAppKey
           };
           this.apiData = json;
           this.currentApiData = {};
@@ -155,15 +190,13 @@ export default {
           // 更新url
           const url = `${window.location.protocol}//${window.location.host}${
             window.location.pathname
-          }?version=${version ? version : ""}`;
+          }?appKey=${this.currentAppKey}`;
           setCurrentUrl(url);
         })
         .catch(err => {
-          console.log(err, err.response);
           const status =
             err.response && err.response.status ? err.response.status : 500;
           if (status === 401) {
-            debugger;
             ls.remove("token");
             verifyAuth();
           } else {
@@ -179,7 +212,6 @@ export default {
         });
     },
     menuChange(currentApiData) {
-      console.log(currentApiData);
       if (currentApiData.type === "md") {
         // docs文档
         this.currentDocData = currentApiData;
@@ -198,10 +230,10 @@ export default {
             this.config = res.data.data;
           }
           ls.set("config", this.config);
+          document.title = this.config.title;
           this.verifyAuth(option);
         })
         .catch(err => {
-          console.log(err, err.response, err.message);
           const status =
             err.response && err.response.status ? err.response.status : 404;
           this.error = {
@@ -240,6 +272,17 @@ export default {
     },
     onSideMenuClose() {
       this.visible.sideMenu = false;
+    },
+    onShowCrud() {
+      const that = this;
+      CrudModal({
+        config: this.config,
+        currentAppKey: this.currentAppKey,
+        clientWidth: this.clientWidth,
+        success: () => {
+          that.getApiList();
+        }
+      });
     }
   }
 };

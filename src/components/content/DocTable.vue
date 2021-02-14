@@ -26,6 +26,7 @@
           :pagination="false"
           :data-source="apiData.param"
           :scroll="tableScroll"
+          defaultExpandAllRows
           childrenColumnName="params"
         >
         </Table>
@@ -34,17 +35,24 @@
 
     <h2>
       响应结果Responses
-      <Popover title="统一响应体">
+      <Popover
+        v-if="config && config.responses && config.responses.jsonStr"
+        title="统一响应体"
+      >
         <template slot="content">
           <textarea
             class="code-textarea"
             cols="30"
             rows="8"
             readonly
-            v-model="responses"
+            v-model="config.responses.jsonStr"
           ></textarea>
           <div class="note-text">
-            <span style="color:#f00;">*</span>以下只展示业务数据内容
+            <span style="color:#f00;">*</span>以下只展示{{
+              config.responses.main && config.responses.main.desc
+                ? config.responses.main.desc
+                : "业务数据"
+            }}内容
           </div>
         </template>
         <Icon
@@ -57,12 +65,15 @@
       <Table
         :columns="returnColumns"
         size="small"
-        :rowKey="renterRowKey"
+        rowKey="_key"
         :bordered="true"
         :pagination="false"
         :data-source="apiData.return"
         :scroll="tableScroll"
+        defaultExpandAllRows
+        :expandedRowKeys="expandedRowKeys"
         childrenColumnName="params"
+        @expandedRowsChange="onExpandedRowsChange"
       >
       </Table>
     </div>
@@ -84,9 +95,9 @@ export default {
       type: Object,
       default: () => {}
     },
-    responses: {
-      type: String,
-      default: ""
+    config: {
+      type: Object,
+      default: () => {}
     }
   },
   computed: {},
@@ -154,12 +165,36 @@ export default {
       tableScroll: {
         x: "600px",
         y: "100%"
-      }
+      },
+      expandedRowKeys: [],
+      returnData: []
     };
   },
-
-  created() {},
+  watch: {
+    apiData(val) {
+      this.returnData = this.handleReturnData(val.return);
+    }
+  },
+  created() {
+    this.returnData = this.handleReturnData(this.apiData.return);
+  },
   methods: {
+    handleReturnData(data) {
+      return data
+        ? data.map(item => {
+            paramsRowKey++;
+            item._key = `${item.name}_${paramsRowKey}`;
+            if (item.params) {
+              this.expandedRowKeys.push(item._key);
+              item.params = this.handleReturnData(item.params);
+            }
+            return item;
+          })
+        : [];
+    },
+    onExpandedRowsChange(expandedRows) {
+      this.expandedRowKeys = expandedRows;
+    },
     // 处理table行rowKey防止key重复
     renterRowKey(record) {
       paramsRowKey++;

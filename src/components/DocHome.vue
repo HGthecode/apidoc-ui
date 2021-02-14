@@ -3,7 +3,6 @@
     <div class="api-home-content">
       <h1>{{ config.title }}</h1>
       <div v-if="config.desc" class="desc">{{ config.desc }}</div>
-      <div class="version">Version：{{ apiData.version }}</div>
       <div>{{ config.copyright }}</div>
     </div>
   </div>
@@ -34,9 +33,6 @@ export default {
   }
   .desc {
     margin-bottom: 20px;
-  }
-  .version {
-    font-size: 18px;
   }
 }
 </style>

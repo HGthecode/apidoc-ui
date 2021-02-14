@@ -1,6 +1,15 @@
 <script>
-import { Menu, Tag, Input, Select, Icon } from "ant-design-vue";
+import {
+  Menu,
+  Tag,
+  Input,
+  Select,
+  Icon,
+  Button,
+  Tooltip
+} from "ant-design-vue";
 import cloneDeep from "lodash/cloneDeep";
+
 function hasKeyword(item, keyword) {
   if (
     item.title.indexOf(keyword) > -1 ||
@@ -36,7 +45,9 @@ export default {
     InputSearch: Input.Search,
     Select,
     SelectOption: Select.Option,
-    Icon
+    Icon,
+    Button,
+    Tooltip
   },
   props: {
     apiData: {
@@ -99,8 +110,9 @@ export default {
       const itemArr = [];
       if (menu.items && menu.items.length) {
         menu.items.forEach(item => itemArr.push(this.renderItem(item)));
+        const title = menu.title == "全部" ? "未分组" : menu.title;
         return (
-          <MenuItemGroup title={menu.title} {...{ key: menu.name }}>
+          <MenuItemGroup title={title} {...{ key: menu.name }}>
             {itemArr}
           </MenuItemGroup>
         );
@@ -116,13 +128,18 @@ export default {
       if (menu.controller) {
         controller = <b style="margin-right:10px;">{menu.controller}</b>;
       }
+      let apiActionButton = "";
+
       return (
-        <MenuSubMenu {...{ key: menu.controller }}>
-          <span slot="title">
+        <MenuSubMenu
+          {...{ key: `${menu.controller}_${Math.ceil(Math.random() * 100)}` }}
+        >
+          <div slot="title" class="menu-sub">
             <Icon type="folder-open" />
             {controller}
             <span>{menu.title}</span>
-          </span>
+            {apiActionButton}
+          </div>
           {itemArr}
         </MenuSubMenu>
       );
@@ -152,7 +169,7 @@ export default {
         return (
           <MenuItem
             {...{
-              key: menu.url,
+              key: `${menu.method}_${menu.url}`,
               on: {
                 click: () => {
                   this.onMenuClick(menu);
@@ -295,13 +312,30 @@ export default {
         }
       };
       return <Select {...selectProps}>{selectOptions}</Select>;
+    },
+    onCrudClick() {
+      this.$emit("showCrud");
     }
   },
   render() {
-    const { renderGroupsSelect } = this;
+    const { renderGroupsSelect, onCrudClick, config } = this;
     const menuTree = this.menuData.map(item => {
       return this.renderItem(item);
     });
+    let createCrudButton = "";
+    if (config.crud && config.debug) {
+      createCrudButton = (
+        <Tooltip placement="top">
+          <template slot="title">快速创建Crud接口</template>
+          <Button
+            style={{ padding: "0 8px", marginLeft: "10px" }}
+            {...{ on: { click: onCrudClick } }}
+          >
+            <Icon type="plus" />
+          </Button>
+        </Tooltip>
+      );
+    }
 
     return (
       <div class="doc-menu">
@@ -314,6 +348,7 @@ export default {
               style="flex"
               {...{ on: { search: this.onSearch } }}
             />
+            {createCrudButton}
           </div>
         </div>
         <div class="doc-menu-box">
@@ -363,5 +398,30 @@ export default {
 .ant-menu-vertical,
 .ant-menu-vertical-left {
   border: none;
+}
+.menu-sub {
+  .menu-sub-actions {
+    position: absolute;
+    right: 40px;
+    button {
+      padding: 0 5px;
+      color: #666;
+      display: none;
+      &:hover {
+        color: #1890ff;
+      }
+    }
+    i {
+      margin-right: 0;
+      font-size: 12px;
+    }
+  }
+  &:hover {
+    .menu-sub-actions {
+      button {
+        display: inline-block;
+      }
+    }
+  }
 }
 </style>

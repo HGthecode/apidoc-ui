@@ -22,27 +22,26 @@
     </div>
     <div class="header-menu"></div>
     <div class="user-wrapper">
-      <div
-        class="select-version"
-        v-if="config && config.versions && config.versions.length"
-      >
-        <span v-if="device != 'mobile'">Select Version </span>
-        <Select
-          v-model="currentVersion"
+      <div class="select-app" v-if="apps.length">
+        <span v-if="device != 'mobile'"
+          >{{
+            config.apps_title
+              ? config.apps_title
+              : this.config.versions
+              ? "Select Version"
+              : "App/Version"
+          }}:
+        </span>
+        <app-select
           :style="{
-            width: device == 'mobile' ? '80px' : '120px'
+            width: device == 'mobile' ? '100px' : '170px'
           }"
-          @change="onVersionChange"
-        >
-          <SelectOption
-            v-for="(item, index) in config.versions"
-            :key="index"
-            :value="item.title"
-          >
-            {{ item.title }}
-          </SelectOption>
-        </Select>
+          :value="currentApp"
+          :options="apps"
+          @change="onAppChange"
+        />
       </div>
+
       <div
         class="select-log"
         v-if="
@@ -89,10 +88,7 @@
         <Tooltip
           v-if="
             (config && config.with_cache) ||
-              (config &&
-                config.cache &&
-                config.cache.enable &&
-                config.cache.reload !== false)
+              (config && config.cache && config.cache.enable && config.debug)
           "
           placement="bottom"
         >
@@ -112,6 +108,7 @@
 <script>
 import { Select, Tooltip, Button, Icon } from "ant-design-vue";
 import GlobalAuthModal from "./auth/globalAuthModal";
+import AppSelect from "./AppSelect";
 import { ls } from "@/utils/cache";
 
 export default {
@@ -120,7 +117,8 @@ export default {
     SelectOption: Select.Option,
     Tooltip,
     Button,
-    Icon
+    Icon,
+    AppSelect
   },
   props: {
     config: {
@@ -139,15 +137,25 @@ export default {
   data() {
     return {
       isGlobalAuth: false,
-      currentVersion: "",
       currentCache: "",
-      logoPath: "./logo.png"
+      logoPath: "./logo.png",
+      currentApp: ""
     };
+  },
+  computed: {
+    apps() {
+      if (this.config.apps && this.config.apps.length) {
+        return this.config.apps;
+      } else if (this.config.versions && this.config.versions.length) {
+        return this.config.versions;
+      }
+      return [];
+    }
   },
   watch: {
     apiData(val) {
       this.currentCache = val.cacheName;
-      this.currentVersion = val.version;
+      this.currentApp = val.appKey;
     }
   },
   created() {
@@ -169,17 +177,22 @@ export default {
         this.isGlobalAuth = false;
       }
     },
-    onVersionChange(val) {
-      this.$emit("onVersionChange", val);
-    },
     onCacheChange(val) {
-      this.$emit("onVersionChange", this.currentVersion, val);
+      this.$emit("cacheChange", this.currentApp, val);
     },
     reloadData() {
-      this.$emit("onVersionChange", this.currentVersion, "", true);
+      this.$emit("reload", this.currentApp, "", true);
     },
     onShowMenuClick() {
       this.$emit("showSideMenu");
+    },
+    onAppChange(key) {
+      if (this.config.versions && this.config.versions.length) {
+        const find = this.config.versions.find(p => p.folder === key);
+        this.$emit("appChange", find.title);
+      } else {
+        this.$emit("appChange", key);
+      }
     }
   }
 };
@@ -223,7 +236,7 @@ export default {
   }
   .user-wrapper {
     display: flex;
-    .select-version {
+    .select-app {
       padding: 4px;
       flex: 1;
     }

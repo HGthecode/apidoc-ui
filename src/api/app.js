@@ -3,7 +3,8 @@ import { sendRequest } from "@/utils/request";
 export const url = {
   config: "/apidoc/config",
   data: "/apidoc/data",
-  auth: "/apidoc/auth"
+  auth: "/apidoc/auth",
+  crud: "/apidoc/crud"
 };
 
 export const getConfig = param => {
@@ -14,4 +15,7 @@ export const getData = param => {
 };
 export const verifyAuth = param => {
   return sendRequest(url.auth, param, "post");
+};
+export const createCrud = param => {
+  return sendRequest(url.crud, param, "post");
 };

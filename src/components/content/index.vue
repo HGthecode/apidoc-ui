@@ -32,10 +32,10 @@
 
     <Tabs default-active-key="1">
       <TabPane key="1" tab="文档">
-        <DocTable :apiData="apiData" :responses="responses" />
+        <DocTable :apiData="apiData" :config="config" />
       </TabPane>
       <TabPane key="2" tab="Json" force-render>
-        <DocJson :apiData="apiData" :responses="responses" />
+        <DocJson :apiData="apiData" :config="config" />
       </TabPane>
       <TabPane key="3" tab="调试">
         <DocDebug :apiData="apiData" />
@@ -65,9 +65,9 @@ export default {
       type: Object,
       default: () => {}
     },
-    responses: {
-      type: String,
-      default: ""
+    config: {
+      type: Object,
+      default: () => {}
     }
   },
   computed: {
@@ -96,6 +96,8 @@ export default {
       let tags = [];
       if (this.apiData.tag && this.apiData.tag.indexOf(" ") > -1) {
         tags = this.apiData.tag.split(" ");
+      } else if (this.apiData.tag) {
+        tags = [this.apiData.tag];
       }
       return tags;
     }
@@ -122,7 +124,6 @@ export default {
 
 <style lang="less" scoped>
 .doc-content {
-  max-width: 740px;
   margin: 0 auto;
   .title-label {
     color: #333;

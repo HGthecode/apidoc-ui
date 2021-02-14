@@ -1,3 +1,5 @@
+import cloneDeep from "lodash/cloneDeep";
+
 /**
  * 去除字符串首尾空格
  * @param {string} s
@@ -101,4 +103,53 @@ export const getUrlQuery = () => {
     values[pair[0]] = pair[1];
   }
   return values;
+};
+
+export const treeTransArray = (tree, key) => {
+  return [].concat(
+    ...tree.map(item => {
+      if (item[key] && item[key].length) {
+        const currentItem = cloneDeep(item);
+        delete currentItem[key];
+        return [].concat(currentItem, ...treeTransArray(item[key], key));
+      } else {
+        return item;
+      }
+    })
+  );
+};
+
+export const getTreeMaxlevel = (treeData, childrenField = "children") => {
+  // let level = 0;
+  // let v = this;
+  let maxLevel = 0;
+  function loop(data, level) {
+    data.forEach(item => {
+      item.level = level;
+      if (level > maxLevel) {
+        maxLevel = level;
+      }
+      if (childrenField in item) {
+        if (item[childrenField].length > 0) {
+          loop(item[childrenField], level + 1);
+        }
+      }
+    });
+  }
+  loop(treeData, 1);
+  return maxLevel;
+};
+
+export const getTreeFirstNode = (tree, childrenField = "children") => {
+  var temp = [];
+  var forFn = function(arr) {
+    if (arr && arr.length > 0) {
+      temp.push(arr[0]);
+      if (arr[0][childrenField]) {
+        forFn(arr[0][childrenField]);
+      }
+    }
+  };
+  forFn(tree);
+  return temp;
 };

@@ -13,17 +13,24 @@
 
     <h2>
       响应结果Responses
-      <Popover title="统一响应体">
+      <Popover
+        v-if="config && config.responses && config.responses.jsonStr"
+        title="统一响应体"
+      >
         <template slot="content">
           <textarea
             class="code-textarea"
             cols="30"
             rows="8"
             readonly
-            v-model="responses"
+            v-model="config.responses.jsonStr"
           ></textarea>
           <div class="note-text">
-            <span style="color:#f00;">*</span>以下只展示业务数据内容
+            <span style="color:#f00;">*</span>以下只展示{{
+              config.responses.main && config.responses.main.desc
+                ? config.responses.main.desc
+                : "业务数据"
+            }}内容
           </div>
         </template>
         <Icon
@@ -71,9 +78,9 @@ export default {
       type: Object,
       default: () => {}
     },
-    responses: {
-      type: String,
-      default: ""
+    config: {
+      type: Object,
+      default: () => {}
     }
   },
   computed: {

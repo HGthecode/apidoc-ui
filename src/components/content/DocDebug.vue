@@ -273,8 +273,6 @@ export default {
         this.apiData.param.forEach(item => {
           if (item.type === "file") {
             const fileList = this.fileList[item.name];
-            console.log(fileList);
-
             if (fileList && fileList.length) {
               formData.append(item.name, fileList[0]);
             }

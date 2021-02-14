@@ -1,9 +1,31 @@
 import axios from "axios";
 import { ls } from "./cache";
+import { url } from "@/api/app";
+import { message } from "ant-design-vue";
+
+const handleError = error => {
+  const handleErrorUrls = [url.crud];
+  const requestUrl = error.response.config.url;
+  const isHandel = handleErrorUrls.some(itemUrl => {
+    if (requestUrl.indexOf(itemUrl) > -1) {
+      return true;
+    }
+    return false;
+  });
+  if (isHandel) {
+    const status = error.response.status;
+    const msg =
+      error.response.data && error.response.data.message
+        ? error.response.data.message
+        : status + "请求错误";
+    message.error(msg);
+  }
+};
 
 // 创建实例
 const service = axios.create({
-  baseURL: process.env.NODE_ENV === "development" ? "http://tp.test.com" : "",
+  baseURL:
+    process.env.NODE_ENV === "development" ? "http://test1.apidoc.com" : "",
   timeout: 1 * 60 * 1000
 });
 // 请求拦截器
@@ -36,6 +58,7 @@ service.interceptors.response.use(
     return response;
   },
   error => {
+    handleError(error);
     return Promise.reject(error);
   }
 );
