@@ -10,22 +10,37 @@ import {
 } from "ant-design-vue";
 import cloneDeep from "lodash/cloneDeep";
 
-function hasKeyword(item, keyword) {
-  if (
-    item.title.indexOf(keyword) > -1 ||
-    (item.url && item.url.indexOf(keyword) > -1) ||
-    (item.tag && item.tag.indexOf(keyword) > -1)
-  ) {
+// 是否满足过滤条件
+function hasKeyword(item, keyword, tags = []) {
+  let hasTag = false;
+  if (tags.length) {
+    hasTag = tags.some(value => {
+      return item.tag && item.tag.indexOf(value) > -1;
+    });
+  }
+  const hasKeyword =
+    keyword &&
+    (item.title.indexOf(keyword) > -1 ||
+      (item.url && item.url.indexOf(keyword) > -1));
+
+  if (keyword && tags.length && (hasKeyword && hasTag)) {
+    return true;
+  } else if (keyword && !tags.length && hasKeyword) {
+    return true;
+  } else if (!keyword && tags.length && hasTag) {
     return true;
   }
+
   return false;
 }
 
-function filterMenu(menus, keyword) {
+// 过滤菜单
+function filterMenu(menus, keyword, _vm) {
   const newMenus = menus.filter(item => {
-    let res = hasKeyword(item, keyword);
+    let res = hasKeyword(item, keyword, _vm.currentTags);
     if (item.children && item.children.length) {
-      item.children = filterMenu(item.children, keyword);
+      item.children = filterMenu(item.children, keyword, _vm);
+      _vm.currentOpenKeys.push(item.menu_key);
       if (item.children && item.children.length) {
         res = true;
       }
@@ -45,6 +60,7 @@ export default {
     InputSearch: Input.Search,
     Select,
     SelectOption: Select.Option,
+    SelectOptGroup: Select.OptGroup,
     Icon,
     Button,
     Tooltip
@@ -55,6 +71,10 @@ export default {
       default: () => []
     },
     groups: {
+      type: Array,
+      default: () => []
+    },
+    tags: {
       type: Array,
       default: () => []
     },
@@ -69,12 +89,20 @@ export default {
     config: {
       type: Object,
       default: () => {}
+    },
+    device: {
+      type: String,
+      default: "xl"
     }
   },
   data() {
     return {
       currentGroupName: 0,
-      menuData: []
+      menuData: [],
+      openKeys: [],
+      currentOpenKeys: [],
+      currentTags: [],
+      keyword: ""
     };
   },
   watch: {
@@ -131,9 +159,7 @@ export default {
       let apiActionButton = "";
 
       return (
-        <MenuSubMenu
-          {...{ key: `${menu.controller}_${Math.ceil(Math.random() * 100)}` }}
-        >
+        <MenuSubMenu {...{ key: menu.menu_key }}>
           <div slot="title" class="menu-sub">
             <Icon type="folder-open" />
             {controller}
@@ -169,7 +195,7 @@ export default {
         return (
           <MenuItem
             {...{
-              key: `${menu.method}_${menu.url}`,
+              key: menu.menu_key,
               on: {
                 click: () => {
                   this.onMenuClick(menu);
@@ -178,7 +204,7 @@ export default {
             }}
           >
             <span class="action-title">
-              <div>
+              <div class="action-title_wraper">
                 <Tag class="action-title-tag" color={tagColor}>
                   {menu.method}
                 </Tag>
@@ -193,7 +219,7 @@ export default {
         return (
           <MenuItem
             {...{
-              key: menu.path,
+              key: menu.menu_key,
               on: {
                 click: () => {
                   this.onMenuClick(menu);
@@ -202,7 +228,7 @@ export default {
             }}
           >
             <span class="action-title">
-              <div>
+              <div class="action-title_wraper">
                 <Icon type="file-text" />
                 {menu.title}
               </div>
@@ -211,7 +237,7 @@ export default {
         );
       }
       return (
-        <MenuItem {...{ key: menu.path }}>
+        <MenuItem {...{ key: menu.menu_key }}>
           <span>{menu.title}</span>
         </MenuItem>
       );
@@ -247,7 +273,7 @@ export default {
       ) {
         let items = [];
         if (key) {
-          items = filterMenu(docsData, key);
+          items = filterMenu(docsData, key, this);
         } else {
           items = docsData;
         }
@@ -262,12 +288,13 @@ export default {
       }
       return data;
     },
-    onSearch(key) {
+    onSearch() {
       const apiData = cloneDeep(this.apiData);
       const docsData = cloneDeep(this.docs);
       let menuData = [];
-      if (key) {
-        const filterData = filterMenu(apiData, key);
+      this.currentOpenKeys = [];
+      if (this.keyword || this.currentTags.length) {
+        const filterData = filterMenu(apiData, this.keyword, this);
         // 分组
         const groupData = this.handleGroupMenuData(filterData);
         menuData = groupData;
@@ -277,9 +304,10 @@ export default {
         menuData = groupData;
       }
 
-      const docsList = this.handleDocsData(docsData, key);
+      const docsList = this.handleDocsData(docsData, this.keyword);
       if (docsList) {
         this.menuData = [docsList, ...menuData];
+        this.openKeys = this.currentOpenKeys;
       } else {
         this.menuData = menuData;
       }
@@ -313,17 +341,68 @@ export default {
       };
       return <Select {...selectProps}>{selectOptions}</Select>;
     },
+    renderTagsSelect() {
+      const { tags, currentTags } = this;
+      if (!(tags && tags.length)) {
+        return null;
+      }
+      const that = this;
+      const selectOptions = tags.map(item => {
+        return <SelectOption value={item}>{item}</SelectOption>;
+      });
+      const selectProps = {
+        props: {
+          value: currentTags,
+          allowClear: true,
+          mode: "multiple",
+          maxTagCount: 3,
+          placeholder: "Tags筛选"
+        },
+        on: {
+          change: val => {
+            that.currentTags = val;
+            that.onSearch();
+          }
+        },
+        style: {
+          width: "100%",
+          minWidth: "120px",
+          marginRight: "10px"
+        }
+      };
+      return (
+        <div class="flex" style="margin-top:5px;overflow:hidden;">
+          <div style="line-height:32px;">Tags：</div>
+          <div class="flex-item">
+            <Select {...selectProps}>{selectOptions}</Select>
+          </div>
+        </div>
+      );
+    },
     onCrudClick() {
       this.$emit("showCrud");
+    },
+    onOpenChange(openKeys) {
+      this.openKeys = openKeys;
     }
   },
   render() {
-    const { renderGroupsSelect, onCrudClick, config } = this;
+    const {
+      renderGroupsSelect,
+      onCrudClick,
+      config,
+      device,
+      onOpenChange,
+      openKeys,
+      renderTagsSelect,
+      onSearch,
+      keyword
+    } = this;
     const menuTree = this.menuData.map(item => {
       return this.renderItem(item);
     });
     let createCrudButton = "";
-    if (config.crud && config.debug) {
+    if (config.crud && config.debug && device !== "mobile") {
       createCrudButton = (
         <Tooltip placement="top">
           <template slot="title">快速创建Crud接口</template>
@@ -337,6 +416,31 @@ export default {
       );
     }
 
+    const menuProps = {
+      props: {
+        openKeys
+      },
+      on: {
+        openChange: onOpenChange
+      }
+    };
+
+    const searchInputProps = {
+      props: {
+        value: keyword
+      },
+      on: {
+        search: onSearch,
+        change: e => {
+          const { value } = e.target;
+          this.keyword = value;
+          if (!value) {
+            onSearch();
+          }
+        }
+      }
+    };
+
     return (
       <div class="doc-menu">
         <div class="doc-menu-header">
@@ -346,13 +450,15 @@ export default {
               allowClear={true}
               placeholder="请输入关键词"
               style="flex"
-              {...{ on: { search: this.onSearch } }}
+              {...searchInputProps}
             />
+
             {createCrudButton}
           </div>
+          {renderTagsSelect()}
         </div>
         <div class="doc-menu-box">
-          <Menu style="width: 100%" mode="inline">
+          <Menu style="width: 100%" mode="inline" {...menuProps}>
             {menuTree}
           </Menu>
         </div>
@@ -364,6 +470,13 @@ export default {
 
 <style lang="less" scoped>
 .doc-menu {
+  .action-title {
+    &_wraper {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
   .action-title-tag {
     width: 50px;
     text-align: center;
@@ -385,7 +498,7 @@ export default {
   }
   .doc-menu-box {
     width: 100%;
-    height: calc(100vh - 100px);
+    height: calc(100vh - 124px);
     overflow: hidden;
     overflow-y: auto;
     padding-bottom: 50px;

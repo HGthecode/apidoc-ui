@@ -31,6 +31,7 @@
             <DocMenu
               :apiData="apiData.list"
               :groups="apiData.groups"
+              :tags="apiData.tags"
               :docs="apiData.docs"
               :config="config"
               @change="menuChange"
@@ -69,8 +70,10 @@
         <DocMenu
           :apiData="apiData.list"
           :groups="apiData.groups"
+          :tags="apiData.tags"
           :docs="apiData.docs"
           :config="config"
+          :device="device"
           @change="menuChange"
         />
       </Drawer>
@@ -220,6 +223,7 @@ export default {
         this.currentApiData = currentApiData;
         this.currentDocData = {};
       }
+      this.visible.sideMenu = false;
     },
     getConfig(option) {
       getConfig()

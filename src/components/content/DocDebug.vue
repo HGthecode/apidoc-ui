@@ -202,7 +202,7 @@ export default {
         if (item.type === "file") {
           fileList[item.name] = [];
         } else {
-          formdata[item.name] = "";
+          formdata[item.name] = item.default ? item.default : "";
         }
       });
       this.fileList = fileList;
@@ -333,7 +333,7 @@ export default {
       this.globalAuthToken = ls.get("globalAuth");
       if (data && data.length) {
         const headers = data.map(item => {
-          if (item.name === this.globalAuthKey) {
+          if (item.name === this.globalAuthKey && this.globalAuthToken) {
             item.default = this.globalAuthToken;
           }
           return item;
