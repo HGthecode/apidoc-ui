@@ -23,7 +23,7 @@
         {{ apiData.method }}
       </div>
       <div class="api-url-input">
-        <input :value="apiData.url" readonly />
+        <input v-model="url" readonly />
       </div>
       <div class="api-url-copy">
         <Icon type="copy" @click="copyUrl" />
@@ -38,7 +38,7 @@
         <DocJson :apiData="apiData" :config="config" />
       </TabPane>
       <TabPane key="3" tab="调试">
-        <DocDebug :apiData="apiData" />
+        <DocDebug :url="url" :apiData="apiData" />
       </TabPane>
     </Tabs>
   </div>
@@ -103,13 +103,21 @@ export default {
     }
   },
   data() {
-    return {};
+    return {
+      url: ""
+    };
   },
-
-  created() {},
+  watch: {
+    "apiData.url"(url) {
+      this.url = url;
+    }
+  },
+  created() {
+    this.url = this.apiData.url;
+  },
   methods: {
     copyUrl() {
-      const text = this.apiData.url;
+      const text = this.url;
       this.$copyText(text)
         .then(() => {
           message.success("复制成功");

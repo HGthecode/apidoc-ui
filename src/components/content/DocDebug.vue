@@ -25,7 +25,12 @@
     <div v-if="apiData.param && apiData.param.length">
       <h2>请求参数Parameters</h2>
       <div class="api-param-textarea">
-        <div v-if="apiData.paramType === 'formdata'" class="param-box">
+        <div
+          v-if="
+            apiData.paramType === 'formdata' || apiData.paramType === 'route'
+          "
+          class="param-box"
+        >
           <Form :label-col="{ span: 5 }" :wrapper-col="{ span: 12 }">
             <FormItem
               v-for="item in apiData.param"
@@ -147,6 +152,10 @@ export default {
     device: {
       type: String,
       default: "xl"
+    },
+    url: {
+      type: String,
+      default: ""
     }
   },
 
@@ -266,6 +275,7 @@ export default {
 
     excute() {
       const that = this;
+      let url = cloneDeep(this.url);
       this.loading = true;
       let json = {};
       if (this.apiData.paramType == "formdata") {
@@ -281,6 +291,23 @@ export default {
           }
         });
         json = formData;
+      } else if (this.apiData.paramType == "route") {
+        // 路由参数，将参数拼接到url中
+        this.apiData.param.forEach(item => {
+          const placeholderKeys = [
+            `:${item.name}`,
+            `<${item.name}>`,
+            `<${item.name}?>`,
+            `[:${item.name}]`
+          ];
+          for (let i = 0; i < placeholderKeys.length; i++) {
+            const key = placeholderKeys[i];
+            if (url.indexOf(key) > -1) {
+              const reg = new RegExp(key, "g");
+              url = url.replace(reg, this.formdata[item.name]);
+            }
+          }
+        });
       } else {
         const string = this.parameters;
         json = eval("(" + string + ")");
@@ -300,8 +327,7 @@ export default {
       if (this.apiData.paramType === "formdata") {
         headers["Content-Type"] = "application/x-www-form-urlencoded";
       }
-
-      sendRequest(this.apiData.url, json, method, headers)
+      sendRequest(url, json, method, headers)
         .then(res => {
           this.loading = false;
           if (res.data && typeof res.data === "string") {
