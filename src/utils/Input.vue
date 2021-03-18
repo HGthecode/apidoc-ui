@@ -7,6 +7,7 @@
         @change="handleChange"
         @blur="onBlur"
         @pressEnter="onEnter"
+        :placeholder="placeholder"
       />
     </div>
     <div v-else class="text-wrapper">
@@ -25,7 +26,8 @@ export default {
     data: {
       type: [String, Number],
       default: ""
-    }
+    },
+    placeholder: String
   },
   // model: {
   //   prop: "data",

@@ -194,32 +194,71 @@ export default {
   },
   watch: {
     apiData() {
-      this.parameters = this.renderParamsCode(this.apiData.param);
       this.returnData = {};
-      this.headerData = this.renderHeaderData(this.apiData.header);
+      this.initApiData();
     }
   },
 
   created() {
-    this.parameters = this.renderParamsCode(this.apiData.param);
     this.config = ls.get("config");
-
-    if (this.apiData.paramType == "formdata") {
-      let fileList = {};
-      let formdata = {};
-      this.apiData.param.forEach(item => {
-        if (item.type === "file") {
-          fileList[item.name] = [];
-        } else {
-          formdata[item.name] = item.default ? item.default : "";
-        }
-      });
-      this.fileList = fileList;
-      this.formdata = formdata;
-    }
-    this.headerData = this.renderHeaderData(this.apiData.header);
+    this.initApiData();
   },
   methods: {
+    initApiData() {
+      this.handleParameters(this.apiData.param);
+
+      if (this.apiData.paramType == "formdata") {
+        let fileList = {};
+        let formdata = {};
+        this.apiData.param.forEach(item => {
+          if (item.type === "file") {
+            fileList[item.name] = [];
+          } else {
+            if (
+              this.globalParams &&
+              this.globalParams.params &&
+              this.globalParams.params.length
+            ) {
+              const paramsItem = this.globalParams.params.find(
+                p => p.key === item.name
+              );
+              if (paramsItem && paramsItem.value) {
+                formdata[item.name] = paramsItem.value;
+              } else {
+                formdata[item.name] = item.default ? item.default : "";
+              }
+            } else {
+              formdata[item.name] = item.default ? item.default : "";
+            }
+          }
+        });
+        this.fileList = fileList;
+        this.formdata = formdata;
+      }
+      this.headerData = this.renderHeaderData(this.apiData.header);
+    },
+    handleParameters(params) {
+      let newParams = params;
+      // 处理全局请求参数
+      this.globalParams = ls.get("globalParams");
+      if (
+        this.globalParams &&
+        this.globalParams.params &&
+        this.globalParams.params.length
+      ) {
+        for (let i = 0; i < this.globalParams.params.length; i++) {
+          const globalParamItem = this.globalParams.params[i];
+          const paramsItem = newParams.find(
+            p => p.name === globalParamItem.key
+          );
+          if (paramsItem && !paramsItem.default) {
+            paramsItem.default = globalParamItem.value;
+          }
+        }
+      }
+
+      this.parameters = this.renderParamsCode(params);
+    },
     renderParamsCode(params, indent = 0) {
       const indentContent = getIndent(indent);
       const valueIndentContent = getIndent(indent + 2);
@@ -315,14 +354,29 @@ export default {
 
       const method = this.apiData.method.toLowerCase();
       const headers = {};
-      this.globalAuthToken = ls.get("globalAuth");
-      if (this.globalAuthToken) {
-        headers[this.globalAuthKey] = this.globalAuthToken;
-      }
       if (this.headerData && this.headerData.length) {
         this.headerData.forEach(item => {
           headers[item.name] = item.default;
         });
+      }
+      // 添加全局请求头参数
+      const globalParams = ls.get("globalParams");
+      if (globalParams && globalParams.headers && globalParams.headers.length) {
+        for (let i = 0; i < globalParams.headers.length; i++) {
+          const globalHeaderParam = globalParams.headers[i];
+          if (!headers[globalHeaderParam.key]) {
+            headers[globalHeaderParam.key] = globalHeaderParam.value;
+          }
+        }
+      }
+      // 添加全局请求参数
+      if (globalParams && globalParams.params && globalParams.params.length) {
+        for (let i = 0; i < globalParams.params.length; i++) {
+          const globalParamItem = globalParams.params[i];
+          if (!json[globalParamItem.key]) {
+            json[globalParamItem.key] = globalParamItem.value;
+          }
+        }
       }
       if (this.apiData.paramType === "formdata") {
         headers["Content-Type"] = "application/x-www-form-urlencoded";
@@ -351,21 +405,27 @@ export default {
     },
     renderHeaderData(headerData) {
       const data = cloneDeep(headerData);
-      // 赋值全局Auth
-      this.globalAuthKey =
-        this.config && this.config.global_auth_key
-          ? this.config.global_auth_key
-          : "Authorization";
-      this.globalAuthToken = ls.get("globalAuth");
       if (data && data.length) {
-        const headers = data.map(item => {
-          if (item.name === this.globalAuthKey && this.globalAuthToken) {
-            item.default = this.globalAuthToken;
-          }
-          return item;
-        });
-        return headers;
+        const globalParams = ls.get("globalParams");
+        if (
+          globalParams &&
+          globalParams.headers &&
+          globalParams.headers.length
+        ) {
+          return data.map(item => {
+            const globalParamFind = globalParams.headers.find(
+              p => p.key === item.name
+            );
+            if (globalParamFind && globalParamFind.value) {
+              item.default = globalParamFind.value;
+            }
+            return item;
+          });
+        } else {
+          return data;
+        }
       }
+
       return [];
     },
     onHeaderCellChange(key, dataIndex, value) {

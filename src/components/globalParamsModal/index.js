@@ -12,11 +12,10 @@ const ComponentExample = options => {
     }
   });
 
-  const id = `globalAuthModal`;
+  const id = `globalParamsModal`;
   instance.id = id;
   instance.vm = instance.$mount();
   document.body.appendChild(instance.vm.$el);
-  instance.vm.visible = true;
 
   //绑定 success 方法
   instance.vm.$on("success", values => {

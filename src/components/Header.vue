@@ -71,17 +71,17 @@
       <div class="actions">
         <Tooltip placement="bottom">
           <template slot="title">
-            Set Global Authorize
+            设置全局请求参数
           </template>
           <Button
-            v-if="isGlobalAuth"
-            icon="safety-certificate"
+            v-if="isGlobalParams"
+            icon="global"
             type="primary"
-            @click="showGlobalAuth"
-            ><span v-if="device != 'mobile'">Authorize</span></Button
+            @click="showGlobalParams"
+            ><span v-if="device != 'mobile'">全局参数</span></Button
           >
-          <Button v-else icon="safety-certificate" @click="showGlobalAuth"
-            ><span v-if="device != 'mobile'">Authorize</span></Button
+          <Button v-else icon="global" @click="showGlobalParams"
+            ><span v-if="device != 'mobile'">全局参数</span></Button
           >
         </Tooltip>
 
@@ -107,7 +107,7 @@
 
 <script>
 import { Select, Tooltip, Button, Icon } from "ant-design-vue";
-import GlobalAuthModal from "./auth/globalAuthModal";
+import GlobalParamsModal from "./globalParamsModal";
 import AppSelect from "./AppSelect";
 import { ls } from "@/utils/cache";
 
@@ -136,7 +136,7 @@ export default {
   },
   data() {
     return {
-      isGlobalAuth: false,
+      isGlobalParams: false,
       currentCache: "",
       logoPath: "./logo.png",
       currentApp: ""
@@ -159,22 +159,23 @@ export default {
     }
   },
   created() {
-    const globalAuth = ls.get("globalAuth");
-    if (globalAuth) {
-      this.isGlobalAuth = true;
+    const globalParams = ls.get("globalParams");
+    if (globalParams) {
+      this.isGlobalParams = true;
     }
   },
   methods: {
-    showGlobalAuth() {
-      GlobalAuthModal({
-        success: this.setGlobalAuthSuccess
+    showGlobalParams() {
+      GlobalParamsModal({
+        config: this.config,
+        success: this.setGlobalParamsSuccess
       });
     },
-    setGlobalAuthSuccess(val) {
+    setGlobalParamsSuccess(val) {
       if (val) {
-        this.isGlobalAuth = true;
+        this.isGlobalParams = true;
       } else {
-        this.isGlobalAuth = false;
+        this.isGlobalParams = false;
       }
     },
     onCacheChange(val) {

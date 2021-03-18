@@ -153,3 +153,12 @@ export const getTreeFirstNode = (tree, childrenField = "children") => {
   forFn(tree);
   return temp;
 };
+
+/**
+ * 将文本内的特殊标记替换成html
+ * @param {string} text
+ * @returns
+ */
+export const textToHtml = text => {
+  return text ? text.replace(/ /g, "&nbsp;").replace(/\r\n/g, "<br>") : "";
+};

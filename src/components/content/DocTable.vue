@@ -29,6 +29,9 @@
           defaultExpandAllRows
           childrenColumnName="params"
         >
+          <template slot="rowDesc" slot-scope="text">
+            <div v-html="textToHtml(text)"></div>
+          </template>
         </Table>
       </div>
     </div>
@@ -75,6 +78,9 @@
         childrenColumnName="params"
         @expandedRowsChange="onExpandedRowsChange"
       >
+        <template slot="rowDesc" slot-scope="text">
+          <div v-html="textToHtml(text)"></div>
+        </template>
       </Table>
     </div>
   </div>
@@ -82,6 +88,7 @@
 
 <script>
 import { Table, Icon, Popover } from "ant-design-vue";
+import { textToHtml } from "../../utils/utils";
 
 let paramsRowKey = 0;
 export default {
@@ -136,7 +143,8 @@ export default {
         },
         {
           title: "说明",
-          dataIndex: "desc"
+          dataIndex: "desc",
+          scopedSlots: { customRender: "rowDesc" }
         }
       ],
       returnColumns: [
@@ -159,7 +167,8 @@ export default {
         },
         {
           title: "说明",
-          dataIndex: "desc"
+          dataIndex: "desc",
+          scopedSlots: { customRender: "rowDesc" }
         }
       ],
       tableScroll: {
@@ -179,6 +188,7 @@ export default {
     this.returnData = this.handleReturnData(this.apiData.return);
   },
   methods: {
+    textToHtml,
     handleReturnData(data) {
       return data
         ? data.map(item => {

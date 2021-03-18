@@ -14,9 +14,7 @@
           </span>
         </div>
       </div>
-      <div class="title-sub">
-        {{ apiData.desc }}
-      </div>
+      <div class="title-sub" v-html="desc"></div>
     </div>
     <div class="api-url-box">
       <div class="api-url-tag" :style="{ background: methodColor }">
@@ -49,6 +47,7 @@ import { Icon, Tabs, message, Tag } from "ant-design-vue";
 import DocTable from "./DocTable";
 import DocJson from "./DocJson";
 import DocDebug from "./DocDebug";
+import { textToHtml } from "../../utils/utils";
 
 export default {
   components: {
@@ -100,6 +99,12 @@ export default {
         tags = [this.apiData.tag];
       }
       return tags;
+    },
+    desc() {
+      if (this.apiData.desc) {
+        return textToHtml(this.apiData.desc);
+      }
+      return "";
     }
   },
   data() {
