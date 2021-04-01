@@ -25,7 +25,7 @@ const handleError = error => {
 // 创建实例
 const service = axios.create({
   baseURL:
-    process.env.NODE_ENV === "development" ? "http://test1.apidoc.com" : "",
+    process.env.NODE_ENV === "development" ? "http://demo.apidoc.com" : "",
   timeout: 1 * 60 * 1000
 });
 // 请求拦截器
@@ -65,7 +65,8 @@ service.interceptors.response.use(
 
 export const sendRequest = (apiUrl, params, type, headers = {}) => {
   const arr = {
-    url: apiUrl,
+    // eslint-disable-next-line no-undef
+    url: config.routePrefix + apiUrl,
     method: type,
     headers: headers
   };

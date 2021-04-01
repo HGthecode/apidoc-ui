@@ -19,6 +19,9 @@
         <div>{{ error.status }}</div>
       </div>
       <div class="error-message">{{ error.message }}</div>
+      <div>
+        <Button icon="reload" size="large" @click="reloadPage">刷新</Button>
+      </div>
     </div>
     <div v-else>
       <splitpanes style="height: calc(100vh - 50px)">
@@ -85,7 +88,7 @@
 import Vue from "vue";
 import { Splitpanes, Pane } from "splitpanes";
 import "splitpanes/dist/splitpanes.css";
-import { Card, Spin, Drawer, Icon } from "ant-design-vue";
+import { Card, Spin, Drawer, Icon, Button } from "ant-design-vue";
 import DocMenu from "./Menu";
 import DocApiContent from "./content";
 import DocHome from "./DocHome";
@@ -113,7 +116,8 @@ export default {
     Header,
     Drawer,
     DocMdContent,
-    Icon
+    Icon,
+    Button
   },
   mixins: [responsiveMixin],
   data() {
@@ -287,6 +291,9 @@ export default {
           that.getApiList();
         }
       });
+    },
+    reloadPage() {
+      window.location.href = "/apidoc/";
     }
   }
 };
@@ -312,6 +319,7 @@ export default {
     background: #282c34;
     border-radius: 6px;
     color: #ddd;
+    margin-bottom: 20px;
   }
 }
 </style>

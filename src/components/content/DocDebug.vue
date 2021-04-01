@@ -120,7 +120,7 @@ import "highlight.js/styles/atom-one-dark.css";
 import javascript from "highlight.js/lib/languages/javascript";
 import json from "highlight.js/lib/languages/json";
 import { sendRequest } from "@/utils/request";
-import { trim, getIndent } from "@/utils/utils";
+import { trim, getIndent, renderParamsCode } from "@/utils/utils";
 import TableInput from "@/utils/Input";
 import cloneDeep from "lodash/cloneDeep";
 import { ls } from "@/utils/cache";
@@ -257,59 +257,7 @@ export default {
         }
       }
 
-      this.parameters = this.renderParamsCode(params);
-    },
-    renderParamsCode(params, indent = 0) {
-      const indentContent = getIndent(indent);
-      const valueIndentContent = getIndent(indent + 2);
-
-      let code = indentContent + "{\n";
-      if (indent > 0) {
-        code = "";
-      }
-      if (params && params.length) {
-        params.forEach(item => {
-          let stringValue = item.default ? item.default : item.type;
-          let value = `"${trim(stringValue)}"`;
-          let type = "string";
-          if (item.type == "object" && item.params && item.params.length) {
-            let arrayCode = indentContent + "{\n";
-            arrayCode += this.renderParamsCode(item.params, indent + 2);
-            arrayCode += valueIndentContent + "},\n";
-            value = arrayCode;
-            type = "object";
-          } else if (
-            item.type == "array" &&
-            item.params &&
-            item.params.length
-          ) {
-            let arrayCode = indentContent + "[\n";
-            arrayCode += valueIndentContent + "{\n";
-            arrayCode += this.renderParamsCode(item.params, indent + 2);
-            arrayCode += valueIndentContent + "}\n";
-            arrayCode += valueIndentContent + "],\n";
-            value = arrayCode;
-            type = "array";
-          } else if (item.type == "tree" && item.params && item.params.length) {
-            let arrayCode = indentContent + "[\n";
-            arrayCode += valueIndentContent + "{\n";
-            arrayCode += this.renderParamsCode(item.params, indent + 4);
-            arrayCode += valueIndentContent + "}\n";
-            arrayCode += valueIndentContent + "],\n";
-            value = arrayCode;
-            type = "tree";
-          }
-          let desc = `,\n`;
-          if (type === "array" || type == "object" || type == "tree") {
-            desc = "";
-          }
-          code += `${valueIndentContent}"${item.name}": ${value}${desc}`;
-        });
-      }
-      if (indent == 0) {
-        code += indentContent + "}\n";
-      }
-      return code;
+      this.parameters = renderParamsCode(params);
     },
 
     excute() {

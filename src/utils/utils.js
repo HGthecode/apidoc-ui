@@ -40,8 +40,34 @@ export const renderParamsCode = (params, indent = 0, notes) => {
 
   if (params && params.length) {
     params.forEach(item => {
-      let stringValue = item.default ? item.default : item.type;
-      let value = `"${trim(stringValue)}"`;
+      let fieldValue = item.default;
+      if (!fieldValue) {
+        switch (item.type) {
+          case "int":
+            fieldValue = 0;
+            break;
+          case "boolean":
+            fieldValue = false;
+            break;
+          case "date":
+            fieldValue = getNowTime();
+            break;
+
+          case "datetime":
+            fieldValue = getNowTime("yyyy-MM-dd HH:mm:ss");
+            break;
+          case "time":
+            fieldValue = getNowTime("HH:mm:ss");
+            break;
+
+          default:
+            fieldValue = item.type;
+            break;
+        }
+      }
+      let value = ["int", "float", "boolean"].includes(item.type)
+        ? fieldValue
+        : `"${trim(fieldValue)}"`;
       let type = "string";
       let noteText = "";
       if (notes) {
@@ -49,24 +75,36 @@ export const renderParamsCode = (params, indent = 0, notes) => {
       }
 
       if (item.type == "object" && item.params && item.params.length) {
-        let arrayCode = indentContent + "{    " + noteText + "\n";
+        let arrayCode = "{    " + noteText + "\n";
         arrayCode += renderParamsCode(item.params, indent + 2, notes);
         arrayCode += valueIndentContent + "},\n";
         value = arrayCode;
 
         type = "object";
       } else if (item.type == "array" && item.params && item.params.length) {
-        let arrayCode = indentContent + "[    " + noteText + "\n";
-        arrayCode += valueIndentContent + "{\n";
-        arrayCode += renderParamsCode(item.params, indent + 2, notes);
-        arrayCode += valueIndentContent + "}\n";
+        let arrayCode = "[    " + noteText + "\n";
+        arrayCode += valueIndentContent + getIndent(2) + "{\n";
+        arrayCode += renderParamsCode(item.params, indent + 4, notes);
+        arrayCode += valueIndentContent + getIndent(2) + "}\n";
         arrayCode += valueIndentContent + "],\n";
         value = arrayCode;
         type = "array";
+      } else if (item.type == "tree" && item.params && item.params.length) {
+        let arrayCode = "[    " + noteText + "\n";
+        arrayCode += valueIndentContent + getIndent(2) + "{\n";
+        arrayCode += renderParamsCode(item.params, indent + 4);
+        arrayCode += valueIndentContent + getIndent(2) + "}\n";
+        arrayCode += valueIndentContent + "],\n";
+        value = arrayCode;
+        type = "tree";
       }
       let desc = "";
-      if (!(type === "array" || type == "object") && notes) {
-        desc = `,  // ${item.desc}\n`;
+      if (!(type === "array" || type == "object" || type === "tree")) {
+        if (notes) {
+          desc = `,  // ${item.desc}\n`;
+        } else {
+          desc = `,\n`;
+        }
       }
       code += `${valueIndentContent}${item.name}: ${value}${desc}`;
     });
@@ -161,4 +199,33 @@ export const getTreeFirstNode = (tree, childrenField = "children") => {
  */
 export const textToHtml = text => {
   return text ? text.replace(/ /g, "&nbsp;").replace(/\r\n/g, "<br>") : "";
+};
+
+export const getNowTime = (fmt = "yyyy-MM-dd") => {
+  const date = new Date();
+  var o = {
+    "M+": date.getMonth() + 1, //月份
+    "d+": date.getDate(), //日
+    "H+": date.getHours(), //小时
+    "h+": date.getHours(), //小时
+    "m+": date.getMinutes(), //分
+    "s+": date.getSeconds(), //秒
+    "q+": Math.floor((date.getMonth() + 3) / 3), //季度
+    S: date.getMilliseconds() //毫秒
+  };
+  if (/(y+)/.test(fmt)) {
+    fmt = fmt.replace(
+      RegExp.$1,
+      (date.getFullYear() + "").substr(4 - RegExp.$1.length)
+    );
+  }
+  for (var k in o) {
+    if (new RegExp("(" + k + ")").test(fmt)) {
+      fmt = fmt.replace(
+        RegExp.$1,
+        RegExp.$1.length == 1 ? o[k] : ("00" + o[k]).substr(("" + o[k]).length)
+      );
+    }
+  }
+  return fmt;
 };
