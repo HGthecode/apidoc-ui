@@ -24,8 +24,11 @@ const handleError = error => {
 
 // 创建实例
 const service = axios.create({
+  // eslint-disable-next-line no-undef
   baseURL:
-    process.env.NODE_ENV === "development" ? "http://demo.apidoc.com" : "",
+    process.env.NODE_ENV === "development"
+      ? "http://demo.apidoc.com"
+      : config.HOST,
   timeout: 1 * 60 * 1000
 });
 // 请求拦截器
@@ -66,7 +69,7 @@ service.interceptors.response.use(
 export const sendRequest = (apiUrl, params, type, headers = {}) => {
   const arr = {
     // eslint-disable-next-line no-undef
-    url: config.routePrefix + apiUrl,
+    url: apiUrl,
     method: type,
     headers: headers
   };
