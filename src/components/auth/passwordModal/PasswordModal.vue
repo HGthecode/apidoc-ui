@@ -1,6 +1,6 @@
 <template>
   <Modal
-    title="请输入验证密码"
+    title="请输入授权密码"
     :width="500"
     :visible="visible"
     :destroyOnClose="true"
@@ -35,6 +35,7 @@ export default {
     InputPassword: Input.Password
   },
   props: {
+    appKey: String,
     success: Function,
     cancel: Function
   },
@@ -56,27 +57,30 @@ export default {
     },
     handleOk() {
       if (!this.password) {
-        message.error("请输入验证密码");
+        message.error("请输入授权密码");
         return;
       }
       this.login({ password: md5(this.password) });
     },
     login(values) {
-      verifyAuth(values)
+      verifyAuth({ ...values, appKey: this.appKey })
         .then(res => {
+          if (res.data.code !== 0) {
+            message.error(res.data.msg);
+            return false;
+          }
           let token = "";
           if (res && res.data && res.data.token) {
             token = res.data.token;
           } else if (res && res.data && res.data.data) {
             token = res.data.data;
           }
-
           if (token) {
             ls.set("token", token);
             this.$emit("success");
             this.visible = false;
           } else {
-            message.error("验证错误，请联系管理员");
+            message.error("验证错误，请联系管理员1");
           }
         })
         .catch(err => {

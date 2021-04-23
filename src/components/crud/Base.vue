@@ -10,35 +10,8 @@
           :options="config.apps"
           @change="onAppChange"
         />
-
-        <!-- <a-select
-          style="width:130px;"
-          v-model="version"
-          @change="onVersionChange"
-        >
-          <a-select-option
-            v-for="(item, index) in config.versions"
-            :key="index"
-            :value="item.title"
-            >{{ item.title }}</a-select-option
-          >
-        </a-select> -->
       </span>
-      <!-- <span v-if="config.versions && config.versions.length">
-        <span class="form-item_label">版本：</span>
-        <a-select
-          style="width:130px;"
-          v-model="version"
-          @change="onVersionChange"
-        >
-          <a-select-option
-            v-for="(item, index) in config.versions"
-            :key="index"
-            :value="item.title"
-            >{{ item.title }}</a-select-option
-          >
-        </a-select>
-      </span> -->
+
       <span v-if="config.groups && config.groups.length">
         <span class="form-item_label">分组：</span>
         <a-select style="width:130px;" v-model="group">

@@ -64,33 +64,7 @@ export default {
       modalWidth: 1200
     };
   },
-  computed: {
-    // namespace() {
-    //   const { appKey } = this;
-    //   if (this.config && this.config.apps) {
-    //     const list = treeTransArray(this.config.apps, "items");
-    //     let appFind = "";
-    //     if (appKey.indexOf("_") > -1) {
-    //       const keyArr = appKey.split("_");
-    //       const lastKey = keyArr[keyArr.length - 1];
-    //       appFind = list.find(p => p.folder === lastKey);
-    //     } else if (appKey) {
-    //       appFind = list.find(p => p.folder === appKey);
-    //     }
-    //     if (appFind && appFind.folder) {
-    //       return appFind.path;
-    //     }
-    //   }
-    //   return "app\\controller";
-    // },
-    // namespacePath() {
-    //   const arr = this.namespace
-    //     .split("\\")
-    //     .filter(p => !["app", "controller"].includes(p));
-    //   const namespacePath = arr.join("/");
-    //   return namespacePath;
-    // }
-  },
+  computed: {},
   created() {
     this.appKey = this.currentAppKey;
     if (this.clientWidth < 1200) {
@@ -126,7 +100,22 @@ export default {
           this.$emit("success");
           this.handleCancel();
         })
-        .catch(() => {});
+        .catch(err => {
+          const status =
+            err.response && err.response.status ? err.response.status : 404;
+          const error = {
+            status: status,
+            message:
+              err.response && err.response.data && err.response.data.message
+                ? err.response.data.message
+                : err.message
+          };
+          Modal.warning({
+            title: "创建失败",
+            content: error.message,
+            okText: "确认"
+          });
+        });
     },
     onClassNameChange(name) {
       this.$refs.service.setClassName(name);

@@ -129,6 +129,40 @@ export const setCurrentUrl = url => {
   );
 };
 
+export const changeUrlArg = (url, arg, val) => {
+  var pattern = arg + "=([^&]*)";
+  var replaceText = arg + "=" + val;
+  return url.match(pattern)
+    ? url.replace(eval("/(" + arg + "=)([^&]*)/gi"), replaceText)
+    : url.match("[?]")
+    ? url + "&" + replaceText
+    : url + "?" + replaceText;
+};
+
+export const deleteUrlArg = (url, name) => {
+  var urlArr = url.split("?");
+  if (urlArr.length > 1 && urlArr[1].indexOf(name) > -1) {
+    var query = urlArr[1];
+    var obj = {};
+    var arr = query.split("&");
+    for (var i = 0; i < arr.length; i++) {
+      arr[i] = arr[i].split("=");
+      obj[arr[i][0]] = arr[i][1];
+    }
+    delete obj[name];
+    var urlte =
+      urlArr[0] +
+      "?" +
+      JSON.stringify(obj)
+        .replace(/[\"\{\}]/g, "")
+        .replace(/\:/g, "=")
+        .replace(/\,/g, "&");
+    return urlte;
+  } else {
+    return url;
+  }
+};
+
 /**
  * 获取当前url参数
  */

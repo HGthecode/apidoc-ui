@@ -102,7 +102,9 @@ export default {
       openKeys: [],
       currentOpenKeys: [],
       currentTags: [],
-      keyword: ""
+      keyword: "",
+      selectedKeys: [],
+      envCofnig: {}
     };
   },
   watch: {
@@ -115,11 +117,20 @@ export default {
   },
 
   created() {
+    // eslint-disable-next-line no-undef
+    this.envCofnig = config;
     this.onSearch();
   },
   methods: {
     onMenuClick(data) {
+      this.selectedKeys = [data.menu_key];
       this.$emit("change", data);
+    },
+    setSelectedKeys(keys) {
+      this.selectedKeys = keys;
+    },
+    getMenuData() {
+      return this.menuData;
     },
     renderItem(menu) {
       if (!menu.hidden) {
@@ -153,7 +164,7 @@ export default {
         menu.children.forEach(item => itemArr.push(this.renderItem(item)));
       }
       let controller = "";
-      if (menu.controller) {
+      if (menu.controller && this.envCofnig.MENU.SHOW_CONTROLLER_CLASS) {
         controller = <b style="margin-right:10px;">{menu.controller}</b>;
       }
       let apiActionButton = "";
@@ -171,25 +182,61 @@ export default {
       );
     },
     renderMenuItem(menu) {
+      // eslint-disable-next-line no-undef
       if (menu && menu.url && menu.method) {
         // 接口
-        let tagColor = "";
-        switch (menu.method) {
-          case "GET":
-            tagColor = "#87d068";
-            break;
-          case "POST":
-            tagColor = "#2db7f5";
-            break;
-          case "PUT":
-            tagColor = "#ff9800";
-            break;
-          case "DELETE":
-            tagColor = "#ff4d4f";
-            break;
-          default:
-            tagColor = "#ddd";
-            break;
+        let method = "";
+        if (this.envCofnig.MENU.SHOW_API_METHOD) {
+          let tagColor = "";
+          switch (menu.method) {
+            case "GET":
+              tagColor = "#87d068";
+              break;
+            case "POST":
+              tagColor = "#2db7f5";
+              break;
+            case "PUT":
+              tagColor = "#ff9800";
+              break;
+            case "DELETE":
+              tagColor = "#ff4d4f";
+              break;
+            default:
+              tagColor = "#ccc";
+              break;
+          }
+          let methodTags = "";
+          if (menu.method.indexOf(",") > -1) {
+            const tags = menu.method.split(",");
+            methodTags = tags.map((p, i) => {
+              if (i < 4) {
+                return <span class={`method-item ${p} method-item-${i}`} />;
+              }
+            });
+            const methodText = `${tags.length}`;
+            method = (
+              <span
+                title={menu.method}
+                class={`action-title-tag method-multiple-tag method-num-${
+                  tags.length > 4 ? 4 : tags.length
+                }`}
+              >
+                {methodTags}
+                <span class={`method-item empty`} />
+                {methodText}
+              </span>
+            );
+          } else {
+            method = (
+              <Tag class="action-title-tag" color={tagColor}>
+                <span>{menu.method}</span>
+              </Tag>
+            );
+          }
+        }
+        let url = "";
+        if (this.envCofnig.MENU.SHOW_API_URL) {
+          url = <span style="margin-left:10px;">{menu.url}</span>;
         }
 
         return (
@@ -205,11 +252,9 @@ export default {
           >
             <span class="action-title">
               <div class="action-title_wraper">
-                <Tag class="action-title-tag" color={tagColor}>
-                  {menu.method}
-                </Tag>
+                {method}
                 {menu.title}
-                <span style="margin-left:10px;">{menu.url}</span>
+                {url}
               </div>
             </span>
           </MenuItem>
@@ -242,6 +287,19 @@ export default {
         </MenuItem>
       );
     },
+    handleSort(list) {
+      return list.sort(function(a, b) {
+        a.sort = a.sort ? a.sort : 999;
+        b.sort = b.sort ? b.sort : 999;
+        if (a.sort < b.sort) {
+          return -1;
+        } else if (a.sort == b.sort) {
+          return 0;
+        } else {
+          return 1;
+        }
+      });
+    },
     handleGroupMenuData(data) {
       const { groups, currentGroupName } = this;
       if (!(groups && groups.length)) {
@@ -250,7 +308,11 @@ export default {
       const apiData = cloneDeep(data);
       if (currentGroupName) {
         // 指定分组
-        return apiData.filter(p => p.group == currentGroupName);
+        let list = apiData.filter(p => p.group == currentGroupName);
+        if (list && list.length) {
+          list = this.handleSort(list);
+        }
+        return list;
       }
       const groupNames = groups.map(p => p.name);
       let groupData = groups.map(item => {
@@ -258,6 +320,9 @@ export default {
           item.items = apiData.filter(p => !groupNames.includes(p.group));
         } else {
           item.items = apiData.filter(p => p.group == item.name);
+        }
+        if (item.items && item.items.length) {
+          item.items = this.handleSort(item.items);
         }
         return item;
       });
@@ -396,13 +461,19 @@ export default {
       openKeys,
       renderTagsSelect,
       onSearch,
-      keyword
+      keyword,
+      selectedKeys
     } = this;
     const menuTree = this.menuData.map(item => {
       return this.renderItem(item);
     });
     let createCrudButton = "";
-    if (config.crud && config.debug && device !== "mobile") {
+    if (
+      config.crud &&
+      config.crud.model &&
+      config.debug &&
+      device !== "mobile"
+    ) {
       createCrudButton = (
         <Tooltip placement="top">
           <template slot="title">快速创建Crud接口</template>
@@ -418,7 +489,8 @@ export default {
 
     const menuProps = {
       props: {
-        openKeys
+        openKeys,
+        selectedKeys
       },
       on: {
         openChange: onOpenChange
@@ -481,6 +553,71 @@ export default {
     width: 50px;
     text-align: center;
     padding: 0 3px;
+  }
+  .method-multiple-tag {
+    position: relative;
+    background: #ccc;
+    width: 50px;
+    text-align: center;
+    padding: 0 3px;
+    border-radius: 4px;
+    display: inline-block;
+    line-height: 22px;
+    margin-right: 8px;
+    &.method-num-2 {
+      padding-left: 13px;
+      .method-item.empty {
+        left: 10px;
+      }
+    }
+    &.method-num-3 {
+      padding-left: 18px;
+      .method-item.empty {
+        left: 15px;
+      }
+    }
+    &.method-num-4 {
+      padding-left: 23px;
+      .method-item.empty {
+        left: 20px;
+      }
+    }
+    .method-item {
+      width: 10px;
+      height: 100%;
+      display: inline-block;
+      border-radius: 4px;
+      position: absolute;
+      top: 0;
+
+      &.GET {
+        background: #87d068;
+      }
+      &.POST {
+        background: #2db7f5;
+      }
+      &.PUT {
+        background: #ff9800;
+      }
+      &.DELETE {
+        background: #ff4d4f;
+      }
+      &.empty {
+        background: #ccc;
+      }
+      &.method-item-0 {
+        left: 0;
+      }
+      &.method-item-1 {
+        left: 5px;
+      }
+      &.method-item-2 {
+        left: 10px;
+      }
+      &.method-item-3 {
+        left: 15px;
+      }
+    }
   }
   .doc-menu-url {
     padding: 2px 10px;

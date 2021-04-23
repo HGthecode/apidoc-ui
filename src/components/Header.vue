@@ -49,7 +49,7 @@
             (config.cache || config.with_cache) &&
             apiData &&
             apiData.cacheFiles &&
-            apiData.cacheFiles.length
+            apiData.cacheFiles.length > 1
         "
       >
         <Select

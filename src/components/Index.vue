@@ -13,13 +13,9 @@
     <div class="spin-box" v-if="loading">
       <Spin tip="Loading..." :spinning="loading"> </Spin>
     </div>
-    <div class="error-box" v-else-if="error.status">
-      <div class="error-status">
-        <div><Icon type="warning" /></div>
-        <div>{{ error.status }}</div>
-      </div>
-      <div class="error-message">{{ error.message }}</div>
-      <div>
+    <div v-else-if="error.status">
+      <error-box :error="error" />
+      <div style="text-align: center;">
         <Button icon="reload" size="large" @click="reloadPage">刷新</Button>
       </div>
     </div>
@@ -32,6 +28,7 @@
             :bodyStyle="{ padding: 0 }"
           >
             <DocMenu
+              ref="sideMenu"
               :apiData="apiData.list"
               :groups="apiData.groups"
               :tags="apiData.tags"
@@ -46,6 +43,7 @@
           <Card
             :bordered="false"
             style="height:100%;overflow: auto;"
+            id="pageContainer"
             :bodyStyle="{ padding: device == 'mobile' ? '10px' : '24px' }"
           >
             <DocApiContent
@@ -56,6 +54,8 @@
             <DocMdContent
               v-else-if="currentDocData && currentDocData.type === 'md'"
               :docData="currentDocData"
+              :appKey="currentAppKey"
+              :device="device"
             />
             <DocHome v-else :apiData="apiData" :config="config" />
           </Card>
@@ -71,6 +71,7 @@
         @close="onSideMenuClose"
       >
         <DocMenu
+          ref="sideMenu"
           :apiData="apiData.list"
           :groups="apiData.groups"
           :tags="apiData.tags"
@@ -94,15 +95,22 @@ import DocApiContent from "./content";
 import DocHome from "./DocHome";
 import VueClipboard from "vue-clipboard2";
 import { ls } from "@/utils/cache";
-import { setCurrentUrl, getUrlQuery, getTreeFirstNode } from "@/utils/utils";
+import {
+  setCurrentUrl,
+  getUrlQuery,
+  getTreeFirstNode,
+  changeUrlArg,
+  treeTransArray,
+  deleteUrlArg
+} from "@/utils/utils";
 import PasswordModal from "./auth/passwordModal";
 import responsiveMixin from "@/utils/responsive";
-import { getConfig, getData } from "@/api/app";
+import { getConfig, getApiData } from "@/api/app";
 import DocMdContent from "./DocMdContent";
 import CrudModal from "./crud";
-
 import Header from "./Header";
 import "./index.less";
+import ErrorBox from "./ErrorBox.vue";
 Vue.use(VueClipboard);
 export default {
   components: {
@@ -117,7 +125,8 @@ export default {
     Drawer,
     DocMdContent,
     Icon,
-    Button
+    Button,
+    ErrorBox
   },
   mixins: [responsiveMixin],
   data() {
@@ -135,13 +144,14 @@ export default {
         status: "",
         message: ""
       },
-      clientWidth: 1920
+      clientWidth: 1920,
+      urlQuery: {}
     };
   },
   created() {
-    const urlQuery = getUrlQuery();
-    this.getConfig([urlQuery.appKey]);
-    this.currentAppKey = urlQuery.appKey;
+    this.urlQuery = getUrlQuery();
+    this.getConfig([this.urlQuery.appKey]);
+    this.currentAppKey = this.urlQuery.appKey;
 
     // this.getApiList();
   },
@@ -150,7 +160,6 @@ export default {
   },
   methods: {
     getApiList(appKey = "", cacheFileName = "", reload = false) {
-      const { verifyAuth } = this;
       let version = null;
       if (appKey) {
         this.currentAppKey = appKey;
@@ -179,7 +188,14 @@ export default {
         }
       }
       this.loading = true;
-      getData({
+      // 更新url
+      const url = changeUrlArg(
+        window.location.href,
+        "appKey",
+        this.currentAppKey
+      );
+      setCurrentUrl(url);
+      getApiData({
         appKey: this.currentAppKey,
         version: version,
         cacheFileName: cacheFileName,
@@ -194,18 +210,36 @@ export default {
           this.apiData = json;
           this.currentApiData = {};
           this.currentDocData = {};
-          // 更新url
-          const url = `${window.location.protocol}//${window.location.host}${
-            window.location.pathname
-          }?appKey=${this.currentAppKey}`;
-          setCurrentUrl(url);
+
+          setTimeout(() => {
+            if (this.urlQuery.md && this.$refs.sideMenu) {
+              // 跳转url指定md
+              const getMenuData = this.$refs.sideMenu.getMenuData();
+              const mdList = treeTransArray(getMenuData[0].items, "items");
+              const mdFind = mdList.find(p => p.path === this.urlQuery.md);
+              if (mdFind) {
+                this.$refs.sideMenu.onMenuClick(mdFind);
+              }
+            } else if (this.urlQuery.api) {
+              const apiList = treeTransArray(this.apiData.list, "children");
+              const apiFind = apiList.find(p => p.url === this.urlQuery.api);
+              if (apiFind) {
+                this.$refs.sideMenu.onMenuClick(apiFind);
+              }
+            }
+          }, 100);
         })
         .catch(err => {
           const status =
             err.response && err.response.status ? err.response.status : 500;
           if (status === 401) {
             ls.remove("token");
-            verifyAuth();
+            PasswordModal({
+              appKey: this.currentAppKey,
+              success: () => {
+                window.location.reload();
+              }
+            });
           } else {
             this.error = {
               status: status,
@@ -226,6 +260,13 @@ export default {
       } else {
         this.currentApiData = currentApiData;
         this.currentDocData = {};
+        let url = changeUrlArg(
+          window.location.href,
+          "api",
+          this.currentApiData.url
+        );
+        url = deleteUrlArg(url, "md");
+        setCurrentUrl(url);
       }
       this.visible.sideMenu = false;
     },
@@ -305,21 +346,5 @@ export default {
   height: 100vh;
   text-align: center;
   padding-top: 100px;
-}
-.error-box {
-  padding: 100px;
-  text-align: center;
-  .error-status {
-    font-size: 50px;
-    color: #ff4d4f;
-  }
-  .error-message {
-    font-size: 16px;
-    padding: 10px;
-    background: #282c34;
-    border-radius: 6px;
-    color: #ddd;
-    margin-bottom: 20px;
-  }
 }
 </style>

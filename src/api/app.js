@@ -2,20 +2,24 @@ import { sendRequest } from "@/utils/request";
 
 export const url = {
   config: "/apidoc/config",
-  data: "/apidoc/data",
-  auth: "/apidoc/auth",
-  crud: "/apidoc/crud"
+  apiData: "/apidoc/apiData",
+  verifyAuth: "/apidoc/verifyAuth",
+  createCrud: "/apidoc/createCrud",
+  mdDetail: "/apidoc/mdDetail"
 };
 
 export const getConfig = param => {
   return sendRequest(url.config, param, "get");
 };
-export const getData = param => {
-  return sendRequest(url.data, param, "get");
+export const getApiData = param => {
+  return sendRequest(url.apiData, param, "get");
 };
 export const verifyAuth = param => {
-  return sendRequest(url.auth, param, "post");
+  return sendRequest(url.verifyAuth, param, "post");
 };
 export const createCrud = param => {
-  return sendRequest(url.crud, param, "post");
+  return sendRequest(url.createCrud, param, "post");
+};
+export const getMdDetail = param => {
+  return sendRequest(url.mdDetail, param, "get");
 };

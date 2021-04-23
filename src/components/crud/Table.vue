@@ -252,7 +252,7 @@ export default {
       let error = false;
       let isMainKey = false;
       const list = data
-        .filter(p => p.field && p.type && p.length)
+        .filter(p => p.field && p.type)
         .map(p => {
           if (!fieldReg.test(p.field)) {
             error = `字段【${p.field}】字段名错误，请重新输入`;
@@ -287,6 +287,8 @@ export default {
         item.length = 11;
       } else if (val === "varchar" && !item.length) {
         item.length = 255;
+      } else if (val === "text" && !item.length) {
+        item.length = "";
       }
     },
     removeRow(index) {

@@ -120,7 +120,7 @@ import "highlight.js/styles/atom-one-dark.css";
 import javascript from "highlight.js/lib/languages/javascript";
 import json from "highlight.js/lib/languages/json";
 import { sendRequest } from "@/utils/request";
-import { trim, getIndent, renderParamsCode } from "@/utils/utils";
+import { renderParamsCode } from "@/utils/utils";
 import TableInput from "@/utils/Input";
 import cloneDeep from "lodash/cloneDeep";
 import { ls } from "@/utils/cache";
@@ -156,6 +156,10 @@ export default {
     url: {
       type: String,
       default: ""
+    },
+    currentMethod: {
+      type: String,
+      default: "GET"
     }
   },
 
@@ -197,6 +201,9 @@ export default {
       this.returnData = {};
       this.initApiData();
     }
+    // currentMethod(){
+
+    // }
   },
 
   created() {
@@ -299,8 +306,7 @@ export default {
         const string = this.parameters;
         json = eval("(" + string + ")");
       }
-
-      const method = this.apiData.method.toLowerCase();
+      const method = this.currentMethod.toLowerCase();
       const headers = {};
       if (this.headerData && this.headerData.length) {
         this.headerData.forEach(item => {

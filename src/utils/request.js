@@ -23,30 +23,24 @@ const handleError = error => {
 };
 
 // 创建实例
+// eslint-disable-next-line no-undef
+const host = config.HOST;
+const authApis = [url.apiData, url.createCrud, url.mdDetail];
 const service = axios.create({
-  // eslint-disable-next-line no-undef
-  baseURL:
-    process.env.NODE_ENV === "development"
-      ? "http://demo.apidoc.com"
-      : config.HOST,
+  baseURL: process.env.NODE_ENV === "development" ? "http://tp.test.com" : host,
   timeout: 1 * 60 * 1000
 });
 // 请求拦截器
 service.interceptors.request.use(
   config => {
-    const apiConfig = ls.get("config");
-    const token = ls.get("token") || "";
-    const headers_key =
-      apiConfig && apiConfig.auth && apiConfig.auth.headers_key
-        ? apiConfig.auth.headers_key
-        : "apidocToken";
-    if (
-      apiConfig &&
-      apiConfig.auth &&
-      (apiConfig.auth.with_auth || apiConfig.auth.enable) &&
-      config.url === "/apidoc/data"
-    ) {
-      config.headers[headers_key] = token;
+    if (authApis.includes(config.url)) {
+      const token = ls.get("token") || "";
+      const headers_key = "apidocToken";
+      if (config.method == "get") {
+        config.params[headers_key] = token;
+      } else {
+        config.data[headers_key] = token;
+      }
     }
     return config;
   },

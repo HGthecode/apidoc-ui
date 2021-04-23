@@ -17,10 +17,24 @@
       <div class="title-sub" v-html="desc"></div>
     </div>
     <div class="api-url-box">
-      <div class="api-url-tag" :style="{ background: methodColor }">
+      <div
+        v-if="methodTags"
+        :class="['api-method-select']"
+        :title="apiData.method"
+      >
+        <a-select v-model="currentMethod" style="width:100%;">
+          <a-select-option
+            v-for="item in methodTags"
+            :key="item"
+            :value="item"
+            >{{ item }}</a-select-option
+          >
+        </a-select>
+      </div>
+      <div v-else class="api-url-tag" :style="{ background: methodColor }">
         {{ apiData.method }}
       </div>
-      <div class="api-url-input">
+      <div :class="['api-url-input', { 'method-multiple': methodTags }]">
         <input v-model="url" readonly />
       </div>
       <div class="api-url-copy">
@@ -36,14 +50,18 @@
         <DocJson :apiData="apiData" :config="config" />
       </TabPane>
       <TabPane key="3" tab="调试">
-        <DocDebug :url="url" :apiData="apiData" />
+        <DocDebug
+          :url="url"
+          :apiData="apiData"
+          :currentMethod="currentMethod"
+        />
       </TabPane>
     </Tabs>
   </div>
 </template>
 
 <script>
-import { Icon, Tabs, message, Tag } from "ant-design-vue";
+import { Icon, Tabs, message, Tag, Select } from "ant-design-vue";
 import DocTable from "./DocTable";
 import DocJson from "./DocJson";
 import DocDebug from "./DocDebug";
@@ -57,7 +75,9 @@ export default {
     DocTable,
     DocJson,
     DocDebug,
-    Tag
+    Tag,
+    [Select.name]: Select,
+    [Select.Option.name]: Select.Option
   },
   props: {
     apiData: {
@@ -91,6 +111,13 @@ export default {
       }
       return color;
     },
+    methodTags() {
+      if (this.apiData.method.indexOf(",") > -1) {
+        const tags = this.apiData.method.split(",");
+        return tags;
+      }
+      return "";
+    },
     tags() {
       let tags = [];
       if (this.apiData.tag && this.apiData.tag.indexOf(" ") > -1) {
@@ -109,16 +136,29 @@ export default {
   },
   data() {
     return {
-      url: ""
+      url: "",
+      currentMethod: ""
     };
   },
   watch: {
     "apiData.url"(url) {
       this.url = url;
+    },
+    methodTags() {
+      if (this.methodTags && this.methodTags.length) {
+        this.currentMethod = this.methodTags[0];
+      } else {
+        this.currentMethod = this.apiData.method;
+      }
     }
   },
   created() {
     this.url = this.apiData.url;
+    if (this.methodTags && this.methodTags.length) {
+      this.currentMethod = this.methodTags[0];
+    } else {
+      this.currentMethod = this.apiData.method;
+    }
   },
   methods: {
     copyUrl() {
@@ -157,7 +197,8 @@ export default {
     border-radius: 4px;
     margin-bottom: 24px;
 
-    .api-url-tag {
+    .api-url-tag,
+    .api-method-select {
       width: 70px;
       text-align: center;
       line-height: 38px;
@@ -167,6 +208,21 @@ export default {
       left: 0;
       border-top-left-radius: 4px;
       border-bottom-left-radius: 4px;
+    }
+    .api-method-select {
+      width: 105px;
+      background: #fafafa;
+      height: 36px;
+      top: 1px;
+      left: 1px;
+      /deep/.ant-select-selection {
+        border: none;
+        background: none;
+        box-shadow: none;
+        .ant-select-selection-selected-value {
+          width: 100%;
+        }
+      }
     }
     .api-url-input {
       line-height: 33px;
@@ -197,6 +253,26 @@ export default {
           box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
         }
       }
+      &.method-multiple {
+        input {
+          padding-left: 110px;
+        }
+      }
+      // &.method-num-2 {
+      //   input {
+      //     padding-left: 90px;
+      //   }
+      // }
+      // &.method-num-3 {
+      //   input {
+      //     padding-left: 120px;
+      //   }
+      // }
+      // &.method-num-4 {
+      //   input {
+      //     padding-left: 175px;
+      //   }
+      // }
     }
     .api-url-copy {
       padding: 8px 15px;
