@@ -144,11 +144,12 @@ export default {
     "apiData.url"(url) {
       this.url = url;
     },
-    methodTags() {
-      if (this.methodTags && this.methodTags.length) {
-        this.currentMethod = this.methodTags[0];
+    "apiData.method"(method) {
+      if (method.indexOf(",") > -1) {
+        const methodTags = method.split(",");
+        this.currentMethod = methodTags[0];
       } else {
-        this.currentMethod = this.apiData.method;
+        this.currentMethod = method;
       }
     }
   },

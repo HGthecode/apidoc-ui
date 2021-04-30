@@ -27,7 +27,8 @@ const handleError = error => {
 const host = config.HOST;
 const authApis = [url.apiData, url.createCrud, url.mdDetail];
 const service = axios.create({
-  baseURL: process.env.NODE_ENV === "development" ? "http://tp.test.com" : host,
+  baseURL:
+    process.env.NODE_ENV === "development" ? "http://demo.apidoc.com" : host,
   timeout: 1 * 60 * 1000
 });
 // 请求拦截器

@@ -168,6 +168,7 @@ export default {
       returnString: "",
       returnData: {},
       parameters: "",
+      method: "",
       headersColumns: [
         {
           title: "Key",
@@ -200,15 +201,16 @@ export default {
     apiData() {
       this.returnData = {};
       this.initApiData();
+    },
+    currentMethod(v) {
+      this.method = v;
     }
-    // currentMethod(){
-
-    // }
   },
 
   created() {
     this.config = ls.get("config");
     this.initApiData();
+    this.method = this.currentMethod;
   },
   methods: {
     initApiData() {
@@ -306,7 +308,7 @@ export default {
         const string = this.parameters;
         json = eval("(" + string + ")");
       }
-      const method = this.currentMethod.toLowerCase();
+      const method = this.method.toLowerCase();
       const headers = {};
       if (this.headerData && this.headerData.length) {
         this.headerData.forEach(item => {
