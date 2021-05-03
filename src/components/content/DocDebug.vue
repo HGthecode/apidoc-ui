@@ -113,7 +113,8 @@ import {
   Empty,
   Table,
   Form,
-  Upload
+  Upload,
+  message
 } from "ant-design-vue";
 import VueHighlightJS from "vue-highlight.js";
 import "highlight.js/styles/atom-one-dark.css";
@@ -306,7 +307,13 @@ export default {
         });
       } else {
         const string = this.parameters;
-        json = eval("(" + string + ")");
+        try {
+          json = eval("(" + string + ")");
+        } catch (error) {
+          message.error("json 格式错误，请检查");
+          this.loading = false;
+          return false;
+        }
       }
       const method = this.method.toLowerCase();
       const headers = {};
@@ -393,11 +400,6 @@ export default {
       }
     },
     fileBeforeUpload(file, name) {
-      // const fileList =
-      //   this.fileList[name] && this.fileList[name].length
-      //     ? this.fileList[name]
-      //     : [];
-
       this.fileList[name] = [file];
 
       return false;
@@ -423,8 +425,9 @@ export default {
 }
 .api-param-code {
   margin-top: 16px;
-  max-height: 500px;
-  overflow: auto;
+  /deep/.hljs {
+    max-height: 500px;
+  }
   .code {
     margin-bottom: 1em;
     pre {
