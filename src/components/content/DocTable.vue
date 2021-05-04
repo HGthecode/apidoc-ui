@@ -7,6 +7,7 @@
           :columns="paramsColumns"
           size="small"
           rowKey="name"
+          :scroll="tableScroll"
           :bordered="true"
           :pagination="false"
           :data-source="apiData.header"
@@ -114,7 +115,7 @@ export default {
         {
           title: "名称",
           dataIndex: "name",
-          width: 200
+          width: 240
         },
         {
           title: "类型",
@@ -125,7 +126,7 @@ export default {
         {
           title: "必填",
           dataIndex: "require",
-          width: 100,
+          width: 60,
           align: "center",
           customRender: text => {
             if (text == 1) {
@@ -139,7 +140,7 @@ export default {
           title: "默认值",
           dataIndex: "default",
           align: "center",
-          width: 100
+          width: 80
         },
         {
           title: "说明",
@@ -151,7 +152,7 @@ export default {
         {
           title: "名称",
           dataIndex: "name",
-          width: 200
+          width: 240
         },
         {
           title: "类型",
@@ -163,7 +164,7 @@ export default {
           title: "默认值",
           dataIndex: "default",
           align: "center",
-          width: 100
+          width: 80
         },
         {
           title: "说明",
@@ -172,7 +173,7 @@ export default {
         }
       ],
       tableScroll: {
-        x: "600px",
+        x: "700px",
         y: "100%"
       },
       expandedRowKeys: [],

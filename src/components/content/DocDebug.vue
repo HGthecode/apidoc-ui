@@ -174,7 +174,7 @@ export default {
         {
           title: "Key",
           dataIndex: "name",
-          width: 150
+          width: 240
         },
         {
           title: "Value",
