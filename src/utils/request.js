@@ -2,6 +2,7 @@ import axios from "axios";
 import { ls } from "./cache";
 import { url } from "@/api/app";
 import { message } from "ant-design-vue";
+import { getCurrentAppConfig } from "@/utils/utils";
 
 const handleError = error => {
   const handleErrorUrls = [url.crud];
@@ -35,13 +36,16 @@ const service = axios.create({
 service.interceptors.request.use(
   config => {
     if (authApis.includes(config.url)) {
-      const token = ls.get("token") || "";
+      // const globalToken = ls.get("token_global") || "";
       const headers_key = "apidocToken";
-      if (config.method == "get") {
-        config.params[headers_key] = token;
-      } else {
-        config.data[headers_key] = token;
-      }
+      const cacheConfig = ls.get("config");
+
+      const key = config.method == "get" ? "params" : "data";
+      const appKey = config[key].appKey;
+      const currentApp = getCurrentAppConfig(appKey, cacheConfig.apps);
+      const tokenKey = currentApp && currentApp.hasPassword ? appKey : "global";
+      const token = ls.get("token_" + tokenKey) || "";
+      config[key][headers_key] = token;
     }
     return config;
   },

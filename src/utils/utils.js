@@ -154,9 +154,9 @@ export const deleteUrlArg = (url, name) => {
       urlArr[0] +
       "?" +
       JSON.stringify(obj)
-        .replace(/[\"\{\}]/g, "")
-        .replace(/\:/g, "=")
-        .replace(/\,/g, "&");
+        .replace(/[\\"\\{\\}]/g, "")
+        .replace(/\\:/g, "=")
+        .replace(/\\,/g, "&");
     return urlte;
   } else {
     return url;
@@ -262,4 +262,25 @@ export const getNowTime = (fmt = "yyyy-MM-dd") => {
     }
   }
   return fmt;
+};
+
+export const getCurrentAppConfig = (appKey, apps) => {
+  if (appKey && appKey.indexOf("_") > -1) {
+    let list = apps;
+    let currentApp = "";
+    const arr = appKey.split("_");
+    for (let i = 0; i < arr.length; i++) {
+      const item = arr[i];
+      const find = list.find(p => p.folder === item);
+      currentApp = find;
+      if (find && find.items && find.items.length) {
+        list = find.items;
+      }
+    }
+    return currentApp;
+  } else if (appKey) {
+    const find = apps.find(p => p.folder === appKey);
+    return find;
+  }
+  return "";
 };

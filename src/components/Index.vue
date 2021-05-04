@@ -89,7 +89,7 @@
 import Vue from "vue";
 import { Splitpanes, Pane } from "splitpanes";
 import "splitpanes/dist/splitpanes.css";
-import { Card, Spin, Drawer, Icon, Button } from "ant-design-vue";
+import { Card, Spin, Drawer, Button } from "ant-design-vue";
 import DocMenu from "./Menu";
 import DocApiContent from "./content";
 import DocHome from "./DocHome";
@@ -101,7 +101,8 @@ import {
   getTreeFirstNode,
   changeUrlArg,
   treeTransArray,
-  deleteUrlArg
+  deleteUrlArg,
+  getCurrentAppConfig
 } from "@/utils/utils";
 import PasswordModal from "./auth/passwordModal";
 import responsiveMixin from "@/utils/responsive";
@@ -124,7 +125,6 @@ export default {
     Header,
     Drawer,
     DocMdContent,
-    Icon,
     Button,
     ErrorBox
   },
@@ -195,12 +195,13 @@ export default {
         this.currentAppKey
       );
       setCurrentUrl(url);
-      getApiData({
+      const json = {
         appKey: this.currentAppKey,
         version: version,
         cacheFileName: cacheFileName,
         reload: reload
-      })
+      };
+      getApiData(json)
         .then(res => {
           this.loading = false;
           const json = {
@@ -270,6 +271,7 @@ export default {
       }
       this.visible.sideMenu = false;
     },
+
     getConfig(option) {
       getConfig()
         .then(res => {
@@ -296,17 +298,31 @@ export default {
         });
     },
     verifyAuth(option) {
+      // 默认版本/应用
+      // let currentAppKey = "";
+      // if (this.currentAppKey && this.config.apps) {
+      //   const appList = treeTransArray(this.config.apps, "items");
+      //   const currentApp = appList.find(p => p.folder === this.currentAppKey);
+      //   currentAppKey = currentApp;
+      // }
       const that = this;
-      const token = ls.get("token");
+      const currentApp = getCurrentAppConfig(
+        this.currentAppKey,
+        this.config.apps
+      );
+      const tokenKey =
+        currentApp && currentApp.hasPassword ? this.currentAppKey : "global";
+      const token = ls.get("token_" + tokenKey);
+      console.log(token, currentApp, this.currentAppKey, option);
       if (
         !token &&
-        this.config &&
-        this.config.auth &&
-        (this.config.auth.with_auth || this.config.auth.enable)
+        ((this.config && this.config.auth && this.config.auth.enable) ||
+          (currentApp && currentApp.hasPassword))
       ) {
         // 不存在token并需要登录
         // 密码验证方法
         PasswordModal({
+          appKey: this.currentAppKey,
           success: () => {
             window.location.reload();
           }

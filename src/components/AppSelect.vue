@@ -1,11 +1,12 @@
 <script>
-import { Select } from "ant-design-vue";
+import { Select, Icon } from "ant-design-vue";
 
 export default {
   components: {
     [Select.name]: Select,
     [Select.OptGroup.name]: Select.OptGroup,
-    [Select.Option.name]: Select.Option
+    [Select.Option.name]: Select.Option,
+    [Icon.name]: Icon
   },
   props: {
     value: {
@@ -17,9 +18,7 @@ export default {
       default: () => []
     }
   },
-  watch: {
-    value(val) {}
-  },
+
   data() {
     return {
       optionData: []
@@ -67,9 +66,13 @@ export default {
       return null;
     },
     renderOption(item) {
+      const lockIcon = item.hasPassword ? <a-icon type="lock" /> : "";
       return (
         <a-select-option value={item._key} label={item.checkedTitle}>
-          {item.title}
+          <div class="app-select-option">
+            <div class="app-select-option_title">{item.title}</div>
+            <div class="app-select-option_icon">{lockIcon}</div>
+          </div>
         </a-select-option>
       );
     },
@@ -96,3 +99,18 @@ export default {
   }
 };
 </script>
+<style lang="less" scoped>
+.app-select-option {
+  display: flex;
+  &_title {
+    flex: 1;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    word-break: break-all;
+  }
+  &_icon {
+    color: #999;
+  }
+}
+</style>

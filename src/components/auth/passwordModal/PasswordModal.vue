@@ -26,6 +26,7 @@
 import { Modal, Button, Input, message } from "ant-design-vue";
 import { verifyAuth } from "@/api/app";
 import { ls } from "@/utils/cache";
+import { getCurrentAppConfig } from "@/utils/utils";
 
 import md5 from "js-md5";
 export default {
@@ -76,7 +77,14 @@ export default {
             token = res.data.data;
           }
           if (token) {
-            ls.set("token", token);
+            const cacheConfig = ls.get("config");
+            const currentApp = getCurrentAppConfig(
+              this.appKey,
+              cacheConfig.apps
+            );
+            const tokenKey =
+              currentApp && currentApp.hasPassword ? this.appKey : "global";
+            ls.set("token_" + tokenKey, token);
             this.$emit("success");
             this.visible = false;
           } else {
