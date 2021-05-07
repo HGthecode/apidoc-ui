@@ -61,7 +61,8 @@ export const renderParamsCode = (params, indent = 0, notes) => {
             break;
 
           default:
-            fieldValue = item.type;
+            // eslint-disable-next-line no-undef
+            fieldValue = config.USE_TYPE_DEFAULT_VALUE ? item.type : "";
             break;
         }
       }
