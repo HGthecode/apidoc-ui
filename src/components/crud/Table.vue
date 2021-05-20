@@ -87,7 +87,7 @@
               />
             </td>
             <td style="width:70px;">
-              <a-input-number v-model="item.length"></a-input-number>
+              <a-input v-model="item.length"></a-input>
             </td>
 
             <td style="width:100px;">

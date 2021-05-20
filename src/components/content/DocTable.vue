@@ -121,7 +121,14 @@ export default {
           title: "类型",
           dataIndex: "type",
           align: "center",
-          width: 100
+          width: 130,
+          customRender: (text, record) => {
+            if (text == "array" && record.childrenType) {
+              return `${text}<${record.childrenType}>`;
+            } else {
+              return text;
+            }
+          }
         },
         {
           title: "必填",
@@ -158,7 +165,14 @@ export default {
           title: "类型",
           dataIndex: "type",
           align: "center",
-          width: 100
+          width: 130,
+          customRender: text => {
+            if (text == 1) {
+              return <Icon type="check" style="color:#1890ff" />;
+            } else {
+              return "";
+            }
+          }
         },
         {
           title: "默认值",

@@ -66,7 +66,11 @@ export const renderParamsCode = (params, indent = 0, notes) => {
             break;
         }
       }
-      let value = ["int", "float", "boolean"].includes(item.type)
+      if (item.type === "array" && (fieldValue === "array" || !fieldValue)) {
+        fieldValue = "[]";
+      }
+
+      let value = ["int", "float", "boolean", "array"].includes(item.type)
         ? fieldValue
         : `"${trim(fieldValue)}"`;
       let type = "string";
@@ -83,10 +87,31 @@ export const renderParamsCode = (params, indent = 0, notes) => {
 
         type = "object";
       } else if (item.type == "array" && item.params && item.params.length) {
+        let childrenTypeCodeStart = valueIndentContent + getIndent(2);
+        let childrenTypeCodeEnd = valueIndentContent + getIndent(2);
+        // 根据子节点类型渲染不同的结构
+        if (item.childrenType == "array") {
+          childrenTypeCodeStart = childrenTypeCodeStart + "[\n";
+          childrenTypeCodeEnd = childrenTypeCodeEnd + "]\n";
+          item.params = item.params.map(p => {
+            p.name = null;
+            return p;
+          });
+        } else if (["string", "int"].includes(item.childrenType)) {
+          childrenTypeCodeStart = "";
+          childrenTypeCodeEnd = "";
+          item.params = item.params.map(p => {
+            p.name = null;
+            return p;
+          });
+        } else {
+          childrenTypeCodeStart = childrenTypeCodeStart + "{\n";
+          childrenTypeCodeEnd = childrenTypeCodeEnd + "}\n";
+        }
         let arrayCode = "[    " + noteText + "\n";
-        arrayCode += valueIndentContent + getIndent(2) + "{\n";
+        arrayCode += childrenTypeCodeStart;
         arrayCode += renderParamsCode(item.params, indent + 4, notes);
-        arrayCode += valueIndentContent + getIndent(2) + "}\n";
+        arrayCode += childrenTypeCodeEnd;
         arrayCode += valueIndentContent + "],\n";
         value = arrayCode;
         type = "array";
@@ -107,7 +132,10 @@ export const renderParamsCode = (params, indent = 0, notes) => {
           desc = `,\n`;
         }
       }
-      code += `${valueIndentContent}${item.name}: ${value}${desc}`;
+
+      code += `${valueIndentContent}${
+        item.name ? item.name + ": " : ""
+      }${value}${desc}`;
     });
   }
   if (indent == 0) {
