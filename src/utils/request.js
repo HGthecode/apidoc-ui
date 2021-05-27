@@ -3,6 +3,7 @@ import { ls } from "./cache";
 import { url } from "@/api/app";
 import { message } from "ant-design-vue";
 import { getCurrentAppConfig } from "@/utils/utils";
+import { getUrlQuery } from "@/utils/utils";
 
 const handleError = error => {
   const handleErrorUrls = [url.crud];
@@ -46,6 +47,10 @@ service.interceptors.request.use(
       const tokenKey = currentApp && currentApp.hasPassword ? appKey : "global";
       const token = ls.get("token_" + tokenKey) || "";
       config[key][headers_key] = token;
+    }
+    const urlQuery = getUrlQuery();
+    if (urlQuery && urlQuery.host) {
+      config.baseURL = urlQuery.host;
     }
     return config;
   },

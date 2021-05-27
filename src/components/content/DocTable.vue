@@ -166,11 +166,11 @@ export default {
           dataIndex: "type",
           align: "center",
           width: 130,
-          customRender: text => {
-            if (text == 1) {
-              return <Icon type="check" style="color:#1890ff" />;
+          customRender: (text, record) => {
+            if (text == "array" && record.childrenType) {
+              return `${text}<${record.childrenType}>`;
             } else {
-              return "";
+              return text;
             }
           }
         },

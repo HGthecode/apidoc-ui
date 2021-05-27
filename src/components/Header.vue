@@ -22,6 +22,25 @@
     </div>
     <div class="header-menu"></div>
     <div class="user-wrapper">
+      <div class="select-host" v-if="hostList && hostList.length > 1">
+        <span v-if="device != 'mobile'">HOST: </span>
+        <Select
+          v-model="currentHost"
+          :style="{
+            width: device == 'mobile' ? '100px' : '170px'
+          }"
+          @change="onHostChange"
+        >
+          <SelectOption
+            v-for="(item, index) in hostList"
+            :key="index"
+            :value="item.host"
+          >
+            {{ item.title }}
+          </SelectOption>
+        </Select>
+      </div>
+
       <div class="select-app" v-if="apps.length">
         <span v-if="device != 'mobile'"
           >{{
@@ -110,6 +129,7 @@ import { Select, Tooltip, Button, Icon } from "ant-design-vue";
 import GlobalParamsModal from "./globalParamsModal";
 import AppSelect from "./AppSelect";
 import { ls } from "@/utils/cache";
+import { getUrlQuery } from "@/utils/utils";
 
 export default {
   components: {
@@ -139,7 +159,10 @@ export default {
       isGlobalParams: false,
       currentCache: "",
       logoPath: "./logo.png",
-      currentApp: ""
+      currentApp: "",
+      currentHost: "",
+      hostList: [],
+      urlQuery: {}
     };
   },
   computed: {
@@ -159,9 +182,14 @@ export default {
     }
   },
   created() {
+    this.urlQuery = getUrlQuery();
     const globalParams = ls.get("globalParams");
     if (globalParams) {
       this.isGlobalParams = true;
+    }
+    this.hostList = config.HOSTS;
+    if (this.urlQuery && this.urlQuery.host) {
+      this.currentHost = this.urlQuery.host;
     }
   },
   methods: {
@@ -194,6 +222,15 @@ export default {
       } else {
         this.$emit("appChange", key);
       }
+    },
+    onHostChange(v) {
+      console.log(v);
+      this.currentHost = v;
+      config.HOST = v;
+
+      const pathname = window.location.pathname ? window.location.pathname : "";
+      const url = pathname + "?host=" + v;
+      window.location.href = url;
     }
   }
 };
@@ -241,7 +278,8 @@ export default {
       padding: 4px;
       flex: 1;
     }
-    .select-log {
+    .select-log,
+    .select-host {
       padding: 4px;
     }
     .actions {
