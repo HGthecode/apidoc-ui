@@ -1,11 +1,9 @@
-const vueConfig = {
-  publicPath: "",
+module.exports = {
+  publicPath: "./",
   outputDir: "apidoc",
   assetsDir: "static",
   productionSourceMap: false,
   devServer: {
-    port: 9998
-  }
+    port: 9999,
+  },
 };
-
-module.exports = vueConfig;
