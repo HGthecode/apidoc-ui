@@ -3,14 +3,14 @@ import App from './App.vue'
 import './registerServiceWorker'
 import router from './router'
 import store from './store'
-// import * as Types from "@/store/modules/App/types";
+import * as Types from "@/store/modules/App/types";
 
 // import hljs from 'highlight.js'
 // import 'highlight.js/styles/vs.css'
 // import "highlight.js/styles/atom-one-dark.css";
 const app = createApp(App);
 
-// store.dispatch(`app/${Types.GET_FE_CONFIG}`)
+store.dispatch(`app/${Types.GET_FE_CONFIG}`)
 
 // 注册代码高亮指令
 // app.directive('highlight', {
