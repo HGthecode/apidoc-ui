@@ -8,10 +8,10 @@
   </div>
 </template>
 <script>
-import LayoutHeader from "./header";
-export default {
-  components: {
-    LayoutHeader,
-  },
-};
+  import LayoutHeader from './header';
+  export default {
+    components: {
+      LayoutHeader,
+    },
+  };
 </script>

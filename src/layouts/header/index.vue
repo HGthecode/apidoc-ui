@@ -9,17 +9,17 @@
 </template>
 
 <script lang="ts">
-import { Button } from "ant-design-vue";
-import { defineComponent } from "vue";
-import Logo from "./Logo.vue";
-export default defineComponent({
-  components: {
-    Logo,
-    [Button.name]: Button,
-  },
-});
+  import { Button } from 'ant-design-vue';
+  import { defineComponent } from 'vue';
+  import Logo from './Logo.vue';
+  export default defineComponent({
+    components: {
+      Logo,
+      [Button.name]: Button,
+    },
+  });
 </script>
 
 <style lang="less">
-@import "./index.less";
+  @import './index.less';
 </style>
