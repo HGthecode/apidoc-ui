@@ -1,11 +1,20 @@
 .layout-header{
     display: flex;
-    height: 40px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    padding:0 30px;
+    box-shadow: 0 2px 8px var(--card-shadow-color);
+    position: fixed;
+    z-index: 200;
+    box-sizing: border-box;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: var(--bgcolor-blur);
+    color:var(--text-color);
     &_left{
-
+        padding:5px 0;
     }
     &_right{
-
+        position: absolute;
+        right: 30px;
     }
 }
