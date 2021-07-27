@@ -8,10 +8,6 @@ import {
 } from "vue-router";
 import BasicLayout from "../layouts/index.vue";
 
-// 异步加载页面组件
-const importPage = (view: string) => () =>
-  import(/* webpackChunkName: "p-[request]" */ `../views/${view}/index.vue`);
-
 export const routes: Array<RouteRecordRaw> = [
   {
     path: "/",
@@ -25,31 +21,14 @@ export const routes: Array<RouteRecordRaw> = [
       {
         path: "/home",
         name: "Home",
-        component: importPage("home"),
+        component: () => import(/* webpackChunkName: "home" */ "../views/home/index.vue"),
         meta: {
           keepKey: "home",
           affix: true,
           title: "首页",
         },
       },
-      // {
-      //   path: "/home1",
-      //   name: "Home1",
-      //   component: () => import(/* webpackChunkName: "home" */ "../views/home/index.vue"),
-      //   meta: {
-      //     affix: true,
-      //     title: "首页1",
-      //   },
-      // },
-      // {
-      //   path: "/home3",
-      //   name: "Home3",
-      //   component: () => import(/* webpackChunkName: "home" */ "../views/home/index.vue"),
-      //   meta: {
-      //     affix: true,
-      //     title: "首页3",
-      //   },
-      // },
+
       {
         path: "/api",
         name: "ApiDetail",
@@ -74,9 +53,5 @@ const router = createRouter({
   history: createWebHashHistory(),
   routes,
 });
-
-// onBeforeRouteUpdate((to)=>{
-
-// })
 
 export default router;

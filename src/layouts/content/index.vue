@@ -1,51 +1,52 @@
 <template>
-  <div class="layout-content" :style="{ marginLeft: `${sideWidth + 2}px` }">
+  <div
+    :class="['layout-content', { mobile: isMobile }]"
+    :style="{ marginLeft: `${sideWidth + 2}px` }"
+  >
     <router-view v-slot="{ Component }">
-      <keep-alive>
-        <component :is="Component" :key="parseRouteKey($route)" />
-      </keep-alive>
+      <transition name="fade-slide" mode="out-in">
+        <keep-alive :include="keepAlivePages">
+          <component :is="handleComponent(Component, $route)" :key="parseRouteKey($route)" />
+        </keep-alive>
+      </transition>
     </router-view>
   </div>
 </template>
 <script lang="ts">
-import { reactive, defineComponent, toRefs, computed } from "vue";
+import { reactive, defineComponent, toRefs, computed, watch, watchEffect } from "vue";
 import { useStore } from "vuex";
 import { GlobalState } from "@/store";
 import { RouteLocationNormalizedLoaded } from "vue-router";
-// import LayoutMultitabs from "../multitabs";
-// 页面监听钩子
 
 export default defineComponent({
-  components: {
-    // LayoutMultitabs,
-  },
-  // computed: {
-  //   // 监听子页面钩子
-  //   hooks() {
-  //     return PAGE_HOOKS.reduce((events: any, hook) => {
-  //       events["hook:" + hook] = () => this.pageHook(hook);
-  //       return events;
-  //     }, {});
-  //   },
-  // },
+  components: {},
   setup() {
     let store = useStore<GlobalState>();
+    // const keepAlivePages: string[] = [];
     const state = reactive({
       sideWidth: computed(() => store.state.app.sideWidth),
+      pageData: computed(() => store.state.app.pageData),
+      keepAlivePages: computed(() => store.getters["app/keepAliveKeys"]),
+      isMobile: computed(() => store.state.app.isMobile),
     });
 
     // 解析路由 key
     function parseRouteKey(route: RouteLocationNormalizedLoaded): string {
-      const defaultKey = route.fullPath;
+      let key = route.fullPath;
       if (route.meta.keepKey as string) {
-        return route.meta.keepKey + "";
+        key = route.meta.keepKey + "";
       } else if (typeof route.meta.keepKey === "function") {
-        return route.meta.keepKey(route);
+        key = route.meta.keepKey(route);
       }
-      return defaultKey;
+      return key;
     }
 
-    return { ...toRefs(state), parseRouteKey };
+    function handleComponent(Component: any, route: RouteLocationNormalizedLoaded) {
+      Component.type.name = parseRouteKey(route);
+      return Component;
+    }
+
+    return { ...toRefs(state), parseRouteKey, handleComponent };
   },
 });
 </script>

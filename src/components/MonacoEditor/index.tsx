@@ -4,13 +4,17 @@ import {
   onMounted,
   watch,
   onBeforeUnmount,
-  shallowReadonly,
   shallowRef,
+  PropType,
+  computed,
 } from "vue";
 
 import * as Monaco from "monaco-editor";
 
-import type { PropType, Ref } from "vue";
+import { copyTextToClipboard } from "@/utils";
+import { useStore } from "vuex";
+import { GlobalState } from "@/store";
+import { ThemeEnum, MonacoEditorThemeEnum } from "@/enums/appEnum";
 
 export default defineComponent({
   props: {
@@ -24,15 +28,29 @@ export default defineComponent({
       >,
       required: true,
     },
+    height: {
+      type: String as PropType<string>,
+      default: "260px",
+    },
+    readOnly: {
+      type: Boolean,
+      default: false,
+    },
   },
   setup(props) {
-    // must be shallowRef, if not, editor.getValue() won't work
+    let store = useStore<GlobalState>();
     const editorRef = shallowRef();
-
+    const isCopySuccess = ref(false);
     const containerRef = ref();
+    const theme = computed(() => store.state.app.theme);
 
     let _subscription: Monaco.IDisposable | undefined;
     let __prevent_trigger_change_event = false;
+
+    function getMonacoEditorTheme(theme: ThemeEnum): MonacoEditorThemeEnum {
+      const key = theme.toUpperCase() as "DARK" | "LIGHT";
+      return MonacoEditorThemeEnum[key];
+    }
 
     onMounted(() => {
       const editor = (editorRef.value = Monaco.editor.create(containerRef.value, {
@@ -41,14 +59,15 @@ export default defineComponent({
         formatOnPaste: true,
         tabSize: 2,
         automaticLayout: true,
+        readOnly: props.readOnly,
         foldingStrategy: "indentation",
         minimap: {
           enabled: false,
         },
+        theme: getMonacoEditorTheme(theme.value),
       }));
 
       _subscription = editor.onDidChangeModelContent((event) => {
-        console.log("--------->", __prevent_trigger_change_event);
         if (!__prevent_trigger_change_event) {
           props.onChange(editor.getValue(), event);
         }
@@ -60,6 +79,14 @@ export default defineComponent({
     });
 
     watch(
+      () => theme.value,
+      (v) => {
+        const theme = getMonacoEditorTheme(v);
+        Monaco.editor.setTheme(theme);
+      }
+    );
+
+    watch(
       () => props.code,
       (v) => {
         const editor = editorRef.value;
@@ -67,7 +94,6 @@ export default defineComponent({
         if (v !== model.getValue()) {
           editor.pushUndoStop();
           __prevent_trigger_change_event = true;
-          // pushEditOperations says it expects a cursorComputer, but doesn't seem to need one.
           model.pushEditOperations(
             [],
             [
@@ -80,14 +106,21 @@ export default defineComponent({
           editor.pushUndoStop();
           __prevent_trigger_change_event = false;
         }
-        // if (v !== editorRef.value.getValue()) {
-        //   editorRef.value.setValue(v)
-        // }
       }
     );
 
+    function onCopy() {
+      props.code && copyTextToClipboard(props.code);
+      isCopySuccess.value = true;
+      setTimeout(() => {
+        isCopySuccess.value = false;
+      }, 1000);
+    }
+
     return () => {
-      return <div class="code-editor" style="width:100%;height:300px" ref={containerRef}></div>;
+      return (
+        <div class="code-editor-wraper" style={{ height: props.height }} ref={containerRef}></div>
+      );
     };
   },
 });

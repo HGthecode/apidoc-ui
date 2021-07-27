@@ -26,7 +26,7 @@ import { reactive, defineComponent, toRefs, computed } from "vue";
 import { Menu } from "ant-design-vue";
 import BasicMenuItem from "./BasicMenuItem.vue";
 import MenuItemContent from "./MenuItemContent.vue";
-import { MenuType, MenuGroupType } from "./types";
+import { MenuItemType, MenuGroupType } from "./interface";
 
 export default defineComponent({
   components: {
@@ -47,8 +47,9 @@ export default defineComponent({
   setup(props, { emit }) {
     const state = reactive({});
 
-    const menuHasChildren = (menuTreeItem: MenuType): boolean => {
-      return (menuTreeItem.children as MenuType[]) && menuTreeItem.children.length > 0;
+    const menuHasChildren = (menuTreeItem: MenuItemType): boolean => {
+      const nodeChildren = menuTreeItem.children as MenuItemType[];
+      return nodeChildren && nodeChildren.length > 0;
     };
 
     const menuHasItems = (menuTreeItem: MenuGroupType): boolean => {

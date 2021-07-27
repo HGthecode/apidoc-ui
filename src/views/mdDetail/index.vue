@@ -1,6 +1,11 @@
 <template>
-  <div>
-    {{ detail }}
+  <div class="md-page" id="mdContainer">
+    <div class="md-content-wraper">
+      <markdown :md="detail.mdDetail" />
+    </div>
+    <div class="md-anchor-wraper">
+      <md-anchor :md="detail.mdDetail" />
+    </div>
   </div>
 </template>
 
@@ -13,9 +18,13 @@ import { onBeforeRouteUpdate, RouteLocationNormalized } from "vue-router";
 import { getMdDetail } from "@/api";
 import { createMdPageKey } from "@/utils";
 import * as Types from "@/store/modules/App/types";
+import Markdown, { MdAnchor } from "@/components/Markdown";
 
 export default defineComponent({
-  components: {},
+  components: {
+    Markdown,
+    MdAnchor,
+  },
   setup(props) {
     const route = useRoute();
     let store = useStore<GlobalState>();
@@ -25,24 +34,20 @@ export default defineComponent({
       pageData: computed(() => store.state.app.pageData),
       detail: {},
     });
-    // console.log("-----", state.pageData);
     const fetchData = () => {
       const { query, params } = route;
       const key = createMdPageKey({
         appKey: query.appKey as string,
         path: query.path as string,
       });
-      if (state.pageData[key] && (state.pageData[key].mdDetail as string)) {
-        state.detail = state.pageData[key];
-      } else if (query.path && state.appKey) {
+      if (query.path && state.appKey) {
         getMdDetail({
           appKey: state.appKey,
           path: query.path as string,
         }).then((res) => {
-          console.log(res);
           store.dispatch(`app/${Types.ADD_PAGE_DATA}`, {
             ...state.pageData[key],
-            mdDetail: res.data.data as string,
+            mdDetail: res.data.data.content as string,
             appKey: state.appKey,
             key,
           });
@@ -51,12 +56,6 @@ export default defineComponent({
       }
     };
     fetchData();
-
-    // onBeforeRouteUpdate((to: RouteLocationNormalized) => {
-    //   if (to.name === "MdDetail") {
-    //     fetchData();
-    //   }
-    // });
 
     watch(
       () => route.fullPath,
@@ -71,3 +70,6 @@ export default defineComponent({
   },
 });
 </script>
+<style lang="less" scoped>
+@import "./index.less";
+</style>

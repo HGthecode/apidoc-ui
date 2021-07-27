@@ -1,11 +1,24 @@
 // http.ts
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { FeConfigState } from "../../store/modules/App/interface";
+import Apis from "@/api/apis";
+import Cache from "@/utils/cache";
+import { AUTH_DATA } from "@/store/modules/Apidoc/types";
+
+let checkToeknUrls = Object.keys(Apis)
+  .map((key: string) => {
+    const item = Apis[key];
+    if (item.checkToken) {
+      return item.url;
+    }
+    return "";
+  })
+  .filter((p) => p != "");
 
 let apidocConfig: FeConfigState = {};
 
-if (localStorage.apidocConfig) {
-  apidocConfig = JSON.parse(localStorage.apidocConfig);
+if (localStorage.APIDOC_CONFIG) {
+  apidocConfig = JSON.parse(localStorage.APIDOC_CONFIG);
 }
 
 const showStatus = (status: number) => {
@@ -60,35 +73,35 @@ const service = axios.create({
   // 联调
   // baseURL: process.env.NODE_ENV === 'production' ? `/` : '/api',
   baseURL: baseUrl,
-  headers: {
-    get: {
-      "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
-    },
-    post: {
-      "Content-Type": "application/json;charset=utf-8",
-    },
-  },
-  // 是否跨站点访问控制请求
-  withCredentials: true,
+  // headers: {
+  //   get: {
+  //     "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
+  //   },
+  //   post: {
+  //     "Content-Type": "application/json;charset=utf-8",
+  //   },
+  // },
+  // // 是否跨站点访问控制请求
+  // withCredentials: true,
   timeout: 30000,
-  transformRequest: [
-    (data) => {
-      data = JSON.stringify(data);
-      return data;
-    },
-  ],
-  validateStatus() {
-    // 使用async-await，处理reject情况较为繁琐，所以全部返回resolve，在业务代码中处理异常
-    return true;
-  },
-  transformResponse: [
-    (data) => {
-      if (typeof data === "string" && data.startsWith("{")) {
-        data = JSON.parse(data);
-      }
-      return data;
-    },
-  ],
+  // transformRequest: [
+  //   (data) => {
+  //     data = JSON.stringify(data);
+  //     return data;
+  //   },
+  // ],
+  // validateStatus() {
+  //   // 使用async-await，处理reject情况较为繁琐，所以全部返回resolve，在业务代码中处理异常
+  //   return true;
+  // },
+  // transformResponse: [
+  //   (data) => {
+  //     if (typeof data === "string" && data.startsWith("{")) {
+  //       data = JSON.parse(data);
+  //     }
+  //     return data;
+  //   },
+  // ],
 });
 
 // 请求拦截器
@@ -99,21 +112,50 @@ service.interceptors.request.use(
     // if(token){
     //   config.headers.Authorization = `${token}`;
     // }
-    const headers_key = "apidocToken";
+    // const headers_key = "apidocToken";
 
-    // const key = config.method == "get" ? "params" : "data";
-    // const token = "666";
-    // config[key][headers_key] = token;
-    if (config.method == "get") {
-      if (config.params) {
-        config.params.token = "66668";
-      } else {
-        config.params = {
-          token: 666,
-        };
+    // 重置host
+    if (localStorage.APIDOC_CONFIG) {
+      const apidocConfig: FeConfigState = JSON.parse(localStorage.APIDOC_CONFIG);
+      if (apidocConfig.HOST) {
+        config.baseURL = apidocConfig.HOST;
       }
-    } else {
-      config.data.token = 6667;
+    }
+
+    // 权限验证携带token
+    if (config.url && checkToeknUrls.includes(config.url)) {
+      const authData = Cache.get(AUTH_DATA);
+      let appKey = "";
+      if (config.params.appKey) {
+        appKey = config.params.appKey;
+      } else if (config.data.appKey) {
+        appKey = config.data.appKey;
+      }
+      let token = "";
+      if (authData && authData[appKey]) {
+        token = authData[appKey];
+      } else if (authData && authData["global"]) {
+        token = authData["global"];
+      }
+      if (token) {
+        if (config.method == "get") {
+          if (config.params) {
+            config.params.token = token;
+          } else {
+            config.params = {
+              token,
+            };
+          }
+        } else if (config.method == "post") {
+          if (config.data) {
+            config.data.token = token;
+          } else {
+            config.data = {
+              token,
+            };
+          }
+        }
+      }
     }
 
     return config;
@@ -148,9 +190,8 @@ service.interceptors.response.use(
     } else {
       // handle error code
       // 错误抛到业务代码
-      error.data = {};
-      error.data.msg = "请求超时或服务器异常，请检查网络或联系管理员！";
-      console.log(error.data.msg);
+      // error.data = {};
+      // error.data.msg = "请求超时或服务器异常，请检查网络或联系管理员！";
     }
     return Promise.reject(error);
   }

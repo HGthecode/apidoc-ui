@@ -13,6 +13,8 @@ export const SET_APP_TITLE = "SET_APP_TITLE";
 
 export const SET_APP_THEME = "SET_APP_THEME";
 
+export const APP_THEME = "APP_THEME";
+
 export const SET_SIDE_WIDTH = "SET_SIDE_WIDTH";
 
 export const SET_APP_KEY = "SET_APP_KEY";
@@ -22,3 +24,9 @@ export const SET_PAGE_DATA = "SET_PAGE_DATA";
 export const ADD_PAGE_DATA = "ADD_PAGE_DATA";
 
 export const REMOVE_PAGE_DATA = "REMOVE_PAGE_DATA";
+
+export const SET_KEEPALIVE_PAGES = "SET_KEEPALIVE_PAGES";
+
+export const SET_IS_MOBILE = "SET_IS_MOBILE";
+
+export const SET_IS_OPENSIDE = "SET_IS_OPENSIDE";

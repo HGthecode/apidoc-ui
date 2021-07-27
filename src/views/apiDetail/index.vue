@@ -1,7 +1,16 @@
 <template>
   <div class="api-page">
-    <div class="base-info">
+    <skeleton v-if="loading" />
+    <div v-else class="base-info">
       <h1>{{ detail.title }}</h1>
+      <div v-if="isReload">
+        <a-alert type="info" show-icon>
+          <template #message>
+            <span>该接口有更新，</span>
+            <a-button size="small" type="link" @click="onReload">点击此处更新</a-button>
+          </template>
+        </a-alert>
+      </div>
       <div class="text-list" style="margin-bottom: 10px">
         <div v-if="detail.author" class="text-list-item">
           <span class="text-label">作者：</span>
@@ -46,7 +55,7 @@
             <json-tab :detail="detail" />
           </a-tab-pane>
           <a-tab-pane key="debug" tab="调试">
-            <debug-tab :detail="detail" />
+            <debug-tab :detail="detail" :currentMethod="currentMethod" />
           </a-tab-pane>
         </a-tabs>
       </div>
@@ -55,18 +64,21 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, computed, toRefs, watch, ComputedRef } from "vue";
+import { defineComponent, reactive, computed, toRefs, watch, ComputedRef, onActivated } from "vue";
 import { useStore } from "vuex";
 import { GlobalState } from "@/store";
 import { useRoute, onBeforeRouteUpdate, RouteLocationNormalized } from "vue-router";
 import { createApiPageKey, copyTextToClipboard } from "@/utils";
-import { Tag, Select, message, Tabs } from "ant-design-vue";
+import { Tag, Select, message, Tabs, Alert, Button } from "ant-design-vue";
 import { cloneDeep } from "lodash";
 import { CopyOutlined } from "@ant-design/icons-vue";
-import { ApiItem } from "../../store/modules/Apidoc/interface";
+import { ApiItem } from "@/api/interface/apiData";
 import TableTab from "./tableTab.vue";
 import JsonTab from "./jsonTab.vue";
 import DebugTab from "./debugTab.vue";
+import * as Types from "@/store/modules/App/types";
+import { PageDataItemState } from "@/store/modules/App/interface";
+import Skeleton from "./skeleton.vue";
 
 export default defineComponent({
   name: "ApiDetail",
@@ -77,17 +89,18 @@ export default defineComponent({
     CopyOutlined,
     [Tabs.name]: Tabs,
     [Tabs.TabPane.name]: Tabs.TabPane,
+    [Alert.name]: Alert,
+    [Button.name]: Button,
     TableTab,
     JsonTab,
     DebugTab,
+    Skeleton,
   },
-  created() {
-    console.log("api page");
-  },
-  setup(props) {
+  setup() {
     const route = useRoute();
     let store = useStore<GlobalState>();
     const detail: ApiItem = {
+      title: "",
       menu_key: "",
       children: [],
     };
@@ -95,32 +108,49 @@ export default defineComponent({
 
     const state = reactive({
       pageData: computed(() => store.state.app.pageData),
+      apiObject: computed(() => store.state.apidoc.apiObject),
       detail: detail,
       currentKey: "",
       methodList: methodList,
       currentMethod: "",
+      loading: false,
+      isReload: false,
     });
     const fetchData = () => {
+      state.loading = true;
       const { query } = route;
-      const key = createApiPageKey({
-        appKey: query.appKey as string,
-        method: query.method as string,
-        url: query.url as string,
-      });
-      state.currentKey = key;
-      if (state.pageData[key]) {
-        const item = cloneDeep(state.pageData[key]);
-        if (item.method && item.method.indexOf(",") > -1) {
-          state.methodList = item.method.split(",");
+      const fullPath = route.fullPath;
+      const key = query.key as string;
+      state.currentKey = fullPath;
+      let detail: PageDataItemState = {
+        title: "",
+        menu_key: "",
+        children: [],
+      };
+
+      if (state.pageData[fullPath]) {
+        detail = cloneDeep(state.pageData[fullPath]);
+      } else if (state.apiObject[key]) {
+        detail = cloneDeep(state.apiObject[key]);
+        store.dispatch(`app/${Types.ADD_PAGE_DATA}`, {
+          ...detail,
+          key: fullPath,
+        });
+      }
+      if (detail.menu_key) {
+        const method = detail.method as string;
+        if (method && method.indexOf(",") > -1) {
+          state.methodList = method.split(",");
           state.currentMethod = state.methodList[0];
         } else {
-          state.currentMethod = item.method as string;
+          state.currentMethod = detail.method as string;
         }
-        state.detail = {
-          ...item,
-        };
+        state.detail = detail;
+        state.loading = false;
       }
     };
+
+    state.loading = true;
     fetchData();
 
     const onCopyUrl = () => {
@@ -132,23 +162,51 @@ export default defineComponent({
       state.currentMethod = value;
     };
 
-    // watch(
-    //   () => route.fullPath,
-    //   () => {
-    //     if (route.name === "ApiDetail") {
-    //       fetchData();
-    //     }
-    //   }
-    // );
-
     watch(
-      () => state.pageData[state.currentKey],
+      () => state.apiObject,
       () => {
-        fetchData();
+        if (!(state.detail && state.detail.menu_key)) {
+          fetchData();
+        }
       }
     );
 
-    return { ...toRefs(state), onCopyUrl, onMethodChange };
+    onActivated(() => {
+      const { query } = route;
+      const fullPath = route.fullPath;
+      const key = query.key as string;
+      const oldData = JSON.stringify({ ...state.pageData[fullPath], menu_key: "" });
+      const newData = JSON.stringify({ ...state.apiObject[key], menu_key: "" });
+      if (!(state.pageData[fullPath] && state.apiObject[key] && oldData === newData)) {
+        state.isReload = true;
+      }
+    });
+
+    function onReload() {
+      state.loading = true;
+      const { query } = route;
+      const fullPath = route.fullPath;
+      const key = query.key as string;
+      const detail = cloneDeep(state.apiObject[key]);
+      store.dispatch(`app/${Types.ADD_PAGE_DATA}`, {
+        ...detail,
+        key: fullPath,
+      });
+      if (detail.menu_key) {
+        const method = detail.method as string;
+        if (method && method.indexOf(",") > -1) {
+          state.methodList = method.split(",");
+          state.currentMethod = state.methodList[0];
+        } else {
+          state.currentMethod = detail.method as string;
+        }
+        state.detail = detail;
+        state.loading = false;
+        state.isReload = false;
+      }
+    }
+
+    return { ...toRefs(state), onCopyUrl, onMethodChange, onReload };
   },
 });
 </script>

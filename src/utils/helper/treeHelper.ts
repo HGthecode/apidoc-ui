@@ -62,3 +62,56 @@ export function findNode<T = any>(
   }
   return null;
 }
+
+export function getTreePath<T = any>(
+  tree: T[],
+  func: (n: T) => boolean,
+  path: string[] = [],
+  key = "menu_key",
+  childrenField = "children"
+): string[] {
+  if (!tree) return [];
+  for (let i = 0; i < tree.length; i++) {
+    const item: any = tree[i];
+    path.push(item[key]);
+    if (func(item)) return path;
+    if (item[childrenField]) {
+      const findChildren: any = getTreePath(item[childrenField], func, path, key, childrenField);
+      if (findChildren.length) return findChildren;
+    }
+    path.pop();
+  }
+  return [];
+}
+
+export function getTreePathByKeys<T = any>(
+  tree: T[],
+  keys: string[],
+  key = "",
+  path: any[] = [],
+  field = "name",
+  childrenField = "children"
+): T[] | null {
+  if (!tree) return [];
+  for (let i = 0; i < tree.length; i++) {
+    const item: any = tree[i];
+    path.push(item);
+    const keyIndex = keys.findIndex((p) => p === key);
+    if (item[field] === key && keyIndex >= keys.length - 1) {
+      return path;
+    }
+    if (item[childrenField]) {
+      const findChildren: any = getTreePathByKeys(
+        item[childrenField],
+        keys,
+        keys[keyIndex + 1],
+        path,
+        field,
+        childrenField
+      );
+      if (findChildren.length) return findChildren;
+    }
+    path.pop();
+  }
+  return [];
+}

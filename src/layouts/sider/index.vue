@@ -1,13 +1,16 @@
 <template>
-  <div class="layout-side" :style="{ width: `${sideWidth + 2}px` }">
+  <div
+    :class="['layout-side', { mobile: isMobile, open: isOpenSide }]"
+    :style="{ width: `${sideWidth + 2}px` }"
+  >
     <div class="layout-side_header">
       <search @search="onSearch" />
     </div>
-    <a-tabs>
+    <a-tabs :activeKey="activeKey" @change="onTabChange">
       <a-tab-pane key="api" tab="API">
         <div class="layout-side_menus">
           <Menu
-            :data="menuData"
+            :data="apiMenus"
             :keyword="keyword"
             :tags="tags"
             :toggleOpenAll="openAllMenuFlag"
@@ -31,6 +34,17 @@
           <tags-select @change="onTagsChange" />
           <a-tooltip>
             <template #title>
+              更新菜单<span v-if="config.cache && config.cache.enable">，并更新缓存</span>
+            </template>
+            <a-button @click="reloadApiData">
+              <template #icon>
+                <UndoOutlined />
+              </template>
+            </a-button>
+          </a-tooltip>
+
+          <a-tooltip>
+            <template #title>
               {{ openAllMenuFlag ? "收起全部" : "展开全部" }}
             </template>
             <a-button @click="toggleMenuOpen">
@@ -44,8 +58,15 @@
       </template>
     </a-tabs>
 
-    <x-drag-line :min="250" :max="800" :value="sideWidth" @mouseMoveChange="onDragLineChange" />
+    <x-drag-line
+      v-if="!isMobile"
+      :min="250"
+      :max="800"
+      :value="sideWidth"
+      @mouseMoveChange="onDragLineChange"
+    />
   </div>
+  <div class="layout-side_mask"></div>
 </template>
 
 <script lang="ts">
@@ -57,13 +78,13 @@ import * as Types from "@/store/modules/App/types";
 import Search from "./Search.vue";
 import { Tabs, Button, Space, Tooltip } from "ant-design-vue";
 import Menu from "../../components/Menu";
-import { MenuType, MenuGroupType } from "@/components/Menu/src/types";
-import { TagsOutlined, DownOutlined, UpOutlined } from "@ant-design/icons-vue";
+import { TagsOutlined, DownOutlined, UpOutlined, UndoOutlined } from "@ant-design/icons-vue";
 import TagsSelect from "@/components/TagsSelect";
 import { findNode } from "@/utils/helper/treeHelper";
 import { useRouter } from "vue-router";
 import { createApiPageKey, createMdPageKey } from "@/utils";
 import { MdMenuItemState } from "@/store/modules/Apidoc/interface";
+import { MenuItemType } from "@/components/Menu/src/interface";
 
 export default defineComponent({
   components: {
@@ -73,6 +94,7 @@ export default defineComponent({
     // TagsOutlined,
     DownOutlined,
     UpOutlined,
+    UndoOutlined,
     TagsSelect,
     [Tabs.name]: Tabs,
     [Tabs.TabPane.name]: Tabs.TabPane,
@@ -80,59 +102,36 @@ export default defineComponent({
     [Space.name]: Space,
     [Tooltip.name]: Tooltip,
   },
-  setup() {
+  emits: ["reload"],
+  setup(props, { emit }) {
     const router = useRouter();
     let store = useStore<GlobalState>();
-    let menuData: MenuType[] = [];
+    let menuData: MenuItemType[] = [];
     const tags: string[] = [];
     const state = reactive({
       sideWidth: computed(() => store.state.app.sideWidth),
       apiData: computed(() => store.state.apidoc.data),
+      apiMenus: computed(() => store.state.apidoc.apiMenus),
       apiGroups: computed(() => store.state.apidoc.groups),
       mdMenus: computed(() => store.state.apidoc.mdMenus),
       appKey: computed(() => store.state.app.appKey),
       pageData: computed(() => store.state.app.pageData),
+      config: computed(() => store.state.app.config),
+      isMobile: computed(() => store.state.app.isMobile),
+      isOpenSide: computed(() => store.state.app.isOpenSide),
       menuData: menuData,
       keyword: "",
       tags: tags,
       openAllMenuFlag: false,
+      activeKey: "api",
     });
-
-    console.log(state.mdMenus);
 
     const onDragLineChange = (x: number) => {
       store.dispatch(`app/${Types.SET_SIDE_WIDTH}`, x);
     };
 
-    const handleMenuData = (data: MenuType[]) => {
-      // const menuData = cloneDeep(data);
-
-      // const groupNames = state.apiGroups.map((p) => p.name);
-      // let groupData = state.apiGroups.map((item) => {
-      //   if (item.name == '0') {
-      //     item.items = menuData.filter((p) => !groupNames.includes(p.group));
-      //   } else {
-      //     item.items = menuData.filter((p) => p.group == item.name);
-      //   }
-      //   if (item.items && item.items.length) {
-      //     // item.items = this.handleSort(item.items);
-      //   }
-      //   return item;
-      // });
-      state.menuData = data;
-    };
-
-    watch<MenuType[]>(
-      () => state.apiData,
-      (menuData) => {
-        handleMenuData(menuData);
-      }
-    );
-
     const onSearch = (keyword: string) => {
-      console.log(keyword);
       state.keyword = keyword;
-      handleMenuData(state.apiData);
     };
 
     const onTagsChange = (tags: string[]) => {
@@ -144,33 +143,17 @@ export default defineComponent({
     };
 
     const onApiMenuSelect = (e: any) => {
-      const currentNode = findNode<MenuType>(state.menuData, (node) => {
+      const currentNode = findNode<MenuItemType>(state.apiMenus, (node) => {
         if (node.menu_key === e.selectedKeys[0]) {
           return true;
         }
         return false;
       });
-      if (currentNode && currentNode.url) {
-        const key = createApiPageKey({
-          method: currentNode.method as string,
-          url: currentNode.url as string,
-          appKey: state.appKey,
-        });
-        if (!state.pageData[key]) {
-          store.dispatch(`app/${Types.ADD_PAGE_DATA}`, {
-            ...currentNode,
-            appKey: state.appKey,
-            key,
-          });
-        }
-
-        // const urlKey = currentNode.url && currentNode.url.replace(/\//g, "_");
+      if (currentNode && ["api", "multiple"].includes(currentNode.type)) {
         router.push({
           name: `ApiDetail`,
           query: {
-            appKey: state.appKey,
-            method: currentNode.method,
-            url: currentNode.url,
+            key: currentNode.key,
           },
           params: {
             title: currentNode.title as string,
@@ -211,6 +194,14 @@ export default defineComponent({
       }
     };
 
+    const reloadApiData = () => {
+      emit("reload", state.activeKey);
+    };
+
+    function onTabChange(key: "api" | "md") {
+      state.activeKey = key;
+    }
+
     return {
       ...toRefs(state),
       onDragLineChange,
@@ -219,6 +210,8 @@ export default defineComponent({
       onTagsChange,
       onApiMenuSelect,
       onMdMenuSelect,
+      reloadApiData,
+      onTabChange,
     };
   },
 });

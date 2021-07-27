@@ -1,16 +1,18 @@
 <template>
   <div class="search-wraper">
-    <app-select />
-    <a-input-search
-      placeholder="名称 URL 描述"
-      @search="onSearch"
-      :allowClear="true"
-    ></a-input-search>
+    <a-space>
+      <app-select />
+      <a-input-search
+        placeholder="名称 URL 描述"
+        @search="onSearch"
+        :allowClear="true"
+      ></a-input-search>
+    </a-space>
   </div>
 </template>
 
 <script lang="ts">
-import { Input } from "ant-design-vue";
+import { Input, Space } from "ant-design-vue";
 import { reactive, defineComponent, toRefs, computed } from "vue";
 import { useStore } from "vuex";
 import { GlobalState } from "@/store";
@@ -21,6 +23,7 @@ export default defineComponent({
   components: {
     AppSelect,
     [Input.Search.name]: Input.Search,
+    [Space.name]: Space,
   },
   emits: ["search"],
   setup(props, { emit }) {

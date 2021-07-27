@@ -11,7 +11,7 @@
           :bordered="true"
           :pagination="false"
           :data-source="detail.header"
-          childrenColumnName="params"
+          childrenColumnName="children"
         >
         </Table>
       </div>
@@ -28,10 +28,10 @@
           :data-source="detail.param"
           :scroll="tableScroll"
           defaultExpandAllRows
-          childrenColumnName="params"
+          childrenColumnName="children"
         >
-          <template v-slot:rowDesc="text">
-            <div v-html="textToHtml(text)"></div>
+          <template #requireCell="{ text }">
+            <CheckOutlined v-if="text" />
           </template>
         </Table>
       </div>
@@ -48,12 +48,8 @@
         :data-source="detail.return"
         :scroll="tableScroll"
         defaultExpandAllRows
-        childrenColumnName="params"
-        @expandedRowsChange="onExpandedRowsChange"
+        childrenColumnName="children"
       >
-        <template v-slot:rowDesc="text">
-          <div v-html="textToHtml(text)"></div>
-        </template>
       </Table>
     </div>
   </div>
@@ -63,6 +59,7 @@
 import { defineComponent, reactive, PropType, toRefs } from "vue";
 import { ApiDetailState, ApiParamState } from "./interface";
 import { Table } from "ant-design-vue";
+import { CheckOutlined } from "@ant-design/icons-vue";
 
 const paramsColumns = [
   {
@@ -75,7 +72,8 @@ const paramsColumns = [
     dataIndex: "type",
     align: "center",
     width: 130,
-    customRender: (text: string, record: any) => {
+    customRender: (e: any) => {
+      const { text, record } = e;
       if (text == "array" && record.childrenType) {
         return `${text}<${record.childrenType}>`;
       } else {
@@ -88,12 +86,8 @@ const paramsColumns = [
     dataIndex: "require",
     width: 60,
     align: "center",
-    customRender: (text: number) => {
-      if (text === 1) {
-        return "是";
-      } else {
-        return "";
-      }
+    slots: {
+      customRender: "requireCell",
     },
   },
   {
@@ -105,7 +99,9 @@ const paramsColumns = [
   {
     title: "说明",
     dataIndex: "desc",
-    scopedSlots: { customRender: "rowDesc" },
+    // slots: {
+    //   customRender: "rowDesc",
+    // },
   },
 ];
 
@@ -120,7 +116,8 @@ const returnColumns = [
     dataIndex: "type",
     align: "center",
     width: 130,
-    customRender: (text: string, record: any) => {
+    customRender: (e: any) => {
+      const { text, record } = e;
       if (text == "array" && record.childrenType) {
         return `${text}<${record.childrenType}>`;
       } else {
@@ -137,13 +134,13 @@ const returnColumns = [
   {
     title: "说明",
     dataIndex: "desc",
-    scopedSlots: { customRender: "rowDesc" },
   },
 ];
 
 export default defineComponent({
   components: {
     Table,
+    CheckOutlined,
   },
   props: {
     detail: {
@@ -164,13 +161,7 @@ export default defineComponent({
         x: "700px",
         y: "100%",
       },
-      expandedRowKeys: [],
     });
-
-    const onExpandedRowsChange = (v: any) => {
-      console.log("onExpandedRowsChange", v);
-      state.expandedRowKeys = v;
-    };
 
     const textToHtml = () => {
       console.log("textToHtml");
@@ -181,7 +172,7 @@ export default defineComponent({
       return `${record.name}_${paramsRowKey}`;
     };
 
-    return { ...toRefs(state), onExpandedRowsChange, textToHtml, renterRowKey };
+    return { ...toRefs(state), textToHtml, renterRowKey };
   },
 });
 </script>

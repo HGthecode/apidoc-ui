@@ -68,7 +68,7 @@ export default defineComponent({
   top: 0;
   right: -2px;
   z-index: 100;
-  width: 4px;
+  width: 3px;
   height: 100%;
   cursor: col-resize;
   border-top: none;

@@ -9,9 +9,11 @@
   },
   "dependencies": {
     "@ant-design/icons-vue": "^6.0.1",
-    "ant-design-vue": "^2.2.0-beta.2",
+    "@vueuse/core": "^5.1.3",
+    "ant-design-vue": "2.2.1",
     "axios": "^0.21.1",
     "core-js": "^3.6.5",
+    "js-md5": "^0.7.3",
     "lodash": "^4.17.21",
     "marked": "^2.1.3",
     "monaco-editor": "^0.25.2",
@@ -23,6 +25,8 @@
     "vuex": "^4.0.0-0"
   },
   "devDependencies": {
+    "@types/js-md5": "^0.4.3",
+    "@types/marked": "^2.0.4",
     "@typescript-eslint/eslint-plugin": "^4.18.0",
     "@typescript-eslint/parser": "^4.18.0",
     "@vue/babel-plugin-jsx": "^1.0.6",

@@ -2,25 +2,16 @@
   <div class="doc-content">
     <h2>请求头Headers</h2>
     <div class="api-param-code mb">
-      <div class="code">
-        <!-- <pre v-highlight:json="headerCode"><code ></code></pre> -->
-        <code-highlight :code="headerCode" />
-      </div>
+      <code-highlight :code="headerCode" title="请求头Headers" />
     </div>
     <h2>请求参数Parameters</h2>
     <div class="api-param-code mb">
-      <div class="code">
-        <!-- <pre v-highlight:json="paramCode"><code ></code></pre> -->
-        <code-highlight :code="paramCode" />
-      </div>
+      <code-highlight :code="paramCode" title="请求参数Parameters" />
     </div>
 
     <h2> 响应结果Responses </h2>
     <div class="api-param-code mb">
-      <div class="code">
-        <!-- <monaco-editor :code="returnCode" /> -->
-        <code-highlight :code="returnCode" />
-      </div>
+      <code-highlight :code="returnCode" title="响应结果Responses" />
     </div>
   </div>
 </template>
@@ -28,13 +19,11 @@
 <script lang="ts">
 import { defineComponent, PropType, reactive, toRefs, watchEffect } from "vue";
 import { ApiDetailState } from "./interface";
-import { renderCodeJsonByParams, formatJson } from "@/utils/helper/codeHelper";
+import { renderCodeJsonByParams, formatJsonCode } from "@/utils/helper/codeHelper";
 import CodeHighlight from "@/components/CodeHighlight";
-// import MonacoEditor from "@/components/MonacoEditor";
 
 export default defineComponent({
   components: {
-    // MonacoEditor,
     CodeHighlight,
   },
   props: {
@@ -56,9 +45,9 @@ export default defineComponent({
     });
 
     watchEffect(() => {
-      state.paramCode = formatJson(renderCodeJsonByParams(props.detail.param));
-      state.returnCode = formatJson(renderCodeJsonByParams(props.detail.return));
-      state.headerCode = formatJson(renderCodeJsonByParams(props.detail.header));
+      state.paramCode = formatJsonCode(renderCodeJsonByParams(props.detail.param));
+      state.returnCode = formatJsonCode(renderCodeJsonByParams(props.detail.return));
+      state.headerCode = formatJsonCode(renderCodeJsonByParams(props.detail.header));
     });
 
     return { ...toRefs(state) };

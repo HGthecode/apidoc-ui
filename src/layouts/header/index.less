@@ -1,6 +1,6 @@
 .layout-header{
     display: flex;
-    padding:0 30px;
+    padding:0 24px;
     box-shadow: 0 2px 8px var(--card-shadow-color);
     position: fixed;
     z-index: 200;
@@ -16,5 +16,18 @@
     &_right{
         position: absolute;
         right: 30px;
+        line-height: 40px;
+    }
+    &_button{
+        padding: 14px;
+        line-height: 30px;
+        margin-right: 10px;
+        font-size: 20px;
+    }
+    &.mobile{
+        padding: 0 10px;
+        .layout-header_right{
+            right:10px;
+        }
     }
 }

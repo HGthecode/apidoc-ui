@@ -1,6 +1,6 @@
 .api-page {
     max-width: 1200px;
-    padding:10px 24px;
+    padding:10px 24px 50px 24px;
     margin: 0 auto;
     .title-label {
       color: #333;
@@ -11,7 +11,7 @@
     .title-sub {
       font-size: 16px;
       color: #999;
-      margin-bottom: 16px;
+      margin-bottom: 10px;
     }
   
     .api-url-box {
@@ -19,15 +19,14 @@
       position: relative;
       height: 38px;
       border-radius: 4px;
-      margin-bottom: 24px;
+      margin-bottom: 10px;
       
-  
       .api-url-tag,
       .api-method-select {
         width: 70px;
         text-align: center;
         line-height: 38px;
-        color: #fff;
+        color:var(--text-color-light);
         position: absolute;
         top: 0;
         left: 0;
@@ -50,7 +49,7 @@
       }
       .api-method-select {
         width: 105px;
-        background: #fafafa;
+        background: var(--bgcolor);
         height: 36px;
         top: 1px;
         left: 1px;
@@ -71,12 +70,12 @@
           font-feature-settings: "tnum";
           width: 100%;
           height: 38px;
-          color: rgba(0, 0, 0, 0.65);
+          color:var(--text-color);
           font-size: 16px;
           line-height: 1.5;
-          background-color: #fff;
+          background-color: var(--bgcolor);
           background-image: none;
-          border: 1px solid #d9d9d9;
+          border: 1px solid var(--bgcolor-light);
           border-radius: 4px;
           transition: all 0.3s;
           font-family: monospace;
@@ -102,13 +101,16 @@
         top: 0;
         right: 0;
         cursor: pointer;
+        color:var(--text-color);
       }
     }
   
     .api-param-table {
-      margin-bottom: 16px;
+      margin-bottom: 10px;
     }
     .text-list-item {
-      margin-bottom: 16px;
+      margin-bottom: 10px;
     }
   }
+
+  

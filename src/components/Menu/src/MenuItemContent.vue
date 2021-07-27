@@ -1,6 +1,6 @@
 <template>
   <span class="menu-item-content">
-    <CopyrightCircleOutlined v-if="item.controller" />
+    <CopyrightCircleOutlined v-if="item.type == 'controller'" />
     <span
       v-else-if="item.method && item.method.indexOf(',') > -1"
       :class="['api-method-icon', `method-color_multiple`]"
@@ -10,7 +10,8 @@
     <span v-else-if="item.method" :class="['api-method-icon', `method-color_${item.method}`]">{{
       item.method
     }}</span>
-    <i v-else-if="item.path && item.type" :class="['iconfont', 'icon-md']"></i>
+    <!-- <i v-else-if="item.path && item.type" :class="['iconfont', 'icon-md']"></i> -->
+    <FileMarkdownOutlined v-else-if="item.path && item.type === 'md'" />
     <FolderOutlined v-else />
 
     {{ item.title }}
@@ -19,12 +20,17 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 
-import { CopyrightCircleOutlined, FolderOutlined } from "@ant-design/icons-vue";
+import {
+  CopyrightCircleOutlined,
+  FolderOutlined,
+  FileMarkdownOutlined,
+} from "@ant-design/icons-vue";
 
 export default defineComponent({
   components: {
     FolderOutlined,
     CopyrightCircleOutlined,
+    FileMarkdownOutlined,
   },
   props: {
     item: {

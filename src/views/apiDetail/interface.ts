@@ -1,4 +1,4 @@
-import { ApiItem } from "@/store/modules/Apidoc/interface";
+import { ApiItem } from "@/api/interface/apiData";
 
 export interface ApiParamState {
   childrenType?: string;

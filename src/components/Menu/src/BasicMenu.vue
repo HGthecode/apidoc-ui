@@ -1,8 +1,10 @@
 <template>
   <a-menu
     mode="inline"
+    :theme="theme"
     :forceSubMenuRender="false"
     :openKeys="openKeys"
+    :selectedKeys="selectedKeys"
     @openChange="onOpenChange"
     @select="onSelect"
   >
@@ -13,15 +15,15 @@
 </template>
 
 <script lang="ts">
-import { reactive, defineComponent, toRefs, computed, PropType, watchEffect } from "vue";
+import { reactive, defineComponent, toRefs, computed, PropType, watchEffect, watch } from "vue";
 import { Menu } from "ant-design-vue";
 import { useStore } from "vuex";
 import { GlobalState } from "@/store";
 import BasicSubMenuItem from "./BasicSubMenuItem.vue";
-import { MenuType } from "./types";
+import { MenuItemType } from "./interface";
 import { cloneDeep } from "lodash";
-import { filterTree, getTreeValueByField, findNode } from "@/utils/helper/treeHelper";
-import { useRouter } from "vue-router";
+import { filterTree, getTreeValueByField, findNode, getTreePath } from "@/utils/helper/treeHelper";
+import { useRoute, useRouter } from "vue-router";
 import * as ApidocTypes from "@/store/modules/Apidoc/types";
 
 export default defineComponent({
@@ -34,7 +36,7 @@ export default defineComponent({
   emits: ["select", "mouseUpChange", "mouseMoveChange"],
   props: {
     data: {
-      type: Array as PropType<MenuType[]>,
+      type: Array as PropType<MenuItemType[]>,
       default: () => [],
     },
     keyword: {
@@ -51,21 +53,25 @@ export default defineComponent({
     },
   },
   setup(props, { emit }) {
-    console.log(props.data);
+    const route = useRoute();
     const router = useRouter();
 
     let store = useStore<GlobalState>();
     const openKeys: string[] = [];
+    const selectedKeys: string[] = [];
+
     const state = reactive({
       menuData: props.data,
       feConfig: computed(() => store.state.app.feConfig),
       appKey: computed(() => store.state.app.appKey),
+      theme: computed(() => store.state.app.theme),
       openKeys: openKeys,
       openAllKeys: openKeys,
+      selectedKeys: selectedKeys,
     });
 
     // 是否满足过滤条件
-    function hasKeyword(item: MenuType, keyword?: string, tags: string[] = []): boolean {
+    function hasKeyword(item: MenuItemType, keyword?: string, tags: string[] = []): boolean {
       let hasTag = false;
       if (tags.length) {
         hasTag = tags.some((value) => {
@@ -88,12 +94,12 @@ export default defineComponent({
       return false;
     }
 
-    const handleMenuData = (data: MenuType[], keyword?: string, tags?: string[]) => {
+    const handleMenuData = (data: MenuItemType[], keyword?: string, tags?: string[]) => {
       let menuData = cloneDeep(data);
       if (keyword || tags?.length) {
-        menuData = filterTree<MenuType>(
+        menuData = filterTree<MenuItemType>(
           menuData,
-          (node: MenuType) => {
+          (node: MenuItemType) => {
             if (hasKeyword(node, keyword, tags)) {
               return true;
             }
@@ -110,12 +116,30 @@ export default defineComponent({
       state.openKeys = openKeys;
     };
 
-    // watch<MenuType[]>(
-    //   () => props.data,
-    //   (menuData) => {
-    //     handleMenuData(menuData);
-    //   }
-    // );
+    let init = true;
+    watch<MenuItemType[]>(
+      () => props.data,
+      (menuData) => {
+        if (init && route.query.key) {
+          const defaultOpenKeys = getTreePath(props.data, (item) => {
+            if (item.key === route.query.key) {
+              return true;
+            }
+            return false;
+          });
+          if (defaultOpenKeys.length) {
+            state.openKeys = defaultOpenKeys;
+            state.selectedKeys = [defaultOpenKeys[defaultOpenKeys.length - 1]];
+          } else {
+            router.push({
+              name: "Home",
+            });
+          }
+        }
+        init = false;
+        // handleMenuData(menuData);
+      }
+    );
     const handleOpenAll = (flag: boolean) => {
       if (flag) {
         // 展开
@@ -137,6 +161,7 @@ export default defineComponent({
     });
 
     const onSelect = (e: any) => {
+      state.selectedKeys = e.selectedKeys;
       emit("select", e);
     };
 

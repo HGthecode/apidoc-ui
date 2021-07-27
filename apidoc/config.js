@@ -1,7 +1,7 @@
 // eslint-disable-next-line no-unused-vars
 const config = {
   // 请求host
-  HOST: "",
+  HOST: "http://demo.apidoc.com",
   // 菜单配置
   MENU: {
     // 是否显示控制器类名
@@ -14,15 +14,18 @@ const config = {
   // 当字段无默认值时，使用字段类型为默认值
   USE_TYPE_DEFAULT_VALUE: true,
   HOSTS: [
-    // {
-    //   title: "本地测试",
-    //   host: "http://demo.apidoc.net.cn"
-    // },
-    // {
-    //   title: "正式环境",
-    //   host: "http://www.apidoc.net.cn"
-    // },
+    {
+      title: "本地测试",
+      host: "http://demo.apidoc.com",
+    },
+    {
+      title: "正式环境",
+      host: "http://www.apidoc.net.cn",
+    },
   ],
+  CACHE: {
+    PREFIX: "apidoc_",
+  },
 };
-let jsonStr = JSON.stringify(config);
-localStorage.apidocConfig = jsonStr;
+
+localStorage.APIDOC_CONFIG = JSON.stringify(config);

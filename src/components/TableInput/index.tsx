@@ -20,12 +20,6 @@ export default defineComponent({
     function onChange(params: any) {
       emit("change", params);
     }
-    function onBlur(params: any) {
-      console.log("onBlur", params);
-    }
-    function onPressEnter(params: any) {
-      console.log("onPressEnter", params);
-    }
 
     watchEffect(() => {
       value.value = props.data;
@@ -34,13 +28,7 @@ export default defineComponent({
       return (
         <div class={style.tableInput}>
           <div class={style.tableInputWraper}>
-            <Input
-              value={value.value}
-              onChange={onChange}
-              onBlur={onBlur}
-              onPressEnter={onPressEnter}
-              placeholder="placeholder"
-            />
+            <Input value={value.value} onChange={onChange} placeholder={props.placeholder} />
           </div>
         </div>
       );

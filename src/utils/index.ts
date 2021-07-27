@@ -2,7 +2,10 @@ import { createApiPageKeyState, createMdPageKeyState } from "./interface";
 
 // 创建api接口页面的key
 export const createApiPageKey = (apiData: createApiPageKeyState): string => {
-  const method = apiData.method ? apiData.method : "";
+  let method = apiData.method;
+  if (method && method.indexOf(",") > -1) {
+    method = method.replace(/,/g, "");
+  }
   return `${apiData.appKey}_${method}_${apiData.url}`;
 };
 
@@ -55,4 +58,12 @@ export const trim = (s: string): string => {
     return s.replace(/(^\s*)|(\s*$)/g, "");
   }
   return "";
+};
+
+/**
+ * 创建随机key
+ * @returns {string}
+ */
+export const createRandKey = (): string => {
+  return new Date().getTime() + Math.ceil(Math.random() * 1000) + "";
 };

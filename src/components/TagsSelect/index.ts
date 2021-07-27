@@ -1,3 +1,3 @@
-import TagsSelect from './TagsSelect.vue';
+import TagsSelect from "./TagsSelect.vue";
 
 export default TagsSelect;

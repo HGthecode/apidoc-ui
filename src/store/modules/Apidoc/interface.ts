@@ -1,4 +1,7 @@
-import { MenuType } from "@/components/Menu/src/types";
+import { MenuItemType } from "@/components/Menu/src/interface";
+import { ApiItem } from "@/api/interface/apiData";
+import { ConfigGlobalParamItem } from "@/api/interface/config";
+
 export interface HttpResponse {
   status: number;
   statusText: string;
@@ -18,12 +21,27 @@ export interface PageDataState {
 }
 
 export interface ApidocState {
-  // docs: DocsItem[],
   groups: GroupItem[];
   data: ApiItem[];
   tags: string[];
-  pageData: PageDataState;
   mdMenus: MdMenuItemState[];
+  apiMenus: MenuItemType[];
+  apiList: ApiItem[];
+  apiObject: ApiObjectState;
+  globalParams: GlobalParamsState;
+  authData: AuthDataState;
+}
+
+export interface AuthDataState {
+  [key: string]: string;
+}
+export interface GlobalParamsState {
+  header: ConfigGlobalParamItem[];
+  params: ConfigGlobalParamItem[];
+}
+
+export interface ApiObjectState {
+  [key: string]: ApiItem;
 }
 
 export interface DocsItem {
@@ -39,9 +57,9 @@ export interface GroupItem {
   items: ApiItem[];
 }
 
-export interface ApiItem extends MenuType {
-  appKey?: string;
-}
+// export interface ApiItem extends MenuItemType {
+//   appKey?: string;
+// }
 
 export interface GetMdMenusState {
   appKey?: string;

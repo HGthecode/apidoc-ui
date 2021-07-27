@@ -14,14 +14,17 @@
               :key="`${item.folder}_${option.folder}`"
               :value="`${item.folder}_${option.folder}`"
               :label="`${item.title}-${option.title}`"
-              >{{ option.title }}</a-select-option
             >
+              {{ option.title }}
+              <span v-if="option.hasPassword" class="app-select-option_icon"><LockOutlined /></span>
+            </a-select-option>
           </a-select-opt-group>
         </template>
         <template v-else>
-          <a-select-option :value="`${item.folder}`" :label="`${item.title}`">{{
-            item.title
-          }}</a-select-option>
+          <a-select-option :value="`${item.folder}`" :label="`${item.title}`">
+            {{ item.title }}
+            <span v-if="item.hasPassword" class="app-select-option_icon"><LockOutlined /></span>
+          </a-select-option>
         </template>
       </template>
     </a-select>
@@ -35,12 +38,14 @@ import { useStore } from "vuex";
 import { GlobalState } from "@/store";
 // import { useRouter } from "vue-router";
 import * as Types from "@/store/modules/App/types";
+import { LockOutlined } from "@ant-design/icons-vue";
 
 export default defineComponent({
   components: {
     ASelect: Select,
     ASelectOption: Select.Option,
     ASelectOptGroup: Select.OptGroup,
+    LockOutlined,
   },
   setup() {
     let store = useStore<GlobalState>();
@@ -51,14 +56,7 @@ export default defineComponent({
       appKey: computed(() => store.state.app.appKey),
     });
 
-    // const router = useRouter();
     const onChange = (appKey: string) => {
-      // router.push({
-      //   name: "ApiDetail",
-      //   query: {
-      //     appKey,
-      //   },
-      // });
       store.dispatch(`app/${Types.SET_APP_KEY}`, appKey);
     };
 
@@ -69,9 +67,13 @@ export default defineComponent({
 <style lang="less" scoped>
 .app-select {
   display: inline-block;
-  margin-right: 10px;
   &_select {
     width: 140px;
+  }
+  &-option_icon {
+    position: absolute;
+    right: 10px;
+    color: var(--text-light-grey);
   }
 }
 </style>

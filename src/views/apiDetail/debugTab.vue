@@ -13,7 +13,7 @@
       >
         <template #headerValue="{ text, record }">
           <TableInput
-            :style="{ width: '350px' }"
+            :style="{ width: '340px' }"
             :data="text"
             @change="onHeaderCellChange(record.name, $event)"
           />
@@ -21,32 +21,8 @@
       </Table>
     </div>
     <h2>请求参数Parameters</h2>
-    <div class="mb">
+    <div class="mb-sm">
       <div v-if="detail.paramType === 'formdata' || detail.paramType === 'route'" class="param-box">
-        <!-- <Form :label-col="{ span: 5 }" :wrapper-col="{ span: 12 }">
-          <FormItem v-for="item in detail.param" :key="item.name" :label="item.name">
-            <div v-if="item.type == 'file'">
-              <Upload
-                :file-list="fileList[item.name]"
-                :remove="
-                  (file) => {
-                    fileHandleRemove(file, item.name);
-                  }
-                "
-                :before-upload="
-                  (file) => {
-                    fileBeforeUpload(file, item.name);
-                    return false;
-                  }
-                "
-                :name="item.name"
-              >
-                <a-button> Select File </a-button>
-              </Upload>
-            </div>
-            <Input v-else v-model="formdata[item.name]" />
-          </FormItem>
-        </Form> -->
         <Table
           :columns="headersColumns"
           size="small"
@@ -57,7 +33,26 @@
           :scroll="tableScroll"
         >
           <template #headerValue="{ text, record }">
+            <Upload
+              v-if="record.type === 'file'"
+              :file-list="fileData[record.name]"
+              :remove="
+                (file) => {
+                  fileHandleRemove(file, record.name);
+                }
+              "
+              :before-upload="
+                (file) => {
+                  fileBeforeUpload(file, record.name);
+                  return false;
+                }
+              "
+              :name="record.name"
+            >
+              <a-button> Select File </a-button>
+            </Upload>
             <TableInput
+              v-else
               :style="{ width: '350px' }"
               :data="text"
               @change="onParamCellChange(record.name, $event)"
@@ -65,35 +60,76 @@
           </template>
         </Table>
       </div>
-      <monaco-editor v-else :code="paramCode" @change="onParamCodeChange" />
+      <code-editor
+        v-else
+        :code="paramCode"
+        @change="onParamCodeChange"
+        title="请求参数Parameters"
+      />
     </div>
-    <div class="mb">
+    <div class="mb-sm">
       <a-button type="primary" :loading="loading" block @click="excute">执行 Excute</a-button>
     </div>
     <h2>响应结果Responses</h2>
-    <div class="mb"> </div>
+    <div v-if="returnData && returnData.status" class="mb">
+      <div class="mb-sm">
+        <Alert
+          :type="returnData.status >= 200 && returnData.status < 300 ? 'success' : 'error'"
+          show-icon
+        >
+          <template #message>
+            <b>{{ returnData.status }}</b>
+            <span style="margin-left: 16px">{{
+              returnData.message ? returnData.message : returnData.statusText
+            }}</span>
+          </template>
+        </Alert>
+      </div>
+      <div v-if="returnData.data" class="api-param-code">
+        <div v-if="returnString" class="string-code" v-html="returnString"></div>
+        <code-editor
+          v-else
+          :code="formatJsonCode(returnData.data)"
+          :readOnly="true"
+          @change="onReturnCodeChange"
+          title="请求参数Parameters"
+        />
+      </div>
+    </div>
+    <div v-else class="api-param-empty">
+      <Empty :description="false" />
+    </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, PropType, watchEffect, toRefs } from "vue";
+import { defineComponent, reactive, PropType, watchEffect, toRefs, computed } from "vue";
 import { ApiDetailState, ApiParamState, FileData, UploadFileState } from "./interface";
-import { Table, Button, message, Form, Upload, Input } from "ant-design-vue";
+import { Table, Button, message, Form, Upload, Input, Alert, Empty } from "ant-design-vue";
 import { cloneDeep } from "lodash";
 import TableInput from "@/components/TableInput";
-import MonacoEditor from "@/components/MonacoEditor";
-import { renderCodeJsonByParams, formatJson } from "@/utils/helper/codeHelper";
+// import MonacoEditor from "@/components/MonacoEditor";
+import CodeEditor from "@/components/CodeEditor";
+import { renderCodeJsonByParams, formatJsonCode } from "@/utils/helper/codeHelper";
+// import CodeHighlight from "@/components/CodeHighlight";
+import Axios from "@/utils/http/index";
+import { ObjectState } from "@/store/index";
+import { useStore } from "vuex";
+import { GlobalState } from "@/store";
 
 export default defineComponent({
   components: {
     Table,
     TableInput,
-    MonacoEditor,
+    CodeEditor,
     [Button.name]: Button,
+    Alert,
+    Empty,
+    // CodeHighlight,
     // Form,
     // FormItem: Form.Item,
     // Input,
-    // Upload,
+    Upload,
   },
   props: {
     detail: {
@@ -105,11 +141,17 @@ export default defineComponent({
         };
       },
     },
+    currentMethod: {
+      type: String as PropType<string>,
+      default: "get",
+    },
   },
   setup(props) {
+    const store = useStore<GlobalState>();
     const headerData: ApiParamState[] = [];
     const fileData: FileData = {};
     const paramFormData: ApiParamState[] = [];
+    // const returnData:
     const state = reactive({
       headerData: headerData,
       paramCode: "",
@@ -119,6 +161,9 @@ export default defineComponent({
       fileData: fileData,
       formdata: {},
       paramFormData: paramFormData,
+      returnData: {},
+      returnString: "",
+      globalParams: computed(() => store.state.apidoc.globalParams),
     });
     const headersColumns = [
       {
@@ -141,31 +186,22 @@ export default defineComponent({
       },
     ];
 
-    // const headerData = renderHeaderData(props.detail.header);
-    // console.log(headerData);
-
     function renderHeaderData(headerData: ApiParamState[]) {
       const data = cloneDeep(headerData);
       if (data && data.length) {
-        // const globalParams = ls.get("globalParams");
-        // if (
-        //   globalParams &&
-        //   globalParams.headers &&
-        //   globalParams.headers.length
-        // ) {
-        //   return data.map(item => {
-        //     const globalParamFind = globalParams.headers.find(
-        //       p => p.key === item.name
-        //     );
-        //     if (globalParamFind && globalParamFind.value) {
-        //       item.default = globalParamFind.value;
-        //     }
-        //     return item;
-        //   });
-        // } else {
-        //   return data;
-        // }
-        return data;
+        // 合并全局参数
+        const globalParams = state.globalParams;
+        if (globalParams && globalParams.header && globalParams.header.length) {
+          return data.map((item) => {
+            const globalParamFind = globalParams.header.find((p) => p.name === item.name);
+            if (globalParamFind && globalParamFind.value) {
+              item.default = globalParamFind.value;
+            }
+            return item;
+          });
+        } else {
+          return data;
+        }
       }
 
       return [];
@@ -176,7 +212,7 @@ export default defineComponent({
     });
     watchEffect(() => {
       const json = renderCodeJsonByParams(props.detail.param);
-      state.paramCode = formatJson(json);
+      state.paramCode = formatJsonCode(json);
       state.paramFormData = props.detail.param;
     });
 
@@ -196,13 +232,12 @@ export default defineComponent({
     }
 
     function onParamCodeChange(code: string) {
-      state.currentParamCode = code;
+      state.paramCode = code;
     }
 
     function excute() {
-      console.log("excute");
+      let url = props.detail.url as string;
       if (props.detail.paramType == "formdata") {
-        console.log(state.paramFormData);
         const formData = new FormData();
         state.paramFormData.forEach((item) => {
           if (item.type === "file") {
@@ -215,21 +250,105 @@ export default defineComponent({
             formData.append(item.name, value);
           }
         });
-        console.log(formData);
-      } else if (state.currentParamCode as string) {
+        sendRequest(url, formData);
+      } else if (props.detail.paramType == "route") {
+        // 路由参数，将参数拼接到url中
+        state.paramFormData.forEach((item) => {
+          const placeholderKeys = [
+            `:${item.name}`,
+            `<${item.name}>`,
+            `<${item.name}?>`,
+            `[:${item.name}]`,
+          ];
+          for (let i = 0; i < placeholderKeys.length; i++) {
+            const key = placeholderKeys[i];
+            if (url.indexOf(key) > -1) {
+              const reg = new RegExp(key, "g");
+              const value: any = item.default;
+              url = url.replace(reg, value);
+            }
+          }
+        });
+        sendRequest(url);
+      } else if (state.paramCode as string) {
         try {
-          const paramJson = eval("(" + state.currentParamCode + ")");
-          console.log(paramJson);
+          const paramJson = eval("(" + state.paramCode + ")");
+          sendRequest(url, paramJson);
         } catch (error) {
-          console.log(error);
           message.error("json 参数格式化错误");
         }
-
-        // state.loading = true;
-        // setTimeout(() => {
-        //   state.loading = false;
-        // }, 2000);
       }
+    }
+
+    function sendRequest(url: string, data?: any) {
+      let method = props.currentMethod as string;
+      if (method) {
+        method = method.toLowerCase();
+      }
+      const headers: ObjectState = {};
+      // 全局请求头参数
+      const globalParams = state.globalParams;
+      if (globalParams && globalParams.header && globalParams.header.length) {
+        globalParams.header.forEach((item) => {
+          headers[item.name] = item.value;
+        });
+      }
+      // 合并全局请求参数
+      if (globalParams && globalParams.params && globalParams.params.length) {
+        globalParams.params.forEach((item) => {
+          if (!data[item.name]) {
+            data[item.name] = item.value;
+          }
+        });
+      }
+      if (state.headerData && state.headerData.length) {
+        state.headerData.forEach((item) => {
+          headers[item.name] = item.default;
+        });
+      }
+
+      if (props.detail.paramType === "formdata") {
+        headers[method] = {
+          "Content-Type": "application/x-www-form-urlencoded",
+        };
+
+        // headers[method]["Content-Type"] = "application/x-www-form-urlencoded";
+      }
+      const json: any = {
+        method,
+        headers,
+      };
+      if (method == "get" && data) {
+        json.params = data;
+      } else if (data) {
+        json.data = data;
+      }
+
+      state.loading = true;
+      Axios(url, json)
+        .then((res) => {
+          state.loading = false;
+          if (res.data && typeof res.data === "string") {
+            state.returnString = res.data;
+            state.returnData = res;
+          } else {
+            state.returnString = "";
+            state.returnData = res;
+          }
+        })
+        .catch((err) => {
+          state.loading = false;
+          if (err.response) {
+            state.returnData = err.response;
+          } else {
+            state.returnData = {
+              status: 500,
+              message: err.message,
+            };
+          }
+        });
+
+      // const method = (props.detail.method as string) && props.detail.method.toLowerCase() : "";
     }
 
     function fileBeforeUpload(file: UploadFileState, name: string): void {
@@ -253,6 +372,10 @@ export default defineComponent({
       }
     }
 
+    function onReturnCodeChange() {
+      console.log("change");
+    }
+
     return {
       ...toRefs(state),
       headersColumns,
@@ -263,7 +386,17 @@ export default defineComponent({
       fileHandleRemove,
       fileBeforeUpload,
       onParamCellChange,
+      formatJsonCode,
+      onReturnCodeChange,
     };
   },
 });
 </script>
+
+<style lang="less" scoped>
+.api-param-empty {
+  border: 1px solid var(--color-line);
+  border-radius: 4px;
+  padding: 16px;
+}
+</style>

@@ -5,10 +5,9 @@
 </template>
 
 <script lang="ts">
-import { reactive, defineComponent, toRefs, computed } from "vue";
+import { reactive, defineComponent, toRefs } from "vue";
 import { Menu } from "ant-design-vue";
 import MenuItemContent from "./MenuItemContent.vue";
-import { MenuType } from "./types";
 
 export default defineComponent({
   components: {
@@ -28,14 +27,10 @@ export default defineComponent({
       default: "",
     },
   },
-  setup(props, { emit }) {
+  setup() {
     const state = reactive({});
 
-    const onClick = (item: MenuType) => {
-      console.log(item);
-    };
-
-    return { ...toRefs(state), onClick };
+    return { ...toRefs(state) };
   },
 });
 </script>
