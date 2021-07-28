@@ -67,3 +67,12 @@ export const trim = (s: string): string => {
 export const createRandKey = (): string => {
   return new Date().getTime() + Math.ceil(Math.random() * 1000) + "";
 };
+
+/**
+ * 将文本内的特殊标记替换成html
+ * @param {string} text
+ * @returns
+ */
+export const textToHtml = (text: string): string => {
+  return text ? text.replace(/ /g, "&nbsp;").replace(/\r\n/g, "<br>") : "";
+};

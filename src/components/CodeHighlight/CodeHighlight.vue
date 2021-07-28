@@ -1,5 +1,5 @@
 <template>
-  <div class="code-highlight-wraper">
+  <div :class="['code-highlight-wraper', { mobile: isMobile }]">
     <div :class="['code-highlight-box', theme]">
       <pre v-if="lang == 'json'" v-highlight:json="code"><code ></code></pre>
     </div>
@@ -17,7 +17,7 @@
     v-model:visible="visible"
     centered
     :title="title"
-    width="80%"
+    width="90%"
     :footer="false"
     :bodyStyle="{ padding: '10px' }"
   >
@@ -63,6 +63,7 @@ export default defineComponent({
     const isCopySuccess = ref(false);
     const visible = ref(false);
     const theme = computed(() => store.state.app.theme);
+    const isMobile = computed(() => store.state.app.isMobile);
 
     function onCopy() {
       props.code && copyTextToClipboard(props.code);
@@ -75,7 +76,7 @@ export default defineComponent({
     function openModalView() {
       visible.value = true;
     }
-    return { onCopy, visible, isCopySuccess, openModalView, theme };
+    return { onCopy, visible, isCopySuccess, openModalView, theme, isMobile };
   },
 });
 </script>
@@ -90,81 +91,11 @@ export default defineComponent({
     right: 10px;
     display: none;
   }
+  &.mobile,
   &:hover {
     .code-highlight-actins {
       display: block;
     }
   }
 }
-// .code-highlight-box {
-//   max-height: 400px;
-//   overflow: auto;
-//   border: 1px solid #ddd;
-//   pre {
-//     margin-bottom: 0;
-//   }
-
-//   .hljs {
-//     display: block;
-//     overflow-x: auto;
-//     padding: 0.5em;
-//     background: var(--code-bgcolor);
-//     color: black;
-//   }
-
-//   .hljs-comment,
-//   .hljs-quote,
-//   .hljs-variable {
-//     color: #008000;
-//   }
-
-//   .hljs-keyword,
-//   .hljs-selector-tag,
-//   .hljs-built_in,
-//   .hljs-name,
-//   .hljs-tag {
-//     color: #00f;
-//   }
-
-//   .hljs-string,
-//   .hljs-title,
-//   .hljs-section,
-//   .hljs-attribute,
-//   .hljs-literal,
-//   .hljs-template-tag,
-//   .hljs-template-variable,
-//   .hljs-type,
-//   .hljs-addition {
-//     color: #a31515;
-//   }
-
-//   .hljs-deletion,
-//   .hljs-selector-attr,
-//   .hljs-selector-pseudo,
-//   .hljs-meta {
-//     color: #2b91af;
-//   }
-
-//   .hljs-doctag {
-//     color: #808080;
-//   }
-
-//   .hljs-attr {
-//     color: #f00;
-//   }
-
-//   .hljs-symbol,
-//   .hljs-bullet,
-//   .hljs-link {
-//     color: #00b0e8;
-//   }
-
-//   .hljs-emphasis {
-//     font-style: italic;
-//   }
-
-//   .hljs-strong {
-//     font-weight: bold;
-//   }
-// }
 </style>

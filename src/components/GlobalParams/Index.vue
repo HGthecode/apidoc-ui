@@ -4,6 +4,7 @@
     :visible="visible"
     :width="900"
     :bodyStyle="{ padding: '0 10px 10px' }"
+    :centered="true"
     title="全局参数"
     @cancel="onCancel"
   >
@@ -13,7 +14,7 @@
           type="info"
           show-icon
           style="margin-bottom: 10px"
-          message="发送请求时，所有接口将自动携带以下Header参数"
+          message="发送请求时，所有接口将自动携带以下Header参数。"
         ></a-alert>
         <params-table ref="headerTableRef" :data="headerData" />
       </a-tab-pane>
@@ -22,7 +23,7 @@
           type="info"
           show-icon
           style="margin-bottom: 10px"
-          message="发送请求时，所有接口将自动携带以下Params参数；如请求参数中存在，则替换全局参数"
+          message="发送请求时，所有接口将自动携带以下Params参数。"
         ></a-alert>
         <params-table ref="paramsTableRef" :data="paramsData" />
       </a-tab-pane>

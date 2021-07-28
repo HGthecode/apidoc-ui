@@ -1,5 +1,5 @@
 <template>
-  <div class="code-edit-wraper">
+  <div :class="['code-edit-wraper', { mobile: isMobile }]">
     <div class="code-edit-box">
       <monaco-editor :code="code" :readOnly="readOnly" @change="onCodeChange" />
     </div>
@@ -17,7 +17,7 @@
     v-model:visible="visible"
     centered
     :title="title"
-    width="80%"
+    width="90%"
     :footer="false"
     :bodyStyle="{ padding: '10px' }"
   >
@@ -33,12 +33,14 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref } from "vue";
+import { defineComponent, PropType, ref, computed } from "vue";
 import { Button, Modal } from "ant-design-vue";
 import { CopyOutlined, CheckOutlined, FullscreenOutlined } from "@ant-design/icons-vue";
 import { copyTextToClipboard } from "@/utils";
 import MonacoEditor from "@/components/MonacoEditor";
 import * as Monaco from "monaco-editor";
+import { useStore } from "vuex";
+import { GlobalState } from "@/store";
 
 export default defineComponent({
   components: {
@@ -74,8 +76,10 @@ export default defineComponent({
     },
   },
   setup(props, { attrs }) {
+    const store = useStore<GlobalState>();
     const isCopySuccess = ref(false);
     const visible = ref(false);
+    const isMobile = computed(() => store.state.app.isMobile);
 
     function onCopy() {
       props.code && copyTextToClipboard(props.code);
@@ -92,7 +96,7 @@ export default defineComponent({
     function onCodeChange(code: string, event: Monaco.editor.IModelContentChangedEvent) {
       props.onChange(code, event);
     }
-    return { onCopy, visible, isCopySuccess, openModalView, onCodeChange };
+    return { onCopy, visible, isCopySuccess, openModalView, onCodeChange, isMobile };
   },
 });
 </script>
@@ -107,6 +111,7 @@ export default defineComponent({
     right: 15px;
     display: none;
   }
+  &.mobile,
   &:hover {
     .code-edit-actins {
       display: block;

@@ -66,7 +66,7 @@
       @mouseMoveChange="onDragLineChange"
     />
   </div>
-  <div class="layout-side_mask"></div>
+  <div v-if="isOpenSide" class="layout-side_mask" @click="onHideSide"></div>
 </template>
 
 <script lang="ts">
@@ -160,6 +160,7 @@ export default defineComponent({
           },
         });
       }
+      state.isOpenSide && onHideSide();
     };
 
     const onMdMenuSelect = (e: any) => {
@@ -192,6 +193,7 @@ export default defineComponent({
           },
         });
       }
+      state.isOpenSide && onHideSide();
     };
 
     const reloadApiData = () => {
@@ -200,6 +202,10 @@ export default defineComponent({
 
     function onTabChange(key: "api" | "md") {
       state.activeKey = key;
+    }
+
+    function onHideSide() {
+      store.dispatch(`app/${Types.SET_IS_OPENSIDE}`, false);
     }
 
     return {
@@ -212,6 +218,7 @@ export default defineComponent({
       onMdMenuSelect,
       reloadApiData,
       onTabChange,
+      onHideSide,
     };
   },
 });

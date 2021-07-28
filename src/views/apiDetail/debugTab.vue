@@ -1,71 +1,78 @@
 <template>
   <div>
-    <h2>请求头Headers</h2>
-    <div class="api-param-table mb">
-      <Table
-        :columns="headersColumns"
-        size="small"
-        rowKey="name"
-        :bordered="true"
-        :pagination="false"
-        :data-source="headerData"
-        :scroll="tableScroll"
-      >
-        <template #headerValue="{ text, record }">
-          <TableInput
-            :style="{ width: '340px' }"
-            :data="text"
-            @change="onHeaderCellChange(record.name, $event)"
-          />
-        </template>
-      </Table>
-    </div>
-    <h2>请求参数Parameters</h2>
-    <div class="mb-sm">
-      <div v-if="detail.paramType === 'formdata' || detail.paramType === 'route'" class="param-box">
+    <div v-if="headerData && headerData.length">
+      <h2>请求头Headers</h2>
+      <div class="api-param-table mb">
         <Table
           :columns="headersColumns"
           size="small"
           rowKey="name"
           :bordered="true"
           :pagination="false"
-          :data-source="paramFormData"
+          :data-source="headerData"
           :scroll="tableScroll"
         >
           <template #headerValue="{ text, record }">
-            <Upload
-              v-if="record.type === 'file'"
-              :file-list="fileData[record.name]"
-              :remove="
-                (file) => {
-                  fileHandleRemove(file, record.name);
-                }
-              "
-              :before-upload="
-                (file) => {
-                  fileBeforeUpload(file, record.name);
-                  return false;
-                }
-              "
-              :name="record.name"
-            >
-              <a-button> Select File </a-button>
-            </Upload>
             <TableInput
-              v-else
-              :style="{ width: '350px' }"
+              :style="{ width: '100%' }"
               :data="text"
-              @change="onParamCellChange(record.name, $event)"
+              @change="onHeaderCellChange(record.name, $event)"
             />
           </template>
         </Table>
       </div>
-      <code-editor
-        v-else
-        :code="paramCode"
-        @change="onParamCodeChange"
-        title="请求参数Parameters"
-      />
+    </div>
+    <div>
+      <h2>请求参数Parameters</h2>
+      <div class="mb-sm">
+        <div
+          v-if="detail.paramType === 'formdata' || detail.paramType === 'route'"
+          class="param-box"
+        >
+          <Table
+            :columns="headersColumns"
+            size="small"
+            rowKey="name"
+            :bordered="true"
+            :pagination="false"
+            :data-source="paramFormData"
+            :scroll="tableScroll"
+          >
+            <template #headerValue="{ text, record }">
+              <Upload
+                v-if="record.type === 'file'"
+                :file-list="fileData[record.name]"
+                :remove="
+                  (file) => {
+                    fileHandleRemove(file, record.name);
+                  }
+                "
+                :before-upload="
+                  (file) => {
+                    fileBeforeUpload(file, record.name);
+                    return false;
+                  }
+                "
+                :name="record.name"
+              >
+                <a-button> Select File </a-button>
+              </Upload>
+              <TableInput
+                v-else
+                :style="{ width: '350px' }"
+                :data="text"
+                @change="onParamCellChange(record.name, $event)"
+              />
+            </template>
+          </Table>
+        </div>
+        <code-editor
+          v-else
+          :code="paramCode"
+          @change="onParamCodeChange"
+          title="请求参数Parameters"
+        />
+      </div>
     </div>
     <div class="mb-sm">
       <a-button type="primary" :loading="loading" block @click="excute">执行 Excute</a-button>
@@ -164,17 +171,17 @@ export default defineComponent({
       returnData: {},
       returnString: "",
       globalParams: computed(() => store.state.apidoc.globalParams),
+      isMobile: computed(() => store.state.app.isMobile),
     });
     const headersColumns = [
       {
         title: "Key",
         dataIndex: "name",
-        width: 240,
+        width: 200,
       },
       {
         title: "Value",
         dataIndex: "default",
-        width: 350,
         slots: {
           customRender: "headerValue",
         },
@@ -183,6 +190,7 @@ export default defineComponent({
       {
         title: "说明",
         dataIndex: "desc",
+        width: 150,
       },
     ];
 
@@ -211,7 +219,7 @@ export default defineComponent({
       state.headerData = renderHeaderData(props.detail.header);
     });
     watchEffect(() => {
-      const json = renderCodeJsonByParams(props.detail.param);
+      const json = renderCodeJsonByParams(props.detail.param, true);
       state.paramCode = formatJsonCode(json);
       state.paramFormData = props.detail.param;
     });

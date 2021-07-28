@@ -1,9 +1,9 @@
 <template>
-  <div class="md-page" id="mdContainer">
+  <div :class="['md-page', { mobile: isMobile }]" id="mdContainer">
     <div class="md-content-wraper">
       <markdown :md="detail.mdDetail" />
     </div>
-    <div class="md-anchor-wraper">
+    <div v-if="!isMobile" class="md-anchor-wraper">
       <md-anchor :md="detail.mdDetail" />
     </div>
   </div>
@@ -32,6 +32,7 @@ export default defineComponent({
     const state = reactive({
       appKey: computed(() => store.state.app.appKey),
       pageData: computed(() => store.state.app.pageData),
+      isMobile: computed(() => store.state.app.isMobile),
       detail: {},
     });
     const fetchData = () => {

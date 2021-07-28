@@ -4,11 +4,18 @@
         font-weight: 600;
         line-height: 1.25;
     }
+    h1{
+        margin-top: 50px;
+    }
 
     h2 {
+        margin-top: 30px;
         font-size: 1.65rem;
         padding-bottom: .3rem;
         border-bottom: 1px solid var(--color-line);
+    }
+    h3{
+        margin-top: 20px;
     }
 
     table {
@@ -44,24 +51,34 @@
     }
 
     
-    &:not(.custom)>h1, 
-    &:not(.custom)>h2, 
-    &:not(.custom)>h3, 
-    &:not(.custom)>h4, 
-    &:not(.custom)>h5, 
-    &:not(.custom)>h6{
-        margin-top: -3.1rem;
-        padding-top: 4.6rem;
-        margin-bottom: 0;
-    }
-    &:not(.custom)>h1:first-child,
-    &:not(.custom)>h2:first-child, 
-    &:not(.custom)>h3:first-child, 
-    &:not(.custom)>h4:first-child, 
-    &:not(.custom)>h5:first-child, 
-    &:not(.custom)>h6:first-child {
-        margin-top: -1.5rem;
-        margin-bottom: 1rem;
+    // &:not(.custom)>h1, 
+    // &:not(.custom)>h2, 
+    // &:not(.custom)>h3, 
+    // &:not(.custom)>h4, 
+    // &:not(.custom)>h5, 
+    // &:not(.custom)>h6{
+    //     margin-top: -3.1rem;
+    //     padding-top: 4.6rem;
+    //     margin-bottom: 0;
+    // }
+    // &:not(.custom)>h1:first-child,
+    // &:not(.custom)>h2:first-child, 
+    // &:not(.custom)>h3:first-child, 
+    // &:not(.custom)>h4:first-child, 
+    // &:not(.custom)>h5:first-child, 
+    // &:not(.custom)>h6:first-child {
+    //     margin-top: -1.5rem;
+    //     margin-bottom: 1rem;
+    // }
+
+    blockquote {
+        color: var(--text-light-grey);
+        border-left: .2rem solid var(--color-line);
+        margin: 1rem 0;
+        padding: .25rem 0 .25rem 1rem;
+        p{
+            margin: 0;
+        }
     }
 
     

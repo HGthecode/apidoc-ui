@@ -26,4 +26,20 @@ export interface ApiItem {
   controller?: string;
   tag?: string[];
   children: ApiItem[];
+  param?: ParamItem;
+  return?: ParamItem;
+  header?: ParamItem;
+}
+
+export interface ParamItem {
+  childrenType?: string;
+  default?: string;
+  desc?: string;
+  md?: string;
+  mdRef?: string;
+  name: string;
+  replaceGlobal?: string;
+  require?: boolean;
+  source?: string;
+  type?: string;
 }

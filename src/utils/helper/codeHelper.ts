@@ -1,10 +1,14 @@
 import { trim } from "../index";
+import Mock from "mockjs";
 
-export function renderCodeJsonByParams<T>(params: T[]): objectState {
+export function renderCodeJsonByParams<T>(params: T[], isMock?: boolean): objectState {
   let json: objectState = {};
   if (params && params.length) {
     params.forEach((item: any) => {
       let fieldValue = item.default;
+      if (isMock && item.mock) {
+        fieldValue = Mock.mock(item.mock);
+      }
       if (!fieldValue) {
         switch (item.type) {
           case "int":
