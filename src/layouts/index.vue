@@ -1,7 +1,8 @@
 <template>
   <div class="layout-container">
     <layout-header />
-    <a-spin :spinning="loading" style="height: 500px">
+    <error-card v-if="error.response && error.response.status != 200" :error="error" />
+    <a-spin v-else :spinning="loading" style="height: 500px">
       <layout-sider @reload="onReload" />
       <layout-multitabs />
       <layout-content />
@@ -26,6 +27,7 @@ import Cache from "@/utils/cache";
 import { cloneDeep } from "lodash";
 import { AxiosError } from "axios";
 import VerifyAuth from "@/components/VerifyAuth";
+import ErrorCard from "@/components/Error";
 
 export default defineComponent({
   components: {
@@ -35,16 +37,29 @@ export default defineComponent({
     LayoutMultitabs,
     [Spin.name]: Spin,
     VerifyAuth,
+    ErrorCard,
   },
   setup() {
     let store = useStore<GlobalState>();
     const route = useRoute();
     const verifyAuthRef = ref<HTMLElement | null>(null);
+    const error: AxiosError = {
+      config: {},
+      isAxiosError: false,
+      toJSON: () => {
+        return {};
+      },
+      name: "",
+      message: "",
+    };
 
     const state = reactive({
       appKey: computed(() => store.state.app.appKey),
       loading: false,
+      error: error,
     });
+
+    const cacheLang = Cache.get("LANG");
 
     const fetchApiData = (appKey: string, reload?: boolean) => {
       state.loading = true;
@@ -52,14 +67,17 @@ export default defineComponent({
         .dispatch(`apidoc/${ApidocTypes.GET_API_DATA}`, {
           appKey,
           reload: reload,
+          lang: cacheLang,
         })
         .then(() => {
           state.loading = false;
         })
         .catch((err: AxiosError) => {
-          const status = err.response && err.response.status;
+          const status = err.response && err.response.status ? err.response.status : 500;
           if (status === 401) {
             unref(verifyAuthRef) && (unref(verifyAuthRef) as any).onShow();
+          } else {
+            state.error = err;
           }
 
           state.loading = false;
@@ -69,52 +87,62 @@ export default defineComponent({
     const fetchMdMenus = (appKey: string): void => {
       store.dispatch(`apidoc/${ApidocTypes.GET_MD_MENUS}`, {
         appKey,
+        lang: cacheLang,
       });
     };
 
-    store.dispatch(`app/${Types.GET_CONFIG_INFO}`).then((res) => {
-      const appKey: string = route.query.appKey as string;
-      if (appKey) {
-        store.dispatch(`app/${Types.SET_APP_KEY}`, appKey);
-      } else if (res.apps && res.apps.length) {
-        const treeFirstNode = getFirstNode(res.apps, "items");
-        if (treeFirstNode && treeFirstNode.length) {
-          const appKey = treeFirstNode.map((p) => p.folder).join("_");
+    store
+      .dispatch(`app/${Types.GET_CONFIG_INFO}`, { lang: cacheLang })
+      .then((res) => {
+        const appKey: string = route.query.appKey as string;
+        if (appKey) {
           store.dispatch(`app/${Types.SET_APP_KEY}`, appKey);
-        }
-      }
-      // 全局参数
-      const cacheGlobalParams = Cache.get(ApidocTypes.GLOBAL_PARAMS);
-      const globalParams = {
-        header: res.headers && res.headers.length ? cloneDeep(res.headers) : [],
-        params: res.parameters && res.parameters.length ? cloneDeep(res.parameters) : [],
-      };
-      if (cacheGlobalParams && cacheGlobalParams.header && cacheGlobalParams.header.length) {
-        const headerNames = globalParams.header.map((p: any) => p.name);
-        for (let i = 0; i < cacheGlobalParams.header.length; i++) {
-          const item = cacheGlobalParams.header[i];
-          const findIndex = headerNames.indexOf(item.name);
-          if (findIndex > -1) {
-            globalParams.header[findIndex] = item;
-          } else {
-            globalParams.header.push(item);
+        } else if (res.apps && res.apps.length) {
+          const treeFirstNode = getFirstNode(res.apps, "items");
+          if (treeFirstNode && treeFirstNode.length) {
+            const appKey = treeFirstNode.map((p) => p.folder).join("_");
+            store.dispatch(`app/${Types.SET_APP_KEY}`, appKey);
           }
         }
-      }
-      if (cacheGlobalParams && cacheGlobalParams.params && cacheGlobalParams.params.length) {
-        const paramsNames = globalParams.params.map((p: any) => p.name);
-        for (let i = 0; i < cacheGlobalParams.params.length; i++) {
-          const item = cacheGlobalParams.params[i];
-          const findIndex = paramsNames.indexOf(item.name);
-          if (findIndex > -1) {
-            globalParams.params[findIndex] = item;
-          } else {
-            globalParams.params.push(item);
+        // 全局参数
+        const cacheGlobalParams = Cache.get(ApidocTypes.GLOBAL_PARAMS);
+        const globalParams = {
+          header: res.headers && res.headers.length ? cloneDeep(res.headers) : [],
+          params: res.parameters && res.parameters.length ? cloneDeep(res.parameters) : [],
+        };
+        if (cacheGlobalParams && cacheGlobalParams.header && cacheGlobalParams.header.length) {
+          const headerNames = globalParams.header.map((p: any) => p.name);
+          for (let i = 0; i < cacheGlobalParams.header.length; i++) {
+            const item = cacheGlobalParams.header[i];
+            const findIndex = headerNames.indexOf(item.name);
+            if (findIndex > -1) {
+              if (item.value) {
+                globalParams.header[findIndex] = item;
+              }
+            } else {
+              globalParams.header.push(item);
+            }
           }
         }
-      }
-      store.dispatch(`apidoc/${ApidocTypes.SET_GLOBAL_PARAMS}`, globalParams);
-    });
+        if (cacheGlobalParams && cacheGlobalParams.params && cacheGlobalParams.params.length) {
+          const paramsNames = globalParams.params.map((p: any) => p.name);
+          for (let i = 0; i < cacheGlobalParams.params.length; i++) {
+            const item = cacheGlobalParams.params[i];
+            const findIndex = paramsNames.indexOf(item.name);
+            if (findIndex > -1) {
+              if (item.value) {
+                globalParams.params[findIndex] = item;
+              }
+            } else {
+              globalParams.params.push(item);
+            }
+          }
+        }
+        store.dispatch(`apidoc/${ApidocTypes.SET_GLOBAL_PARAMS}`, globalParams);
+      })
+      .catch((err: AxiosError) => {
+        state.error = err;
+      });
 
     const onReload = (tabKey: string) => {
       if (tabKey === "api") {

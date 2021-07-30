@@ -82,41 +82,4 @@ export default defineComponent({
     width: 180px;
   }
 }
-.select-menu {
-  max-height: 200px;
-  // width: 180px;
-  overflow: hidden;
-  overflow-y: auto;
-  background: var(--bgcolor-light);
-  box-shadow: 0 2px 8px var(--card-shadow-color);
-  ul,
-  li {
-    padding: 0;
-    margin: 0;
-    list-style: none;
-  }
-  li {
-    line-height: 32px;
-    padding: 0 10px;
-    position: relative;
-    cursor: pointer;
-    color: var(--text-color);
-    &:hover {
-      background: var(--theme-color-light);
-    }
-    .tags-select_check {
-      display: none;
-      position: absolute;
-      top: 0px;
-      right: 10px;
-      color: var(--theme-color);
-    }
-    &.active {
-      background: var(--theme-color-light);
-      .tags-select_check {
-        display: block;
-      }
-    }
-  }
-}
 </style>

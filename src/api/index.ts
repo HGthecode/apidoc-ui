@@ -1,12 +1,17 @@
 import Axios from "@/utils/http/index";
 import { HttpResponse, CheckAuthState, CheckAuthResponse } from "./interface";
-import { ConfigInfo } from "./interface/config";
+import { ConfigInfo, GetConfigState } from "./interface/config";
 import { GetApiDataState, ApiDataInfo } from "./interface/apiData";
 import { MdMenuItem, GetMdMenusState, GetMdDetailState, MdDetail } from "./interface/markdown";
 import Apis from "./apis";
 
-export const getConfigInfo = (): Promise<HttpResponse<ConfigInfo>> => {
-  return Axios(Apis.GET_CONFIG.url);
+export const getConfigInfo = (params: GetConfigState): Promise<HttpResponse<ConfigInfo>> => {
+  return Axios(Apis.GET_CONFIG.url, {
+    method: Apis.GET_CONFIG.method,
+    params: {
+      ...params,
+    },
+  });
 };
 
 export const getApiData = (params: GetApiDataState): Promise<HttpResponse<ApiDataInfo>> => {

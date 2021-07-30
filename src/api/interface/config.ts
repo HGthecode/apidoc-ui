@@ -1,3 +1,7 @@
+export interface GetConfigState {
+  lang?: string;
+}
+
 /**
  * 后端配置响应内容
  */

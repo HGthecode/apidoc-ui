@@ -1,17 +1,17 @@
 <template>
   <div class="doc-content">
-    <h2>请求头Headers</h2>
+    <h2>{{ t("apiPage.title.header") }}</h2>
     <div class="api-param-code mb">
-      <code-highlight :code="headerCode" title="请求头Headers" />
+      <code-highlight :code="headerCode" :title="t('apiPage.title.header')" />
     </div>
-    <h2>请求参数Parameters</h2>
+    <h2>{{ t("apiPage.title.params") }}</h2>
     <div class="api-param-code mb">
-      <code-highlight :code="paramCode" title="请求参数Parameters" />
+      <code-highlight :code="paramCode" :title="t('apiPage.title.params')" />
     </div>
 
-    <h2> 响应结果Responses </h2>
+    <h2> {{ t("apiPage.title.responses") }} </h2>
     <div class="api-param-code mb">
-      <code-highlight :code="returnCode" title="响应结果Responses" />
+      <code-highlight :code="returnCode" :title="t('apiPage.title.responses')" />
     </div>
   </div>
 </template>
@@ -21,6 +21,7 @@ import { defineComponent, PropType, reactive, toRefs, watchEffect } from "vue";
 import { ApiDetailState } from "./interface";
 import { renderCodeJsonByParams, formatJsonCode } from "@/utils/helper/codeHelper";
 import CodeHighlight from "@/components/CodeHighlight";
+import { useI18n } from "@/hooks/useI18n";
 
 export default defineComponent({
   components: {
@@ -38,6 +39,7 @@ export default defineComponent({
     },
   },
   setup(props) {
+    const { t } = useI18n();
     const state = reactive({
       paramCode: "",
       returnCode: "",
@@ -50,7 +52,7 @@ export default defineComponent({
       state.headerCode = formatJsonCode(renderCodeJsonByParams(props.detail.header));
     });
 
-    return { ...toRefs(state) };
+    return { ...toRefs(state), t };
   },
 });
 </script>

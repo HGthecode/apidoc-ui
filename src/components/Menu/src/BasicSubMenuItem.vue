@@ -44,7 +44,7 @@ export default defineComponent({
       },
     },
   },
-  setup(props, { emit }) {
+  setup() {
     const state = reactive({});
 
     const menuHasChildren = (menuTreeItem: MenuItemType): boolean => {

@@ -1,7 +1,9 @@
 <template>
   <div :class="['layout-header', { mobile: isMobile }]">
     <div class="layout-header_left">
-      <span class="layout-header_button" @click="onOpenSideMenu"><MenuOutlined /></span>
+      <span v-if="isMobile" class="layout-header_button" @click="onOpenSideMenu"
+        ><MenuOutlined
+      /></span>
       <logo />
     </div>
     <div class="layout-header_right">
@@ -9,6 +11,7 @@
         <dark-switch />
         <global-params />
         <host-select />
+        <lang-select />
       </a-space>
       <!-- <a-button><GlobalOutlined />全局参数</a-button> -->
     </div>
@@ -22,6 +25,8 @@ import Logo from "./Logo.vue";
 import DarkSwitch from "./DarkSwitch.vue";
 import GlobalParams from "@/components/GlobalParams";
 import HostSelect from "@/components/HostSelect";
+import LangSelect from "@/components/LangSelect";
+
 import { MenuOutlined } from "@ant-design/icons-vue";
 import * as Types from "@/store/modules/App/types";
 
@@ -38,6 +43,7 @@ export default defineComponent({
     GlobalParams,
     HostSelect,
     MenuOutlined,
+    LangSelect,
     // GlobalOutlined,
   },
   setup() {

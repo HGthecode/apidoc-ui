@@ -27,12 +27,8 @@ export default defineComponent({
       feConfig: computed(() => store.state.app.feConfig),
     });
 
-    console.log(state.theme);
-
     const onChange = (checked: boolean) => {
       const theme = checked ? "dark" : "light";
-      console.log(theme);
-
       Cache.set(Types.APP_THEME, theme);
       store.dispatch(`app/${Types.SET_APP_THEME}`, theme);
     };

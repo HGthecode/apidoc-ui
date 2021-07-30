@@ -28,15 +28,27 @@ export interface PageDataState {
 export interface FeConfigState {
   HOST?: string;
   CACHE?: FeConfigCecheState;
+  LANG?: FeConfigLangState[];
+  HTTP?: FeConfigHTTPState;
+}
+
+export interface FeConfigLangState {
+  title: string;
+  lang: string;
+  messages: FeConfigLangMessage;
+}
+
+export interface FeConfigHTTPState {
+  TIMEOUT?: number;
+}
+
+export interface FeConfigLangMessage {
+  [key: string]: string;
 }
 
 export interface FeConfigCecheState {
   PREFIX: string;
 }
-
-// export interface ConfigState {
-//   title?: string;
-// }
 
 export interface GetConfigState {
   appKey?: string;

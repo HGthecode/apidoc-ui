@@ -5,6 +5,7 @@ import { ConfigAppItem } from "./config";
  */
 export interface GetApiDataState {
   appKey: string;
+  lang?: string;
 }
 
 /**

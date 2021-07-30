@@ -16,10 +16,8 @@ export const createMdPageKey = (apiData: createMdPageKeyState): string => {
 
 export const copyTextToClipboard = (text: string): boolean => {
   const element = document.createElement("textarea");
-  // const previouslyFocusedElement = document.activeElement;
   element.value = text;
   element.setAttribute("readonly", "");
-  // element.style.contain = "strict";
   element.style.position = "absolute";
   element.style.left = "-9999px";
   element.style.fontSize = "12pt";
@@ -43,9 +41,6 @@ export const copyTextToClipboard = (text: string): boolean => {
     selection.removeAllRanges();
     selection.addRange(originalRange);
   }
-  // if (previouslyFocusedElement) {
-  //   previouslyFocusedElement.focus();
-  // }
   return isSuccess;
 };
 

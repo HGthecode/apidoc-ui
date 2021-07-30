@@ -1,43 +1,45 @@
 <template>
-  <a-button @click="onShow"><GlobalOutlined /><span v-if="!isMobile">全局参数</span></a-button>
+  <a-button @click="onShow"
+    ><GlobalOutlined /><span v-if="!isMobile">{{ t("globalParam.title") }}</span></a-button
+  >
   <a-modal
     :visible="visible"
     :width="900"
     :bodyStyle="{ padding: '0 10px 10px' }"
     :centered="true"
-    title="全局参数"
+    :title="t('globalParam.title')"
     @cancel="onCancel"
   >
     <a-tabs :activeKey="currentTabKey" @change="onTabChange">
-      <a-tab-pane key="header" tab="全局Header">
+      <a-tab-pane key="header" :tab="t('globalParam.header')">
         <a-alert
           type="info"
           show-icon
           style="margin-bottom: 10px"
-          message="发送请求时，所有接口将自动携带以下Header参数。"
+          :message="t('globalParam.header.message')"
         ></a-alert>
         <params-table ref="headerTableRef" :data="headerData" />
       </a-tab-pane>
-      <a-tab-pane key="params" tab="全局Params">
+      <a-tab-pane key="params" :tab="t('globalParam.params')">
         <a-alert
           type="info"
           show-icon
           style="margin-bottom: 10px"
-          message="发送请求时，所有接口将自动携带以下Params参数。"
+          :message="t('globalParam.params.message')"
         ></a-alert>
         <params-table ref="paramsTableRef" :data="paramsData" />
       </a-tab-pane>
     </a-tabs>
     <template #footer>
       <a-popconfirm
-        title="确认清空以上所有参数吗?"
-        ok-text="确认"
-        cancel-text="取消"
+        :title="t('globalParam.cancel.confirm')"
+        :ok-text="t('common.ok')"
+        :cancel-text="t('common.cancel')"
         @confirm="handleDelete"
       >
-        <a-button danger ghost>清空</a-button>
+        <a-button danger ghost>{{ t("common.clear") }}</a-button>
       </a-popconfirm>
-      <a-button type="primary" @click="handleOk">确认</a-button>
+      <a-button type="primary" @click="handleOk">{{ t("common.ok") }}</a-button>
     </template>
   </a-modal>
 </template>
@@ -55,6 +57,7 @@ import { ConfigInfo } from "@/api/interface/config";
 import * as Types from "@/store/modules/Apidoc/types";
 import { GlobalParamsState } from "@/store/modules/Apidoc/interface";
 import { createRandKey } from "@/utils";
+import { useI18n } from "@/hooks/useI18n";
 
 // import Cache from "@/utils/cache";
 // import * as Types from "./types";
@@ -71,6 +74,7 @@ export default defineComponent({
     ParamsTable,
   },
   setup() {
+    const { t } = useI18n();
     const store = useStore<GlobalState>();
     const { visible, onShow, onCancel } = useModal();
     const config = computed(() => store.state.app.config);
@@ -173,6 +177,7 @@ export default defineComponent({
       currentTabKey,
       onTabChange,
       isMobile,
+      t,
     };
   },
 });

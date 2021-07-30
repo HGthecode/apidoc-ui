@@ -10,7 +10,7 @@
       <markdown :md="md" />
     </div>
     <template #footer>
-      <a-button @click="onCancel">关闭</a-button>
+      <a-button @click="onCancel">{{ t("common.close") }}</a-button>
     </template>
   </a-modal>
 </template>
@@ -23,6 +23,8 @@ import { useStore } from "vuex";
 import { GlobalState } from "@/store";
 import Markdown from "./Markdown.vue";
 import { getMdDetail } from "@/api";
+import { useI18n } from "@/hooks/useI18n";
+import Cache from "@/utils/cache";
 
 export default defineComponent({
   components: {
@@ -32,7 +34,8 @@ export default defineComponent({
     Markdown,
   },
   emits: ["check"],
-  setup(props, { emit }) {
+  setup() {
+    const { t } = useI18n();
     const store = useStore<GlobalState>();
     const { visible, onShow, onCancel } = useModal();
     const title = ref<string>("");
@@ -40,6 +43,7 @@ export default defineComponent({
     const loading = ref<boolean>(false);
     const isMobile = computed(() => store.state.app.isMobile);
     const appKey = computed(() => store.state.app.appKey);
+    const cacheLang = Cache.get("LANG");
 
     function show(text: string, modalTitle = "说明", mdRef = "") {
       title.value = modalTitle;
@@ -49,6 +53,7 @@ export default defineComponent({
         getMdDetail({
           appKey: appKey.value,
           path: mdRef,
+          lang: cacheLang,
         }).then((res) => {
           md.value = res.data.data.content;
           loading.value = false;
@@ -66,6 +71,7 @@ export default defineComponent({
       md,
       show,
       isMobile,
+      t,
     };
   },
 });

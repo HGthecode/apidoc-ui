@@ -23,7 +23,12 @@
       </div>
     </div>
     <div>
-      <h2>请求参数Parameters</h2>
+      <div class="flex">
+        <h2 class="flex-item">请求参数Parameters</h2>
+        <div>
+          <a-button @click="onMockReload"><ReloadOutlined />更新Mock</a-button>
+        </div>
+      </div>
       <div class="mb-sm">
         <div
           v-if="detail.paramType === 'formdata' || detail.paramType === 'route'"
@@ -113,12 +118,11 @@
 import { defineComponent, reactive, PropType, watchEffect, toRefs, computed } from "vue";
 import { ApiDetailState, ApiParamState, FileData, UploadFileState } from "./interface";
 import { Table, Button, message, Form, Upload, Input, Alert, Empty } from "ant-design-vue";
+import { ReloadOutlined } from "@ant-design/icons-vue";
 import { cloneDeep } from "lodash";
 import TableInput from "@/components/TableInput";
-// import MonacoEditor from "@/components/MonacoEditor";
 import CodeEditor from "@/components/CodeEditor";
 import { renderCodeJsonByParams, formatJsonCode } from "@/utils/helper/codeHelper";
-// import CodeHighlight from "@/components/CodeHighlight";
 import Axios from "@/utils/http/index";
 import { ObjectState } from "@/store/index";
 import { useStore } from "vuex";
@@ -132,10 +136,7 @@ export default defineComponent({
     [Button.name]: Button,
     Alert,
     Empty,
-    // CodeHighlight,
-    // Form,
-    // FormItem: Form.Item,
-    // Input,
+    ReloadOutlined,
     Upload,
   },
   props: {
@@ -384,6 +385,11 @@ export default defineComponent({
       console.log("change");
     }
 
+    function onMockReload() {
+      const json = renderCodeJsonByParams(props.detail.param, true);
+      state.paramCode = formatJsonCode(json);
+    }
+
     return {
       ...toRefs(state),
       headersColumns,
@@ -396,6 +402,7 @@ export default defineComponent({
       onParamCellChange,
       formatJsonCode,
       onReturnCodeChange,
+      onMockReload,
     };
   },
 });

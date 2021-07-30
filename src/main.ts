@@ -9,52 +9,55 @@ import * as Types from "@/store/modules/App/types";
 
 import hljs from "highlight.js";
 import "@/components/CodeHighlight/hljs.less";
-// import "@/components/CodeHighlight/drak.less";
-// import "highlight.js/styles/vs.css";
-// import "highlight.js/styles/atom-one-dark.css";
+import { setupI18n } from "@/locales/setupI18n";
 
-const app = createApp(App);
+async function bootstrap() {
+  const app = createApp(App);
 
-store.dispatch(`app/${Types.GET_FE_CONFIG}`);
+  store.dispatch(`app/${Types.GET_FE_CONFIG}`);
 
-getCacheToStore();
+  getCacheToStore();
 
-// app.component('IconFont',IconFont);
+  // app.component('IconFont',IconFont);
 
-hljs.configure({
-  tabReplace: "  ",
-});
-// 注册代码高亮指令
-app.directive("highlight", {
-  beforeMount(el, binding) {
-    const targets = el.querySelectorAll("code");
-    const arg = binding.arg ? binding.arg : "json";
-    targets.forEach((target: HTMLElement) => {
-      if (typeof binding.value === "string") {
-        target.textContent = binding.value;
-      }
-      target.classList.add(`language-${arg}`);
-      hljs.highlightBlock(target);
-    });
-  },
-  updated(el, binding) {
-    const targets = el.querySelectorAll("code");
-    const arg = binding.arg ? binding.arg : "json";
-    targets.forEach((target: HTMLElement) => {
-      if (typeof binding.value === "string") {
-        target.textContent = binding.value;
+  hljs.configure({
+    tabReplace: "  ",
+  });
+  // 注册代码高亮指令
+  app.directive("highlight", {
+    beforeMount(el, binding) {
+      const targets = el.querySelectorAll("code");
+      const arg = binding.arg ? binding.arg : "json";
+      targets.forEach((target: HTMLElement) => {
+        if (typeof binding.value === "string") {
+          target.textContent = binding.value;
+        }
         target.classList.add(`language-${arg}`);
-
         hljs.highlightBlock(target);
-      }
-    });
-  },
-});
+      });
+    },
+    updated(el, binding) {
+      const targets = el.querySelectorAll("code");
+      const arg = binding.arg ? binding.arg : "json";
+      targets.forEach((target: HTMLElement) => {
+        if (typeof binding.value === "string") {
+          target.textContent = binding.value;
+          target.classList.add(`language-${arg}`);
 
-app.use(hljs.vuePlugin);
+          hljs.highlightBlock(target);
+        }
+      });
+    },
+  });
 
-app.use(store);
+  setupI18n(app);
+  app.use(hljs.vuePlugin);
 
-app.use(router);
+  app.use(store);
 
-app.mount("#app");
+  app.use(router);
+
+  app.mount("#app");
+}
+
+void bootstrap();

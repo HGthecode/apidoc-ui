@@ -3,6 +3,7 @@
  */
 export interface GetMdMenusState {
   appKey?: string;
+  lang?: string;
 }
 
 /**
@@ -11,6 +12,7 @@ export interface GetMdMenusState {
 export interface GetMdDetailState {
   appKey: string;
   path: string;
+  lang?: string;
 }
 
 /**

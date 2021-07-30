@@ -57,10 +57,6 @@ export interface GroupItem {
   items: ApiItem[];
 }
 
-// export interface ApiItem extends MenuItemType {
-//   appKey?: string;
-// }
-
 export interface GetMdMenusState {
   appKey?: string;
 }

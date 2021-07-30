@@ -7,7 +7,7 @@
       <search @search="onSearch" />
     </div>
     <a-tabs :activeKey="activeKey" @change="onTabChange">
-      <a-tab-pane key="api" tab="API">
+      <a-tab-pane key="api" :tab="t('common.api')">
         <div class="layout-side_menus">
           <Menu
             :data="apiMenus"
@@ -18,7 +18,7 @@
           />
         </div>
       </a-tab-pane>
-      <a-tab-pane key="md" tab="文档">
+      <a-tab-pane key="md" :tab="t('common.docs')">
         <div class="layout-side_menus">
           <Menu
             :data="mdMenus"
@@ -34,7 +34,10 @@
           <tags-select @change="onTagsChange" />
           <a-tooltip>
             <template #title>
-              更新菜单<span v-if="config.cache && config.cache.enable">，并更新缓存</span>
+              {{ t("layout.menu.reload")
+              }}<span v-if="config.cache && config.cache.enable"
+                >，{{ t("layout.cache.reload") }}</span
+              >
             </template>
             <a-button @click="reloadApiData">
               <template #icon>
@@ -45,7 +48,7 @@
 
           <a-tooltip>
             <template #title>
-              {{ openAllMenuFlag ? "收起全部" : "展开全部" }}
+              {{ openAllMenuFlag ? t("layout.menu.hideAll") : t("layout.menu.openAll") }}
             </template>
             <a-button @click="toggleMenuOpen">
               <template #icon>
@@ -85,6 +88,7 @@ import { useRouter } from "vue-router";
 import { createApiPageKey, createMdPageKey } from "@/utils";
 import { MdMenuItemState } from "@/store/modules/Apidoc/interface";
 import { MenuItemType } from "@/components/Menu/src/interface";
+import { useI18n } from "@/hooks/useI18n";
 
 export default defineComponent({
   components: {
@@ -104,6 +108,7 @@ export default defineComponent({
   },
   emits: ["reload"],
   setup(props, { emit }) {
+    const { t } = useI18n();
     const router = useRouter();
     let store = useStore<GlobalState>();
     let menuData: MenuItemType[] = [];
@@ -219,6 +224,7 @@ export default defineComponent({
       reloadApiData,
       onTabChange,
       onHideSide,
+      t,
     };
   },
 });

@@ -6,18 +6,20 @@
       <div v-if="isReload">
         <a-alert type="info" show-icon>
           <template #message>
-            <span>该接口有更新，</span>
-            <a-button size="small" type="link" @click="onReload">点击此处更新</a-button>
+            <span>{{ t("apiPage.update.tip") }}，</span>
+            <a-button size="small" type="link" @click="onReload">{{
+              t("apiPage.update.button")
+            }}</a-button>
           </template>
         </a-alert>
       </div>
       <div class="text-list" style="margin-bottom: 10px">
         <div v-if="detail.author" class="text-list-item">
-          <span class="text-label">作者：</span>
+          <span class="text-label">{{ t("apiPage.author") }}：</span>
           <span class="text-value">{{ detail.author }}</span>
         </div>
         <div v-if="detail.tag && detail.tag.length" class="text-list-item">
-          <span class="text-label">Tags：</span>
+          <span class="text-label">{{ t("apiPage.tag") }}：</span>
           <span class="text-value">
             <a-tag v-for="(item, index) in detail.tag" :key="index">{{ item }}</a-tag>
           </span>
@@ -48,13 +50,13 @@
 
       <div class="api-content">
         <a-tabs>
-          <a-tab-pane key="table" tab="文档">
+          <a-tab-pane key="table" :tab="t('apiPage.docs')">
             <table-tab :detail="detail" />
           </a-tab-pane>
-          <a-tab-pane key="json" tab="Json">
+          <a-tab-pane key="json" :tab="t('apiPage.json')">
             <json-tab :detail="detail" />
           </a-tab-pane>
-          <a-tab-pane key="debug" tab="调试">
+          <a-tab-pane key="debug" :tab="t('apiPage.debug')">
             <debug-tab :detail="detail" :currentMethod="currentMethod" />
           </a-tab-pane>
         </a-tabs>
@@ -64,11 +66,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, computed, toRefs, watch, ComputedRef, onActivated } from "vue";
+import { defineComponent, reactive, computed, toRefs, watch, onActivated } from "vue";
 import { useStore } from "vuex";
 import { GlobalState } from "@/store";
-import { useRoute, onBeforeRouteUpdate, RouteLocationNormalized } from "vue-router";
-import { createApiPageKey, copyTextToClipboard } from "@/utils";
+import { useRoute } from "vue-router";
+import { copyTextToClipboard } from "@/utils";
 import { Tag, Select, message, Tabs, Alert, Button } from "ant-design-vue";
 import { cloneDeep } from "lodash";
 import { CopyOutlined } from "@ant-design/icons-vue";
@@ -79,6 +81,7 @@ import DebugTab from "./debugTab.vue";
 import * as Types from "@/store/modules/App/types";
 import { PageDataItemState } from "@/store/modules/App/interface";
 import Skeleton from "./skeleton.vue";
+import { useI18n } from "@/hooks/useI18n";
 
 export default defineComponent({
   name: "ApiDetail",
@@ -97,6 +100,7 @@ export default defineComponent({
     Skeleton,
   },
   setup() {
+    const { t } = useI18n();
     const route = useRoute();
     let store = useStore<GlobalState>();
     const detail: ApiItem = {
@@ -155,7 +159,7 @@ export default defineComponent({
 
     const onCopyUrl = () => {
       state.detail.url && copyTextToClipboard(state.detail.url);
-      message.success("复制成功");
+      message.success(t("common.copySuccess"));
     };
 
     const onMethodChange = (value: string) => {
@@ -206,7 +210,7 @@ export default defineComponent({
       }
     }
 
-    return { ...toRefs(state), onCopyUrl, onMethodChange, onReload };
+    return { ...toRefs(state), onCopyUrl, onMethodChange, onReload, t };
   },
 });
 </script>

@@ -10,7 +10,6 @@
     <span v-else-if="item.method" :class="['api-method-icon', `method-color_${item.method}`]">{{
       item.method
     }}</span>
-    <!-- <i v-else-if="item.path && item.type" :class="['iconfont', 'icon-md']"></i> -->
     <FileMarkdownOutlined v-else-if="item.path && item.type === 'md'" />
     <FolderOutlined v-else />
 

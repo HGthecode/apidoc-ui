@@ -1,18 +1,15 @@
 import "./index.less";
 import { defineComponent, ref, computed, watch, reactive } from "vue";
 import { Tabs, Dropdown, message } from "ant-design-vue";
-import { onBeforeRouteUpdate, RouteLocationNormalized, RouteRecordRaw } from "vue-router";
+import { onBeforeRouteUpdate, RouteLocationNormalized } from "vue-router";
 import { useRouter, useRoute } from "vue-router";
 import { isString } from "lodash";
-import { routes } from "@/router/index";
 import { useStore } from "vuex";
 import { GlobalState } from "@/store";
 import * as Types from "@/store/modules/App/types";
-import { createApiPageKey, createMdPageKey } from "@/utils";
 import { findNode } from "@/utils/helper/treeHelper";
 import { MenuItemType } from "@/components/Menu/src/interface";
-
-// import { RouteRecordRaw } from "vue-router";
+import { useI18n } from "@/hooks/useI18n";
 interface stateType {
   pageList: RouteLocationNormalized[];
   activeKey: string;
@@ -24,14 +21,10 @@ interface stateType {
 
 export default defineComponent({
   setup() {
+    const { t } = useI18n();
     const router = useRouter();
     const route = useRoute();
     const store = useStore<GlobalState>();
-    // const pageList = ref<RouteLocationNormalized[]>([]);
-    // const activeKey = ref("");
-    // const apiData = computed(() => store.state.apidoc.data);
-    // const appKey = computed(() => store.state.app.appKey);
-    // const sideWidth = computed(() => store.state.app.sideWidth);
 
     const state: stateType = reactive({
       pageList: [],
@@ -47,7 +40,7 @@ export default defineComponent({
         fullPath: "/home",
         hash: "",
         matched: [],
-        meta: { title: "首页", affix: true },
+        meta: { title: t("home.title"), affix: true },
         name: "Home",
         params: {},
         path: "/home",
@@ -174,7 +167,11 @@ export default defineComponent({
         }
         removePageData(removeKeys);
       } else {
-        message.info(`${direction == "left" ? "左侧" : "右侧"}没有标签`);
+        message.info(
+          `${direction == "left" ? t("layout.tabs.leftSide") : t("layout.tabs.rightSide")}${t(
+            "layout.tabs.notTab"
+          )}`
+        );
       }
     }
 
@@ -201,10 +198,12 @@ export default defineComponent({
       return (
         <div class="tab-menu select-menu">
           <ul>
-            <li onClick={() => closeThat(keyPath)}>关闭当前</li>
-            <li onClick={() => closeLeftOrRight(keyPath, "left")}>关闭左侧</li>
-            <li onClick={() => closeLeftOrRight(keyPath, "right")}>关闭右侧</li>
-            <li onClick={() => closeAll()}>关闭全部</li>
+            <li onClick={() => closeThat(keyPath)}>{t("layout.tabs.closeCurrent")}</li>
+            <li onClick={() => closeLeftOrRight(keyPath, "left")}>{t("layout.tabs.closeLeft")}</li>
+            <li onClick={() => closeLeftOrRight(keyPath, "right")}>
+              {t("layout.tabs.closeRight")}
+            </li>
+            <li onClick={() => closeAll()}>{t("layout.tabs.closeAll")}</li>
           </ul>
         </div>
       );
@@ -242,13 +241,6 @@ export default defineComponent({
           />
         );
       });
-      // tabBarStyle={{
-      //   background: "#FFF",
-      //   margin: 0,
-      //   paddingTop: "3px",
-      //   paddingLeft: "10px",
-      //   paddingRight: "10px",
-      // }}
 
       const classNames = ["multi-tab-wrapper"];
       if (state.isMobile) {

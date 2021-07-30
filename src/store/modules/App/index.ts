@@ -1,5 +1,5 @@
 import { Module } from "vuex";
-import { GlobalState, IAxiosResponseData } from "../../index";
+import { GlobalState } from "../../index";
 import * as Types from "./types";
 import {
   AppState,
@@ -8,7 +8,7 @@ import {
   AddPageDataState,
   PageDataState,
 } from "./interface";
-import { ConfigInfo } from "@/api/interface/config";
+import { ConfigInfo, GetConfigState } from "@/api/interface/config";
 import * as API from "@/api";
 import { cloneDeep } from "lodash";
 import { ThemeEnum } from "@/enums/appEnum";
@@ -35,9 +35,11 @@ const app: Module<AppState, GlobalState> = {
   state,
   actions: {
     // 获取配置信息
-    [Types.GET_CONFIG_INFO]({ commit }) {
+    [Types.GET_CONFIG_INFO]({ commit }, params: GetConfigState) {
       return new Promise((resolve, reject) => {
-        API.getConfigInfo()
+        API.getConfigInfo({
+          ...params,
+        })
           .then((res) => {
             commit(Types.SET_CONFIG_INFO, res.data.data);
             resolve(res.data.data);

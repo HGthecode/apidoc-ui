@@ -14,18 +14,18 @@ import { defineComponent, reactive, computed, toRefs, watch } from "vue";
 import { useStore } from "vuex";
 import { GlobalState } from "@/store";
 import { useRoute } from "vue-router";
-import { onBeforeRouteUpdate, RouteLocationNormalized } from "vue-router";
 import { getMdDetail } from "@/api";
 import { createMdPageKey } from "@/utils";
 import * as Types from "@/store/modules/App/types";
 import Markdown, { MdAnchor } from "@/components/Markdown";
+import Cache from "@/utils/cache";
 
 export default defineComponent({
   components: {
     Markdown,
     MdAnchor,
   },
-  setup(props) {
+  setup() {
     const route = useRoute();
     let store = useStore<GlobalState>();
 
@@ -35,6 +35,7 @@ export default defineComponent({
       isMobile: computed(() => store.state.app.isMobile),
       detail: {},
     });
+    const cacheLang = Cache.get("LANG");
     const fetchData = () => {
       const { query, params } = route;
       const key = createMdPageKey({
@@ -45,6 +46,7 @@ export default defineComponent({
         getMdDetail({
           appKey: state.appKey,
           path: query.path as string,
+          lang: cacheLang,
         }).then((res) => {
           store.dispatch(`app/${Types.ADD_PAGE_DATA}`, {
             ...state.pageData[key],

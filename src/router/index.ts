@@ -1,11 +1,4 @@
-import {
-  createRouter,
-  createWebHistory,
-  RouteRecordRaw,
-  createWebHashHistory,
-  onBeforeRouteUpdate,
-  RouteLocationNormalizedLoaded,
-} from "vue-router";
+import { createRouter, RouteRecordRaw, createWebHashHistory } from "vue-router";
 import BasicLayout from "../layouts/index.vue";
 
 export const routes: Array<RouteRecordRaw> = [
@@ -13,9 +6,7 @@ export const routes: Array<RouteRecordRaw> = [
     path: "/",
     name: "index",
     component: BasicLayout,
-    meta: {
-      // title: "首页",
-    },
+    meta: {},
     redirect: "/home",
     children: [
       {
@@ -25,7 +16,6 @@ export const routes: Array<RouteRecordRaw> = [
         meta: {
           keepKey: "home",
           affix: true,
-          title: "首页",
         },
       },
 
@@ -33,11 +23,7 @@ export const routes: Array<RouteRecordRaw> = [
         path: "/api",
         name: "ApiDetail",
         component: () => import(/* webpackChunkName: "apiDetail" */ "../views/apiDetail/index.vue"),
-        meta: {
-          // keepKey: ($route: RouteLocationNormalizedLoaded): string => {
-          //   return $route.fullPath;
-          // },
-        },
+        meta: {},
       },
       {
         path: "/md",

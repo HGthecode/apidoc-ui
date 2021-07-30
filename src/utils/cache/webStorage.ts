@@ -1,7 +1,3 @@
-// import { computed } from "vue";
-// import { useStore } from "vuex";
-// import { GlobalState } from "@/store";
-
 export interface CreateStorageParams {
   prefixKey: string;
   storage: Storage;
@@ -16,10 +12,6 @@ export const createStorage = ({
     private storage: Storage;
 
     constructor() {
-      // const store = useStore<GlobalState>();
-      // const feConfig = computed(() => store.state.app.feConfig);
-
-      // this.prefixKey = feConfig.value.CACHE.PREFIX;
       this.prefixKey = prefixKey;
       this.storage = storage;
     }

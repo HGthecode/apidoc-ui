@@ -23,7 +23,7 @@
       </template>
     </Table>
 
-    <a-button style="margin-top: 10px" @click="addRow">+ 添加参数</a-button>
+    <a-button style="margin-top: 10px" @click="addRow">+ {{ t("globalParam.add") }}</a-button>
   </div>
 </template>
 
@@ -34,6 +34,7 @@ import TableInput from "@/components/TableInput";
 import { DataItemType } from "./interface";
 import { DeleteOutlined } from "@ant-design/icons-vue";
 import { createRandKey } from "@/utils";
+import { useI18n } from "@/hooks/useI18n";
 
 export default defineComponent({
   components: {
@@ -49,10 +50,11 @@ export default defineComponent({
     },
   },
   setup(props) {
+    const { t } = useI18n();
     const state = reactive({
       columns: [
         {
-          title: "Key",
+          title: t("common.field"),
           dataIndex: "name",
           width: 150,
           slots: {
@@ -60,14 +62,14 @@ export default defineComponent({
           },
         },
         {
-          title: "Value",
+          title: t("common.value"),
           dataIndex: "value",
           slots: {
             customRender: "editRowValue",
           },
         },
         {
-          title: "说明",
+          title: t("common.desc"),
           dataIndex: "desc",
           width: 260,
           slots: {
@@ -75,7 +77,7 @@ export default defineComponent({
           },
         },
         {
-          title: "操作",
+          title: t("common.action"),
           dataIndex: "id",
           width: 70,
           slots: {
@@ -124,6 +126,7 @@ export default defineComponent({
       deleteRow,
       addRow,
       getData,
+      t,
     };
   },
 });

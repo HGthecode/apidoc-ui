@@ -7,9 +7,6 @@ import { defineComponent, PropType, watchEffect, ref } from "vue";
 
 import marked from "marked";
 import hljs from "highlight.js";
-// import "highlight.js/styles/atom-one-dark.css";
-// import "../styles/markdown.less";
-
 marked.setOptions({
   highlight: function (code: string) {
     return hljs.highlightAuto(code).value;

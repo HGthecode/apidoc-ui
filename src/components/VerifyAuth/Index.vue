@@ -5,12 +5,12 @@
     :closable="false"
     :destroyOnClose="true"
     :maskClosable="false"
-    title="授权访问"
+    :title="t('auth.title')"
     @cancel="onCancel"
   >
     <div>
       <a-input-password
-        placeholder="请输入访问密码"
+        :placeholder="t('auth.input.placeholder')"
         size="large"
         :allowClear="true"
         v-model:value="password"
@@ -18,7 +18,7 @@
       />
     </div>
     <template #footer>
-      <a-button type="primary" @click="handleOk">确认</a-button>
+      <a-button type="primary" @click="handleOk">{{ t("common.ok") }}</a-button>
     </template>
   </a-modal>
 </template>
@@ -33,7 +33,7 @@ import md5 from "js-md5";
 import { checkAuth } from "@/api";
 import { getTreePathByKeys } from "@/utils/helper/treeHelper";
 import * as ApidocTypes from "@/store/modules/Apidoc/types";
-import { AxiosError } from "axios";
+import { useI18n } from "@/hooks/useI18n";
 
 export default defineComponent({
   components: {
@@ -43,6 +43,7 @@ export default defineComponent({
   },
   emits: ["check"],
   setup(props, { emit }) {
+    const { t } = useI18n();
     const store = useStore<GlobalState>();
     const { visible, onShow, onCancel } = useModal();
     const password = ref<string>("");
@@ -96,6 +97,7 @@ export default defineComponent({
       onCancel,
       password,
       handleOk,
+      t,
     };
   },
 });
