@@ -21,3 +21,7 @@ export const GLOBAL_PARAMS = "GLOBAL_PARAMS";
 export const SET_AUTH_DATA = "SET_AUTH_DATA";
 
 export const AUTH_DATA = "AUTH_DATA";
+
+export const SET_API_ANALYSIS = "SET_API_ANALYSIS";
+
+export const SET_CURRENT_APP = "SET_CURRENT_APP";

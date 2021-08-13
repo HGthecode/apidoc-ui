@@ -13,6 +13,7 @@ export interface AppState {
   keepAlivePages: string[];
   isMobile: boolean;
   isOpenSide: boolean;
+  apiDetailInitState?: boolean;
 }
 
 export type PageDataItemState = ApiItem;
@@ -26,6 +27,7 @@ export interface PageDataState {
 }
 
 export interface FeConfigState {
+  TITLE?: string;
   HOST?: string;
   CACHE?: FeConfigCecheState;
   LANG?: FeConfigLangState[];

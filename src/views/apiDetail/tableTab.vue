@@ -72,7 +72,7 @@
 
 <script lang="ts">
 import { defineComponent, reactive, PropType, toRefs, ref, unref } from "vue";
-import { ApiDetailState, ApiParamState } from "./interface";
+import { ApiDetailState } from "./interface";
 import { Table } from "ant-design-vue";
 import { CheckOutlined } from "@ant-design/icons-vue";
 import { textToHtml } from "@/utils";
@@ -126,7 +126,7 @@ export default defineComponent({
       {
         title: t("common.require"),
         dataIndex: "require",
-        width: 60,
+        width: 100,
         align: "center",
         slots: {
           customRender: "requireCell",
@@ -159,7 +159,7 @@ export default defineComponent({
     });
 
     let paramsRowKey = 0;
-    const renterRowKey = (record: ApiParamState) => {
+    const renterRowKey = (record: ParamItem) => {
       paramsRowKey++;
       return `${record.name}_${paramsRowKey}`;
     };
@@ -177,3 +177,11 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="less" scoped>
+.api-table {
+  .desc {
+    margin-bottom: 16px;
+  }
+}
+</style>

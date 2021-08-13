@@ -28,12 +28,13 @@ export interface ConfigAppItem {
   path: string;
   title: string;
   hasPassword?: boolean;
+  items?: ConfigAppItem[];
 }
 
 /**
  * 配置应用分组内容
  */
-interface ConfigAppGroupItem {
+export interface ConfigAppGroupItem {
   title: string;
   name: string;
   children?: ConfigAppGroupItem[];

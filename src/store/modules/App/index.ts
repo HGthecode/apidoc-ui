@@ -28,6 +28,7 @@ const state: AppState = {
   keepAlivePages: [],
   isMobile: false,
   isOpenSide: false,
+  apiDetailInitState: undefined,
 };
 
 const app: Module<AppState, GlobalState> = {
@@ -102,6 +103,10 @@ const app: Module<AppState, GlobalState> = {
     [Types.SET_IS_OPENSIDE]({ commit }, flag) {
       commit(Types.SET_IS_OPENSIDE, flag);
     },
+    // api文档加载状态
+    [Types.SET_APIDETAIL_INIT_STATE]({ commit }, flag) {
+      commit(Types.SET_APIDETAIL_INIT_STATE, flag);
+    },
   },
   mutations: {
     // 设置配置信息
@@ -151,6 +156,9 @@ const app: Module<AppState, GlobalState> = {
     },
     [Types.SET_IS_OPENSIDE](state, flag: boolean) {
       state.isOpenSide = flag;
+    },
+    [Types.SET_APIDETAIL_INIT_STATE](state, flag: boolean) {
+      state.apiDetailInitState = flag;
     },
   },
   getters: {

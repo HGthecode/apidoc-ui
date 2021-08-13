@@ -27,9 +27,12 @@ export interface ApiItem {
   controller?: string;
   tag?: string[];
   children: ApiItem[];
-  param?: ParamItem;
-  return?: ParamItem;
-  header?: ParamItem;
+  param?: ParamItem[];
+  return?: ParamItem[];
+  header?: ParamItem[];
+  before?: ApiEventItem[];
+  after?: ApiEventItem[];
+  author?: string;
 }
 
 export interface ParamItem {
@@ -43,4 +46,11 @@ export interface ParamItem {
   require?: boolean;
   source?: string;
   type?: string;
+}
+
+export interface ApiEventItem {
+  event: string;
+  key?: string;
+  value?: string;
+  desc?: string;
 }

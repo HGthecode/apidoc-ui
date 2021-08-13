@@ -2,7 +2,7 @@
   <div v-if="feConfig.HOSTS && feConfig.HOSTS.length" class="host-select">
     <a-select
       :value="currentHost"
-      class="host-select_select"
+      :class="['host-select_select', { mobile: isMobile }]"
       option-label-prop="label"
       @change="onChange"
     >
@@ -36,6 +36,7 @@ export default defineComponent({
       count: 0,
       config: computed(() => store.state.app.config),
       feConfig: computed(() => store.state.app.feConfig),
+      isMobile: computed(() => store.state.app.isMobile),
       currentHost: "",
     });
     state.currentHost = state.feConfig.HOST as string;
@@ -55,6 +56,9 @@ export default defineComponent({
   display: inline-block;
   &_select {
     width: 140px;
+    &.mobile {
+      width: 90px;
+    }
   }
 }
 </style>

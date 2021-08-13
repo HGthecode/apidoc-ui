@@ -1,7 +1,13 @@
 <template>
-  <div class="layout-container">
+  <div v-show="!initLoading" class="layout-container">
     <layout-header />
-    <error-card v-if="error.response && error.response.status != 200" :error="error" />
+    <error-card
+      v-if="
+        !loading &&
+        ((error.response && error.response.status != 200) || (!error.response && error.message))
+      "
+      :error="error"
+    />
     <a-spin v-else :spinning="loading" style="height: 500px">
       <layout-sider @reload="onReload" />
       <layout-multitabs />
@@ -28,6 +34,9 @@ import { cloneDeep } from "lodash";
 import { AxiosError } from "axios";
 import VerifyAuth from "@/components/VerifyAuth";
 import ErrorCard from "@/components/Error";
+import { useLoading } from "@/components/Loading";
+import { handleConfigAppsData } from "@/store/modules/Apidoc/helper";
+import { ThemeEnum } from "@/enums/appEnum";
 
 export default defineComponent({
   components: {
@@ -42,7 +51,9 @@ export default defineComponent({
   setup() {
     let store = useStore<GlobalState>();
     const route = useRoute();
+    const theme = computed(() => store.state.app.theme);
     const verifyAuthRef = ref<HTMLElement | null>(null);
+    let initLoading = ref<boolean>(true);
     const error: AxiosError = {
       config: {},
       isAxiosError: false,
@@ -52,9 +63,18 @@ export default defineComponent({
       name: "",
       message: "",
     };
+    const [openFullLoading, closeFullLoading] = useLoading({
+      tip: "加载中...",
+      background: theme.value === ThemeEnum.LIGHT ? "#fff" : "#1e1e1e",
+    });
+    setTimeout(() => {
+      openFullLoading();
+      initLoading.value = false;
+    }, 10);
 
     const state = reactive({
       appKey: computed(() => store.state.app.appKey),
+      apiAnalysis: computed(() => store.state.apidoc.apiAnalysis),
       loading: false,
       error: error,
     });
@@ -71,6 +91,7 @@ export default defineComponent({
         })
         .then(() => {
           state.loading = false;
+          closeFullLoading();
         })
         .catch((err: AxiosError) => {
           const status = err.response && err.response.status ? err.response.status : 500;
@@ -81,6 +102,7 @@ export default defineComponent({
           }
 
           state.loading = false;
+          closeFullLoading();
         });
     };
 
@@ -91,58 +113,78 @@ export default defineComponent({
       });
     };
 
-    store
-      .dispatch(`app/${Types.GET_CONFIG_INFO}`, { lang: cacheLang })
-      .then((res) => {
-        const appKey: string = route.query.appKey as string;
-        if (appKey) {
-          store.dispatch(`app/${Types.SET_APP_KEY}`, appKey);
-        } else if (res.apps && res.apps.length) {
-          const treeFirstNode = getFirstNode(res.apps, "items");
-          if (treeFirstNode && treeFirstNode.length) {
-            const appKey = treeFirstNode.map((p) => p.folder).join("_");
+    const fetchConfig = () => {
+      state.loading = true;
+      store
+        .dispatch(`app/${Types.GET_CONFIG_INFO}`, { lang: cacheLang })
+        .then((res) => {
+          // 设置标题
+          if (res.title) {
+            document.title = res.title;
+          }
+
+          const appKey: string = route.query.appKey as string;
+          if (appKey) {
             store.dispatch(`app/${Types.SET_APP_KEY}`, appKey);
-          }
-        }
-        // 全局参数
-        const cacheGlobalParams = Cache.get(ApidocTypes.GLOBAL_PARAMS);
-        const globalParams = {
-          header: res.headers && res.headers.length ? cloneDeep(res.headers) : [],
-          params: res.parameters && res.parameters.length ? cloneDeep(res.parameters) : [],
-        };
-        if (cacheGlobalParams && cacheGlobalParams.header && cacheGlobalParams.header.length) {
-          const headerNames = globalParams.header.map((p: any) => p.name);
-          for (let i = 0; i < cacheGlobalParams.header.length; i++) {
-            const item = cacheGlobalParams.header[i];
-            const findIndex = headerNames.indexOf(item.name);
-            if (findIndex > -1) {
-              if (item.value) {
-                globalParams.header[findIndex] = item;
-              }
-            } else {
-              globalParams.header.push(item);
+          } else if (res.apps && res.apps.length) {
+            const treeFirstNode = getFirstNode(res.apps, "items");
+            if (treeFirstNode && treeFirstNode.length) {
+              const appKey = treeFirstNode.map((p) => p.folder).join("_");
+              store.dispatch(`app/${Types.SET_APP_KEY}`, appKey);
             }
           }
-        }
-        if (cacheGlobalParams && cacheGlobalParams.params && cacheGlobalParams.params.length) {
-          const paramsNames = globalParams.params.map((p: any) => p.name);
-          for (let i = 0; i < cacheGlobalParams.params.length; i++) {
-            const item = cacheGlobalParams.params[i];
-            const findIndex = paramsNames.indexOf(item.name);
-            if (findIndex > -1) {
-              if (item.value) {
-                globalParams.params[findIndex] = item;
+          // 应用总数
+          const appData = handleConfigAppsData(res.apps);
+          const apiAnalysis = {
+            ...state.apiAnalysis,
+            appCount: appData.count,
+          };
+          store.dispatch(`apidoc/${ApidocTypes.SET_API_ANALYSIS}`, apiAnalysis);
+
+          // 全局参数
+          const cacheGlobalParams = Cache.get(ApidocTypes.GLOBAL_PARAMS);
+          const globalParams = {
+            header: res.headers && res.headers.length ? cloneDeep(res.headers) : [],
+            params: res.parameters && res.parameters.length ? cloneDeep(res.parameters) : [],
+          };
+          if (cacheGlobalParams && cacheGlobalParams.header && cacheGlobalParams.header.length) {
+            const headerNames = globalParams.header.map((p: any) => p.name);
+            for (let i = 0; i < cacheGlobalParams.header.length; i++) {
+              const item = cacheGlobalParams.header[i];
+              const findIndex = headerNames.indexOf(item.name);
+              if (findIndex > -1) {
+                if (item.value) {
+                  globalParams.header[findIndex] = item;
+                }
+              } else {
+                globalParams.header.push(item);
               }
-            } else {
-              globalParams.params.push(item);
             }
           }
-        }
-        store.dispatch(`apidoc/${ApidocTypes.SET_GLOBAL_PARAMS}`, globalParams);
-      })
-      .catch((err: AxiosError) => {
-        state.error = err;
-      });
+          if (cacheGlobalParams && cacheGlobalParams.params && cacheGlobalParams.params.length) {
+            const paramsNames = globalParams.params.map((p: any) => p.name);
+            for (let i = 0; i < cacheGlobalParams.params.length; i++) {
+              const item = cacheGlobalParams.params[i];
+              const findIndex = paramsNames.indexOf(item.name);
+              if (findIndex > -1) {
+                if (item.value) {
+                  globalParams.params[findIndex] = item;
+                }
+              } else {
+                globalParams.params.push(item);
+              }
+            }
+          }
+          store.dispatch(`apidoc/${ApidocTypes.SET_GLOBAL_PARAMS}`, globalParams);
+        })
+        .catch((err: AxiosError) => {
+          state.error = err;
+          state.loading = false;
+          closeFullLoading();
+        });
+    };
+
+    fetchConfig();
 
     const onReload = (tabKey: string) => {
       if (tabKey === "api") {
@@ -165,7 +207,7 @@ export default defineComponent({
       state.appKey && fetchApiData(state.appKey);
     };
 
-    return { ...toRefs(state), onReload, verifyAuthRef, onCheckAuth };
+    return { ...toRefs(state), onReload, verifyAuthRef, onCheckAuth, initLoading };
   },
 });
 </script>

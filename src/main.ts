@@ -6,9 +6,8 @@ import { getCacheToStore } from "@/utils/bootstrap";
 import router from "./router";
 import store from "./store";
 import * as Types from "@/store/modules/App/types";
+import { registerHighlight } from "@/directives/highlight";
 
-import hljs from "highlight.js";
-import "@/components/CodeHighlight/hljs.less";
 import { setupI18n } from "@/locales/setupI18n";
 
 async function bootstrap() {
@@ -18,40 +17,9 @@ async function bootstrap() {
 
   getCacheToStore();
 
-  // app.component('IconFont',IconFont);
-
-  hljs.configure({
-    tabReplace: "  ",
-  });
-  // 注册代码高亮指令
-  app.directive("highlight", {
-    beforeMount(el, binding) {
-      const targets = el.querySelectorAll("code");
-      const arg = binding.arg ? binding.arg : "json";
-      targets.forEach((target: HTMLElement) => {
-        if (typeof binding.value === "string") {
-          target.textContent = binding.value;
-        }
-        target.classList.add(`language-${arg}`);
-        hljs.highlightBlock(target);
-      });
-    },
-    updated(el, binding) {
-      const targets = el.querySelectorAll("code");
-      const arg = binding.arg ? binding.arg : "json";
-      targets.forEach((target: HTMLElement) => {
-        if (typeof binding.value === "string") {
-          target.textContent = binding.value;
-          target.classList.add(`language-${arg}`);
-
-          hljs.highlightBlock(target);
-        }
-      });
-    },
-  });
+  registerHighlight(app);
 
   setupI18n(app);
-  app.use(hljs.vuePlugin);
 
   app.use(store);
 

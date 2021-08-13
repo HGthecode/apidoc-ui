@@ -1,0 +1,47 @@
+.home-page{
+    padding:16px;
+    min-height: calc(100vh - 90px);
+    background-color: var(--bgcolor-light);
+    .readme{
+        h1{
+            margin-bottom: 5px;
+        }
+    }
+    .tags-wraper{
+        height: 130px;
+    }
+}
+.number-block{
+    padding-top:5px;
+    &-item{
+        background-color: var(--bgcolor);
+        border-radius: 3px;
+        padding:11px;
+        margin-bottom: 16px;
+        &:deep(.ant-card-meta-title){
+            margin-bottom: 0px;
+        }
+        .color-green{
+            background-color: var(--color-green);
+        }
+        .color-blue{
+            background-color: var(--color-blue);
+        }
+        .color-orange{
+            background-color: var(--color-orange);
+        }
+    }
+}
+.author-list{
+    &>ul{
+        padding-left: 0;
+        &>li{
+            list-style-type:none;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--color-line);
+            h4{
+                margin-bottom: 0;
+            }
+        }
+    }
+}

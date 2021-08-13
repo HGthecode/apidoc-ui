@@ -2,7 +2,7 @@
   <div v-if="langList && langList.length > 1" class="lang-select">
     <a-select
       v-model:value="currentLang"
-      class="lang-select_select"
+      :class="['lang-select_select', { mobile: isMobile }]"
       option-label-prop="label"
       @select="onChange"
     >
@@ -38,6 +38,7 @@ export default defineComponent({
       config: computed(() => store.state.app.config),
       feConfig: computed(() => store.state.app.feConfig),
       currentLang: "",
+      isMobile: computed(() => store.state.app.isMobile),
     });
     const langList = computed(() => {
       if (state.feConfig.LANG && state.feConfig.LANG.length) {
@@ -79,6 +80,9 @@ export default defineComponent({
   display: inline-block;
   &_select {
     width: 100px;
+    &.mobile {
+      width: 86px;
+    }
   }
 }
 </style>

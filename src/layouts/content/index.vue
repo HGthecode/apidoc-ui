@@ -3,7 +3,9 @@
     :class="['layout-content', { mobile: isMobile }]"
     :style="{ marginLeft: `${sideWidth + 2}px` }"
   >
-    <router-view v-slot="{ Component }">
+    <div v-if="apiDetailInitState === true" class="skeleton-wraper"><Skeleton /></div>
+
+    <router-view v-show="apiDetailInitState !== true" v-slot="{ Component }">
       <transition name="fade-slide" mode="out-in">
         <keep-alive :include="keepAlivePages">
           <component :is="handleComponent(Component, $route)" :key="parseRouteKey($route)" />
@@ -17,9 +19,12 @@ import { reactive, defineComponent, toRefs, computed, watch, watchEffect } from 
 import { useStore } from "vuex";
 import { GlobalState } from "@/store";
 import { RouteLocationNormalizedLoaded } from "vue-router";
+import Skeleton from "@/views/apiDetail/skeleton.vue";
 
 export default defineComponent({
-  components: {},
+  components: {
+    Skeleton,
+  },
   setup() {
     let store = useStore<GlobalState>();
     // const keepAlivePages: string[] = [];
@@ -28,6 +33,7 @@ export default defineComponent({
       pageData: computed(() => store.state.app.pageData),
       keepAlivePages: computed(() => store.getters["app/keepAliveKeys"]),
       isMobile: computed(() => store.state.app.isMobile),
+      apiDetailInitState: computed(() => store.state.app.apiDetailInitState),
     });
 
     // 解析路由 key

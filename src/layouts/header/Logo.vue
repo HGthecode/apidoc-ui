@@ -1,7 +1,7 @@
 <template>
   <a class="header-logo">
     <img class="header-logo_img" src="../../assets/logo.png" />
-    <span v-if="!isMobile" class="header-logo_title">{{ feConfig.TITLE }}</span>
+    <span v-if="!isMobile" class="header-logo_title">{{ appTitle }}</span>
   </a>
 </template>
 
@@ -17,9 +17,18 @@ export default defineComponent({
     const state = reactive({
       isMobile: computed(() => store.state.app.isMobile),
       feConfig: computed(() => store.state.app.feConfig),
+      config: computed(() => store.state.app.config),
+    });
+    const appTitle = computed(() => {
+      if (state.config && state.config.title) {
+        return state.config.title;
+      } else if (state.feConfig && state.feConfig.TITLE) {
+        return state.feConfig.TITLE;
+      }
+      return "Apidoc";
     });
 
-    return { ...toRefs(state) };
+    return { ...toRefs(state), appTitle };
   },
 });
 </script>

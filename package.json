@@ -13,6 +13,7 @@
     "ant-design-vue": "2.2.1",
     "axios": "^0.21.1",
     "core-js": "^3.6.5",
+    "echarts": "^5.1.2",
     "js-md5": "^0.7.3",
     "lodash": "^4.17.21",
     "marked": "^2.1.3",

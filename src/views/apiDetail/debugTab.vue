@@ -1,7 +1,7 @@
 <template>
   <div>
     <div v-if="headerData && headerData.length">
-      <h2>请求头Headers</h2>
+      <h2>{{ t("apiPage.title.header") }}</h2>
       <div class="api-param-table mb">
         <Table
           :columns="headersColumns"
@@ -24,9 +24,11 @@
     </div>
     <div>
       <div class="flex">
-        <h2 class="flex-item">请求参数Parameters</h2>
+        <h2 class="flex-item">{{ t("apiPage.title.params") }}</h2>
         <div>
-          <a-button @click="onMockReload"><ReloadOutlined />更新Mock</a-button>
+          <a-button @click="onMockReload"
+            ><ReloadOutlined />{{ t("apiPage.debug.mock.reload") }}</a-button
+          >
         </div>
       </div>
       <div class="mb-sm">
@@ -80,9 +82,11 @@
       </div>
     </div>
     <div class="mb-sm">
-      <a-button type="primary" :loading="loading" block @click="excute">执行 Excute</a-button>
+      <a-button type="primary" :loading="loading" block @click="excute">{{
+        t("apiPage.debug.excute")
+      }}</a-button>
     </div>
-    <h2>响应结果Responses</h2>
+    <h2>{{ t("apiPage.title.responses") }}</h2>
     <div v-if="returnData && returnData.status" class="mb">
       <div class="mb-sm">
         <Alert
@@ -116,7 +120,7 @@
 
 <script lang="ts">
 import { defineComponent, reactive, PropType, watchEffect, toRefs, computed } from "vue";
-import { ApiDetailState, ApiParamState, FileData, UploadFileState } from "./interface";
+import { ApiDetailState, FileData, UploadFileState } from "./interface";
 import { Table, Button, message, Form, Upload, Input, Alert, Empty } from "ant-design-vue";
 import { ReloadOutlined } from "@ant-design/icons-vue";
 import { cloneDeep } from "lodash";
@@ -127,6 +131,9 @@ import Axios from "@/utils/http/index";
 import { ObjectState } from "@/store/index";
 import { useStore } from "vuex";
 import { GlobalState } from "@/store";
+import { ParamItem } from "@/api/interface/apiData";
+import { handleRequestBeforeEvent, handleRequestAfterEvent } from "./debugEvent";
+import { useI18n } from "@/hooks/useI18n";
 
 export default defineComponent({
   components: {
@@ -156,9 +163,11 @@ export default defineComponent({
   },
   setup(props) {
     const store = useStore<GlobalState>();
-    const headerData: ApiParamState[] = [];
+    const headerData: ParamItem[] = [];
     const fileData: FileData = {};
-    const paramFormData: ApiParamState[] = [];
+    const paramFormData: ParamItem[] = [];
+    const { t } = useI18n();
+
     // const returnData:
     const state = reactive({
       headerData: headerData,
@@ -195,7 +204,7 @@ export default defineComponent({
       },
     ];
 
-    function renderHeaderData(headerData: ApiParamState[]) {
+    function renderHeaderData(headerData: ParamItem[]) {
       const data = cloneDeep(headerData);
       if (data && data.length) {
         // 合并全局参数
@@ -217,12 +226,16 @@ export default defineComponent({
     }
 
     watchEffect(() => {
-      state.headerData = renderHeaderData(props.detail.header);
+      if (props.detail.header) {
+        state.headerData = renderHeaderData(props.detail.header);
+      }
     });
     watchEffect(() => {
-      const json = renderCodeJsonByParams(props.detail.param, true);
-      state.paramCode = formatJsonCode(json);
-      state.paramFormData = props.detail.param;
+      if (props.detail.param) {
+        const json = renderCodeJsonByParams(props.detail.param, true);
+        state.paramCode = formatJsonCode(json);
+        state.paramFormData = props.detail.param;
+      }
     });
 
     const tableScroll = {
@@ -299,7 +312,9 @@ export default defineComponent({
       const globalParams = state.globalParams;
       if (globalParams && globalParams.header && globalParams.header.length) {
         globalParams.header.forEach((item) => {
-          headers[item.name] = item.value;
+          if (item.name && item.value) {
+            headers[item.name] = item.value;
+          }
         });
       }
       // 合并全局请求参数
@@ -312,7 +327,9 @@ export default defineComponent({
       }
       if (state.headerData && state.headerData.length) {
         state.headerData.forEach((item) => {
-          headers[item.name] = item.default;
+          if (item.name && item.default) {
+            headers[item.name] = item.default;
+          }
         });
       }
 
@@ -323,7 +340,7 @@ export default defineComponent({
 
         // headers[method]["Content-Type"] = "application/x-www-form-urlencoded";
       }
-      const json: any = {
+      let json: any = {
         method,
         headers,
       };
@@ -334,8 +351,18 @@ export default defineComponent({
       }
 
       state.loading = true;
+      // 执行前置方法
+      if (props.detail.before && props.detail.before.length) {
+        json = handleRequestBeforeEvent(props.detail.before, json, store);
+      }
       Axios(url, json)
         .then((res) => {
+          // 执行后置方法
+          if (props.detail.after && props.detail.after.length) {
+            console.log(json);
+            handleRequestAfterEvent(props.detail.after, json, res, store);
+          }
+          console.log(res);
           state.loading = false;
           if (res.data && typeof res.data === "string") {
             state.returnString = res.data;
@@ -386,8 +413,10 @@ export default defineComponent({
     }
 
     function onMockReload() {
-      const json = renderCodeJsonByParams(props.detail.param, true);
-      state.paramCode = formatJsonCode(json);
+      if (props.detail.param) {
+        const json = renderCodeJsonByParams(props.detail.param, true);
+        state.paramCode = formatJsonCode(json);
+      }
     }
 
     return {
@@ -403,6 +432,7 @@ export default defineComponent({
       formatJsonCode,
       onReturnCodeChange,
       onMockReload,
+      t,
     };
   },
 });

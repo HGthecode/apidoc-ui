@@ -7,12 +7,14 @@ import {
   ApiObjectState,
   GlobalParamsState,
   AuthDataState,
+  ApiAnalysisData,
 } from "./interface";
 import * as API from "@/api";
-import { handleApiData } from "./helper";
+import { handleApiData, handleMdMenusData } from "./helper";
 import { GetApiDataState, ApiItem } from "@/api/interface/apiData";
 import { MenuItemType } from "@/components/Menu/src/interface";
 import Cache from "@/utils/cache";
+import { ConfigAppItem } from "@/api/interface/config";
 
 const state: ApidocState = {
   groups: [],
@@ -27,6 +29,21 @@ const state: ApidocState = {
     params: [],
   },
   authData: {},
+  apiAnalysis: {
+    apiCount: 0,
+    apiMethodTotal: {},
+    controllerGroupTotal: {},
+    apiGroupTotal: {},
+    apiTagTotal: {},
+    apiAuthorTotal: {},
+    docsCount: 0,
+    appCount: 0,
+  },
+  currentApp: {
+    folder: "",
+    path: "",
+    title: "",
+  },
 };
 
 const apidoc: Module<ApidocState, GlobalState> = {
@@ -38,12 +55,16 @@ const apidoc: Module<ApidocState, GlobalState> = {
       return new Promise((resolve, reject) => {
         API.getApiData(params)
           .then((res) => {
-            const { apiList, apiMenus, apiObject } = handleApiData(res.data.data, params.appKey);
+            const { apiList, apiMenus, apiObject, apiAnalysis } = handleApiData(
+              res.data.data,
+              params.appKey
+            );
             commit(Types.SET_API_LIST, apiList);
             commit(Types.SET_API_OBJECT, apiObject);
             commit(Types.SET_API_MENUS, apiMenus);
             commit(Types.SET_API_TAGS, res.data.data.tags);
-
+            commit(Types.SET_API_ANALYSIS, apiAnalysis);
+            commit(Types.SET_CURRENT_APP, res.data.data.app);
             // commit(Types.SET_API_DATA, res.data.data);
             resolve(res.data.data);
           })
@@ -57,7 +78,13 @@ const apidoc: Module<ApidocState, GlobalState> = {
       return new Promise((resolve, reject) => {
         API.getMdMenus(params)
           .then((res) => {
-            commit(Types.GET_MD_MENUS, res.data.data);
+            const { menus, count } = handleMdMenusData(res.data.data);
+            const apiAnalysis = {
+              ...state.apiAnalysis,
+              docsCount: count,
+            };
+            commit(Types.SET_API_ANALYSIS, apiAnalysis);
+            commit(Types.GET_MD_MENUS, menus);
             resolve(res.data.data);
           })
           .catch((err) => {
@@ -74,6 +101,10 @@ const apidoc: Module<ApidocState, GlobalState> = {
     [Types.SET_AUTH_DATA]({ commit }, data: AuthDataState) {
       Cache.set(Types.AUTH_DATA, data);
       commit(Types.SET_AUTH_DATA, data);
+    },
+    // 设置api分析数据
+    [Types.SET_API_ANALYSIS]({ commit }, data: ApiAnalysisData) {
+      commit(Types.SET_API_ANALYSIS, data);
     },
   },
   mutations: {
@@ -111,6 +142,14 @@ const apidoc: Module<ApidocState, GlobalState> = {
     // 设置权限token
     [Types.SET_AUTH_DATA](state, data: AuthDataState) {
       state.authData = data;
+    },
+    // 设置api分析数据
+    [Types.SET_API_ANALYSIS](state, data: ApiAnalysisData) {
+      state.apiAnalysis = { ...state.apiAnalysis, ...data };
+    },
+    // 设置当前app的参数
+    [Types.SET_CURRENT_APP](state, data: ConfigAppItem) {
+      state.currentApp = data;
     },
   },
 };

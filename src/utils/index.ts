@@ -71,3 +71,22 @@ export const createRandKey = (): string => {
 export const textToHtml = (text: string): string => {
   return text ? text.replace(/ /g, "&nbsp;").replace(/\r\n/g, "<br>") : "";
 };
+
+// 获取对象中指定key的值
+export const getObjectValueByKey = (key: string, obj: ObjectType): any => {
+  let value = obj;
+  if (key && key.indexOf(".") > -1) {
+    const keysArr = key.split(".");
+    for (let i = 0; i < keysArr.length; i++) {
+      const k = keysArr[i];
+      if (value[k]) {
+        value = value[k];
+      } else {
+        break;
+      }
+    }
+  } else if (key) {
+    value = value[key];
+  }
+  return value;
+};

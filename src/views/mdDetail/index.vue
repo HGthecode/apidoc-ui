@@ -1,9 +1,10 @@
 <template>
   <div :class="['md-page', { mobile: isMobile }]" id="mdContainer">
     <div class="md-content-wraper">
-      <markdown :md="detail.mdDetail" />
+      <skeleton v-if="loading" />
+      <markdown v-else :md="detail.mdDetail" />
     </div>
-    <div v-if="!isMobile" class="md-anchor-wraper">
+    <div v-if="!isMobile && !loading" class="md-anchor-wraper">
       <md-anchor :md="detail.mdDetail" />
     </div>
   </div>
@@ -19,11 +20,13 @@ import { createMdPageKey } from "@/utils";
 import * as Types from "@/store/modules/App/types";
 import Markdown, { MdAnchor } from "@/components/Markdown";
 import Cache from "@/utils/cache";
+import Skeleton from "@/views/apiDetail/skeleton.vue";
 
 export default defineComponent({
   components: {
     Markdown,
     MdAnchor,
+    Skeleton,
   },
   setup() {
     const route = useRoute();
@@ -34,17 +37,25 @@ export default defineComponent({
       pageData: computed(() => store.state.app.pageData),
       isMobile: computed(() => store.state.app.isMobile),
       detail: {},
+      loading: false,
     });
+
     const cacheLang = Cache.get("LANG");
     const fetchData = () => {
+      state.loading = true;
       const { query, params } = route;
       const key = createMdPageKey({
         appKey: query.appKey as string,
         path: query.path as string,
       });
-      if (query.path && state.appKey) {
+      let appKey: string = state.appKey as string;
+      if (!appKey && query.appKey) {
+        appKey = query.appKey as string;
+      }
+
+      if (query.path && appKey) {
         getMdDetail({
-          appKey: state.appKey,
+          appKey: appKey,
           path: query.path as string,
           lang: cacheLang,
         }).then((res) => {
@@ -55,6 +66,7 @@ export default defineComponent({
             key,
           });
           state.detail = state.pageData[key];
+          state.loading = false;
         });
       }
     };

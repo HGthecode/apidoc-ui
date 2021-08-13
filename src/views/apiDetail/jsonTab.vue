@@ -47,9 +47,15 @@ export default defineComponent({
     });
 
     watchEffect(() => {
-      state.paramCode = formatJsonCode(renderCodeJsonByParams(props.detail.param));
-      state.returnCode = formatJsonCode(renderCodeJsonByParams(props.detail.return));
-      state.headerCode = formatJsonCode(renderCodeJsonByParams(props.detail.header));
+      if (props.detail.param) {
+        state.paramCode = formatJsonCode(renderCodeJsonByParams(props.detail.param));
+      }
+      if (props.detail.return) {
+        state.returnCode = formatJsonCode(renderCodeJsonByParams(props.detail.return));
+      }
+      if (props.detail.header) {
+        state.headerCode = formatJsonCode(renderCodeJsonByParams(props.detail.header));
+      }
     });
 
     return { ...toRefs(state), t };

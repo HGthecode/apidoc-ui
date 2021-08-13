@@ -21,7 +21,8 @@
         <div v-if="detail.tag && detail.tag.length" class="text-list-item">
           <span class="text-label">{{ t("apiPage.tag") }}：</span>
           <span class="text-value">
-            <a-tag v-for="(item, index) in detail.tag" :key="index">{{ item }}</a-tag>
+            <a-tag v-if="detail.tag && typeof detail.tag === 'string'">{{ detail.tag }}</a-tag>
+            <a-tag v-else v-for="(item, index) in detail.tag" :key="index">{{ item }}</a-tag>
           </span>
         </div>
       </div>
@@ -37,7 +38,7 @@
             }}</a-select-option>
           </a-select>
         </div>
-        <div v-else :class="['api-url-tag', currentMethod]">
+        <div v-else :class="['api-url-method', currentMethod]">
           {{ detail.method }}
         </div>
         <div :class="['api-url-input', { 'method-multiple': methodList.length > 0 }]">
@@ -152,6 +153,7 @@ export default defineComponent({
         state.detail = detail;
         state.loading = false;
       }
+      store.dispatch(`app/${Types.SET_APIDETAIL_INIT_STATE}`, false);
     };
 
     state.loading = true;

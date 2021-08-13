@@ -1,6 +1,7 @@
 import { MenuItemType } from "@/components/Menu/src/interface";
 import { ApiItem } from "@/api/interface/apiData";
 import { ConfigGlobalParamItem } from "@/api/interface/config";
+import { ConfigAppItem } from "@/api/interface/config";
 
 export interface HttpResponse {
   status: number;
@@ -30,6 +31,19 @@ export interface ApidocState {
   apiObject: ApiObjectState;
   globalParams: GlobalParamsState;
   authData: AuthDataState;
+  apiAnalysis: ApiAnalysisData;
+  currentApp: ConfigAppItem;
+}
+
+export interface ApiAnalysisData {
+  apiCount: number;
+  apiMethodTotal: ObjectType;
+  controllerGroupTotal: ObjectType;
+  apiGroupTotal: ObjectType;
+  apiTagTotal: ObjectType;
+  apiAuthorTotal: ObjectType;
+  docsCount?: number;
+  appCount?: number;
 }
 
 export interface AuthDataState {
@@ -65,6 +79,7 @@ export interface MdMenuItemState {
   menu_key: string;
   title: string;
   path: string;
+  type?: string;
 }
 
 export interface GetMdDetailState {

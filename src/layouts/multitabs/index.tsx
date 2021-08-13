@@ -1,7 +1,7 @@
 import "./index.less";
 import { defineComponent, ref, computed, watch, reactive } from "vue";
 import { Tabs, Dropdown, message } from "ant-design-vue";
-import { onBeforeRouteUpdate, RouteLocationNormalized } from "vue-router";
+import { onBeforeRouteUpdate, RouteLocationNormalized, onBeforeRouteLeave } from "vue-router";
 import { useRouter, useRoute } from "vue-router";
 import { isString } from "lodash";
 import { useStore } from "vuex";
@@ -10,6 +10,7 @@ import * as Types from "@/store/modules/App/types";
 import { findNode } from "@/utils/helper/treeHelper";
 import { MenuItemType } from "@/components/Menu/src/interface";
 import { useI18n } from "@/hooks/useI18n";
+import { MdMenuItemState } from "@/store/modules/Apidoc/interface";
 interface stateType {
   pageList: RouteLocationNormalized[];
   activeKey: string;
@@ -17,6 +18,8 @@ interface stateType {
   sideWidth: number;
   apiMenus: MenuItemType[];
   isMobile: boolean;
+  apiDetailInitState?: boolean;
+  mdMenus: MdMenuItemState[];
 }
 
 export default defineComponent({
@@ -33,6 +36,8 @@ export default defineComponent({
       appKey: computed(() => store.state.app.appKey),
       sideWidth: computed(() => store.state.app.sideWidth),
       isMobile: computed(() => store.state.app.isMobile),
+      apiDetailInitState: computed(() => store.state.app.apiDetailInitState),
+      mdMenus: computed(() => store.state.apidoc.mdMenus),
     });
 
     state.pageList = [
@@ -68,10 +73,44 @@ export default defineComponent({
                 title: currentNode.title as string,
               },
             });
+            state.activeKey = route.fullPath;
+          } else {
+            message.error(t("common.page.404"));
+            router.push({
+              name: "Home",
+            });
           }
-          state.activeKey = route.fullPath;
+          isInit = false;
         }
-        isInit = false;
+      }
+    );
+    // 初始化md文档页面
+    watch<MdMenuItemState[]>(
+      () => state.mdMenus,
+      (menuData) => {
+        if (isInit && route.name === "MdDetail") {
+          const currentNode = findNode<MdMenuItemState>(state.mdMenus, (node) => {
+            if (node.path === route.query.path) {
+              return true;
+            }
+            return false;
+          });
+          if (currentNode) {
+            state.pageList.push({
+              ...route,
+              params: {
+                title: currentNode.title as string,
+              },
+            });
+            state.activeKey = route.fullPath;
+          } else {
+            message.error(t("common.page.404"));
+            router.push({
+              name: "Home",
+            });
+          }
+          isInit = false;
+        }
       }
     );
 
@@ -122,11 +161,21 @@ export default defineComponent({
      * 路由跳转前触发
      */
     onBeforeRouteUpdate((to: RouteLocationNormalized) => {
+      if (state.apiDetailInitState === undefined && to.name === "ApiDetail") {
+        store.dispatch(`app/${Types.SET_APIDETAIL_INIT_STATE}`, true);
+      }
       const find = state.pageList.find((p) => p.fullPath === to.fullPath);
       if (!find) {
+        if (!to.params.title) {
+          to.params.title = t("common.page.404");
+        }
         state.pageList.push(to);
       }
       state.activeKey = to.fullPath;
+    });
+
+    onBeforeRouteLeave((to: RouteLocationNormalized) => {
+      console.log("aaa", to);
     });
 
     /**
