@@ -63,7 +63,7 @@ export default defineComponent({
         cancelText: t("common.cancel"),
         onOk() {
           Cache.set("LANG", currentLang);
-          window.location.href = "/";
+          window.location.href = state.feConfig.PUBLICPATH ? state.feConfig.PUBLICPATH : "/";
         },
         onCancel() {
           state.currentLang = cacheLang;

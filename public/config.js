@@ -2,30 +2,8 @@
 const config = {
   // 标题
   TITLE: "Apidoc",
-  // 请求host
-  HOST: "http://demo.apidoc.com",
-  // 菜单配置
-  MENU: {
-    // 是否显示控制器类名
-    SHOW_CONTROLLER_CLASS: true,
-    // 是否显示接口url
-    SHOW_API_URL: true,
-    // 是否显示接口请求类型
-    SHOW_API_METHOD: true,
-  },
-  // 当字段无默认值时，使用字段类型为默认值
-  USE_TYPE_DEFAULT_VALUE: true,
-  // 多个可切换的host
-  HOSTS: [
-    {
-      title: "本地测试",
-      host: "http://demo.apidoc.com",
-    },
-    {
-      title: "正式环境",
-      host: "http://www.apidoc.net.cn",
-    },
-  ],
+  // 根目录
+  PUBLICPATH: "/apidoc/",
   // 缓存配置
   CACHE: {
     // 缓存前缀
@@ -35,6 +13,17 @@ const config = {
   HTTP: {
     // 接口响应超时时间
     TIMEOUT: 30000,
+    // 多个可切换的host
+    HOSTS: [
+      {
+        title: "TP6演示",
+        host: "http://demo.apidoc.com",
+      },
+      {
+        title: "TP5演示",
+        host: "http://tp5.apidoc.com",
+      },
+    ],
   },
   // 多语言
   LANG: [
@@ -68,10 +57,9 @@ const config = {
         "common.currentApp": "当前应用",
         "lang.change.confirm.title": "您确认切换语言为 {langTitle} 吗？",
         "lang.change.confirm.content": "确认后将刷新页面，并回到首页",
-
+        "host.change.confirm.title": "您确认切换Host为 {hostTitle} 吗？",
         "auth.title": "授权访问",
         "auth.input.placeholder": "请输入访问密码",
-
         "apiPage.update.tip": "该接口有更新",
         "apiPage.update.button": "点击此处更新",
         "apiPage.author": "作者",
@@ -85,7 +73,6 @@ const config = {
         "apiPage.mdDetail.title": "{name} 字段的说明",
         "apiPage.debug.mock.reload": "更新Mock",
         "apiPage.debug.excute": "执行 Excute",
-
         "layout.menu.reload": "更新菜单",
         "layout.menu.openAll": "展开全部",
         "layout.menu.hideAll": "收起全部",
@@ -97,7 +84,6 @@ const config = {
         "layout.tabs.closeLeft": "关闭左侧",
         "layout.tabs.closeRight": "关闭右侧",
         "layout.tabs.closeAll": "关闭全部",
-
         "globalParam.title": "全局参数",
         "globalParam.header": "Header",
         "globalParam.header.message": "发送请求时，所有接口将自动携带以下Header参数。",
@@ -105,6 +91,17 @@ const config = {
         "globalParam.params.message": "发送请求时，所有接口将自动携带以下Params参数。",
         "globalParam.cancel.confirm": "确认清空以上所有参数吗?",
         "globalParam.add": "添加参数",
+        "apiPage.json.formatError": "json 参数格式化错误",
+        "apiPage.debug.event.before": "请求前事件",
+        "apiPage.debug.event.after": "响应后事件",
+        "apiPage.debug.event.setHeader": "设置请求头参数",
+        "apiPage.debug.event.setGlobalHeader": "设置全局请求头参数",
+        "apiPage.debug.event.setGlobalParam": "设置全局请求参数",
+        "apiPage.debug.event.clearGlobalHeader": "清除全局请求头参数",
+        "apiPage.debug.event.clearGlobalParam": "清除全局请求参数",
+        "apiPage.debug.event.setParam": "设置请求参数",
+        "apiPage.debug.event.clearParam": "清除请求参数",
+        "apiPage.debug.event.handleParam": "处理请求参数",
       },
     },
     {
@@ -138,10 +135,9 @@ const config = {
         "lang.change.confirm.title": "Are you switch the language to {langTitle} ?",
         "lang.change.confirm.content":
           "After confirmation, the page will refresh and return to the home page",
-
+        "host.change.confirm.title": "Are you switch the Host to {hostTitle} ?",
         "auth.title": "Authorized Access",
         "auth.input.placeholder": "Please input the access password",
-
         "apiPage.update.tip": "The Api has been updated",
         "apiPage.update.button": "Click here to update",
         "apiPage.author": "Author",
@@ -155,7 +151,6 @@ const config = {
         "apiPage.title.params": "Parameters",
         "apiPage.title.responses": "Responses",
         "apiPage.mdDetail.title": "{name} Field Describe",
-
         "layout.menu.reload": "Updated Menu",
         "layout.menu.openAll": "Open All",
         "layout.menu.hideAll": "Hide All",
@@ -167,7 +162,6 @@ const config = {
         "layout.tabs.closeLeft": "Close Left",
         "layout.tabs.closeRight": "Close Right",
         "layout.tabs.closeAll": "Close All",
-
         "globalParam.title": "Global Param",
         "globalParam.header": "Header",
         "globalParam.header.message":
@@ -177,6 +171,17 @@ const config = {
           "When send a request, all Api will auto carry the following params。",
         "globalParam.cancel.confirm": "Are you sure to clear all the above parameters?",
         "globalParam.add": "Add Param",
+        "apiPage.json.formatError": "Json Format Error",
+        "apiPage.debug.event.before": "Before Event",
+        "apiPage.debug.event.after": "After Event",
+        "apiPage.debug.event.setHeader": "SetHeader",
+        "apiPage.debug.event.setGlobalHeader": "SetGlobalHeader",
+        "apiPage.debug.event.setGlobalParam": "SetGlobalParam",
+        "apiPage.debug.event.clearGlobalHeader": "ClearGlobalHeader",
+        "apiPage.debug.event.clearGlobalParam": "ClearGlobalParam",
+        "apiPage.debug.event.setParam": "SetParam",
+        "apiPage.debug.event.clearParam": "ClearParam",
+        "apiPage.debug.event.handleParam": "HandleParam",
       },
     },
   ],

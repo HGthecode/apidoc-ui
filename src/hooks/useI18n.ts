@@ -46,3 +46,8 @@ export function useI18n(namespace?: string): {
     t: tFn,
   };
 }
+
+export const t = (key: string, namespace?: string): string => {
+  const { t } = i18n.global;
+  return t(getKey(namespace, key));
+};

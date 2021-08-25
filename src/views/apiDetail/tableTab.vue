@@ -182,6 +182,7 @@ export default defineComponent({
 .api-table {
   .desc {
     margin-bottom: 16px;
+    color: var(--text-color);
   }
 }
 </style>

@@ -20,7 +20,9 @@ const state: AppState = {
     title: "",
   },
   feConfig: {
-    HOST: "",
+    HTTP: {
+      HOSTS: [],
+    },
   },
   sideWidth: 350,
   appKey: "",

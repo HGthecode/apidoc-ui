@@ -28,10 +28,10 @@ export interface PageDataState {
 
 export interface FeConfigState {
   TITLE?: string;
-  HOST?: string;
   CACHE?: FeConfigCecheState;
   LANG?: FeConfigLangState[];
-  HTTP?: FeConfigHTTPState;
+  HTTP: FeConfigHTTPState;
+  PUBLICPATH?: string;
 }
 
 export interface FeConfigLangState {
@@ -42,6 +42,12 @@ export interface FeConfigLangState {
 
 export interface FeConfigHTTPState {
   TIMEOUT?: number;
+  HOSTS?: FeConfigHttpHosts[];
+}
+
+export interface FeConfigHttpHosts {
+  title: string;
+  host: string;
 }
 
 export interface FeConfigLangMessage {

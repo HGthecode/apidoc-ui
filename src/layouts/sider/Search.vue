@@ -2,11 +2,7 @@
   <div class="search-wraper">
     <a-space>
       <app-select />
-      <a-input-search
-        placeholder="名称 URL 描述"
-        @search="onSearch"
-        :allowClear="true"
-      ></a-input-search>
+      <a-input-search placeholder="名称 URL" @search="onSearch" :allowClear="true"></a-input-search>
     </a-space>
   </div>
 </template>
@@ -16,7 +12,6 @@ import { Input, Space } from "ant-design-vue";
 import { reactive, defineComponent, toRefs, computed } from "vue";
 import { useStore } from "vuex";
 import { GlobalState } from "@/store";
-import * as Types from "@/store/modules/App/types";
 import AppSelect from "@/components/AppSelect";
 
 export default defineComponent({

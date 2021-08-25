@@ -79,14 +79,30 @@ export const getObjectValueByKey = (key: string, obj: ObjectType): any => {
     const keysArr = key.split(".");
     for (let i = 0; i < keysArr.length; i++) {
       const k = keysArr[i];
-      if (value[k]) {
-        value = value[k];
-      } else {
-        break;
-      }
+      value = value[k];
     }
   } else if (key) {
     value = value[key];
   }
   return value;
+};
+
+//  设置对象中指定key的值
+export const setObjectValueByKey = (obj: ObjectType, key: string, value: string): any => {
+  let res = obj;
+  if (key && key.indexOf(".") > -1) {
+    const keysArr = key.split(".");
+    let find = res;
+    for (let i = 0; i < keysArr.length; i++) {
+      const k = keysArr[i];
+      if (i >= keysArr.length - 1 && find[k]) {
+        find[k] = value;
+      } else if (find[k]) {
+        find = find[k];
+      }
+    }
+  } else if (key && res[key]) {
+    res[key] = value;
+  }
+  return res;
 };

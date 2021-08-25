@@ -6,7 +6,7 @@
         <p>{{ config.desc }}</p>
       </div>
       <a-row :gutter="16">
-        <a-col :span="8">
+        <a-col :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
           <div class="number-block">
             <a-card-meta class="number-block-item">
               <template #avatar>
@@ -43,17 +43,17 @@
             </a-card-meta>
           </div>
         </a-col>
-        <a-col :span="8">
-          <a-card :bodyStyle="{ textAlign: 'center', padding: '5px' }">
+        <a-col :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
+          <a-card class="mb-sm" :bodyStyle="{ textAlign: 'center', padding: '5px' }">
             <template #title> {{ t("common.type") }} </template>
             <div
               ref="methodChart"
-              :style="{ width: '172px', height: '172px', margin: '0 auto' }"
+              :style="{ width: '100%', height: '172px', margin: '0 auto' }"
             ></div>
           </a-card>
         </a-col>
-        <a-col :span="8">
-          <a-card>
+        <a-col :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
+          <a-card class="mb-sm">
             <template #title> {{ t("apiPage.tag") }} </template>
             <div v-if="Object.keys(apiAnalysis.apiTagTotal).length" class="tags-wraper">
               <a-tag v-for="(number, key) in apiAnalysis.apiTagTotal" :key="key"
@@ -67,8 +67,8 @@
         </a-col>
       </a-row>
       <a-row :gutter="16">
-        <a-col :span="8">
-          <a-card>
+        <a-col :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
+          <a-card class="mb-sm">
             <template #title> {{ t("apiPage.author") }} </template>
             <div v-if="Object.keys(apiAnalysis.apiAuthorTotal).length" class="author-list">
               <ul>
@@ -86,8 +86,8 @@
             </div>
           </a-card>
         </a-col>
-        <a-col :span="16">
-          <a-card :bodyStyle="{ padding: '10px' }">
+        <a-col :xs="24" :sm="24" :md="16" :lg="16" :xl="16">
+          <a-card class="mb-sm" :bodyStyle="{ padding: '10px' }">
             <template #title> {{ t("common.group") }} </template>
             <div>
               <a-table
@@ -164,16 +164,18 @@ export default defineComponent({
           trigger: "item",
         },
         legend: {
-          show: false,
+          show: true,
+          top: "5%",
+          left: "left",
           orient: "vertical",
-          left: "right",
         },
         series: [
           {
             name: "请求类型",
             type: "pie",
-            radius: ["50%", "90%"],
+            radius: ["40%", "80%"],
             avoidLabelOverlap: false,
+            left: "8%",
             itemStyle: {
               borderRadius: 10,
               borderColor: "#fff",

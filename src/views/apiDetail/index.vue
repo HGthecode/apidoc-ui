@@ -78,7 +78,7 @@ import { CopyOutlined } from "@ant-design/icons-vue";
 import { ApiItem } from "@/api/interface/apiData";
 import TableTab from "./tableTab.vue";
 import JsonTab from "./jsonTab.vue";
-import DebugTab from "./debugTab.vue";
+import DebugTab from "./debug";
 import * as Types from "@/store/modules/App/types";
 import { PageDataItemState } from "@/store/modules/App/interface";
 import Skeleton from "./skeleton.vue";

@@ -24,7 +24,6 @@ import { MenuItemType } from "./interface";
 import { cloneDeep } from "lodash";
 import { filterTree, getTreeValueByField, findNode, getTreePath } from "@/utils/helper/treeHelper";
 import { useRoute, useRouter } from "vue-router";
-import * as ApidocTypes from "@/store/modules/Apidoc/types";
 
 export default defineComponent({
   components: {

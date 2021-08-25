@@ -3,6 +3,7 @@ import { FeConfigState } from "../../store/modules/App/interface";
 import Apis from "@/api/apis";
 import Cache from "@/utils/cache";
 import { AUTH_DATA } from "@/store/modules/Apidoc/types";
+import { isArray } from "lodash";
 
 let checkToeknUrls = Object.keys(Apis)
   .map((key: string) => {
@@ -14,26 +15,34 @@ let checkToeknUrls = Object.keys(Apis)
   })
   .filter((p) => p != "");
 
-let apidocConfig: FeConfigState = {};
+let apidocConfig: FeConfigState = {
+  HTTP: {},
+};
 
+let timeout = 30000;
+let baseURL = "/";
 if (localStorage.APIDOC_CONFIG) {
   apidocConfig = JSON.parse(localStorage.APIDOC_CONFIG);
+  if (apidocConfig.HTTP) {
+    timeout = apidocConfig.HTTP.TIMEOUT ? apidocConfig.HTTP.TIMEOUT : timeout;
+  }
+  if (apidocConfig.HTTP && apidocConfig.HTTP.HOSTS && isArray(apidocConfig.HTTP.HOSTS)) {
+    baseURL = apidocConfig.HTTP.HOSTS[0] && apidocConfig.HTTP.HOSTS[0].host;
+  }
 }
 
 const service = axios.create({
-  baseURL: "/",
-  timeout: apidocConfig.HTTP && apidocConfig.HTTP.TIMEOUT ? apidocConfig.HTTP.TIMEOUT : 30000,
+  baseURL: baseURL,
+  timeout: timeout,
 });
 
 // 请求拦截器
 service.interceptors.request.use(
   (config: AxiosRequestConfig) => {
     // 重置host
-    if (localStorage.APIDOC_CONFIG) {
-      const apidocConfig: FeConfigState = JSON.parse(localStorage.APIDOC_CONFIG);
-      if (apidocConfig.HOST) {
-        config.baseURL = apidocConfig.HOST;
-      }
+    const cacheHost = Cache.get("HOST");
+    if (cacheHost) {
+      config.baseURL = cacheHost;
     }
 
     // 权限验证携带token
