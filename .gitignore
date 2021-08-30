@@ -1,7 +1,7 @@
-.DS_Store
+*.zip
+dist
 node_modules
-# /dist
-
+apidoc
 
 # local env files
 .env.local
