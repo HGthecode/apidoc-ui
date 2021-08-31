@@ -81,6 +81,8 @@ export default defineComponent({
             });
           }
           isInit = false;
+        } else if (isInit) {
+          isInit = false;
         }
       }
     );
@@ -109,6 +111,8 @@ export default defineComponent({
               name: "Home",
             });
           }
+          isInit = false;
+        } else if (isInit) {
           isInit = false;
         }
       }

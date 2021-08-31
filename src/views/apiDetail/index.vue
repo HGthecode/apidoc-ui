@@ -183,7 +183,10 @@ export default defineComponent({
       const key = query.key as string;
       const oldData = JSON.stringify({ ...state.pageData[fullPath], menu_key: "" });
       const newData = JSON.stringify({ ...state.apiObject[key], menu_key: "" });
-      if (!(state.pageData[fullPath] && state.apiObject[key] && oldData === newData)) {
+      if (
+        !(state.pageData[fullPath] && state.apiObject[key] && oldData === newData) &&
+        state.apiObject[key]
+      ) {
         state.isReload = true;
       }
     });
