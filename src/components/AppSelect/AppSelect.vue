@@ -11,8 +11,8 @@
           <a-select-opt-group :label="item.title">
             <a-select-option
               v-for="option in item.items"
-              :key="`${item.folder}_${option.folder}`"
-              :value="`${item.folder}_${option.folder}`"
+              :key="`${item.folder},${option.folder}`"
+              :value="`${item.folder},${option.folder}`"
               :label="`${item.title}-${option.title}`"
             >
               {{ option.title }}

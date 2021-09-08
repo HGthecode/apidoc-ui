@@ -62,7 +62,7 @@ export default defineComponent({
         }
         const token = res.data.data.token;
         let tokenKey = "global";
-        const appKeys = appKey.value.split("_");
+        const appKeys = appKey.value.split(",");
         if (config.value.apps) {
           const appPath = getTreePathByKeys(
             config.value.apps,

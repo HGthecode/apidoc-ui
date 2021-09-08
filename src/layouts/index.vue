@@ -129,7 +129,7 @@ export default defineComponent({
           } else if (res.apps && res.apps.length) {
             const treeFirstNode = getFirstNode(res.apps, "items");
             if (treeFirstNode && treeFirstNode.length) {
-              const appKey = treeFirstNode.map((p) => p.folder).join("_");
+              const appKey = treeFirstNode.map((p) => p.folder).join(",");
               store.dispatch(`app/${Types.SET_APP_KEY}`, appKey);
             }
           }
