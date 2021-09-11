@@ -5,7 +5,9 @@
       <div>{{ status }}</div>
     </div>
     <div>
-      <p>ApiUrl: {{ error.config.baseURL }}{{ error.config.url }}</p>
+      <p
+        >ApiUrl: {{ error.config && error.config.baseURL }}{{ error.config && error.config.url }}</p
+      >
     </div>
     <div class="error-message">{{ message }}</div>
   </div>

@@ -21,7 +21,11 @@
           </a-select-opt-group>
         </template>
         <template v-else>
-          <a-select-option :value="`${item.folder}`" :label="`${item.title}`">
+          <a-select-option
+            :value="`${item.folder}`"
+            :label="`${item.title}`"
+            :key="`${item.folder}`"
+          >
             {{ item.title }}
             <span v-if="item.hasPassword" class="app-select-option_icon"><LockOutlined /></span>
           </a-select-option>
