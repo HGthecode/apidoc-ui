@@ -63,6 +63,14 @@
           defaultExpandAllRows
           childrenColumnName="children"
         >
+          <template #rowDesc="{ text, record }">
+            <div>
+              <span v-html="textToHtml(text)"></span>&nbsp;&nbsp;
+              <a v-if="record.md || record.mdRef" @click="onShowMdDetail(record)">{{
+                t("common.view")
+              }}</a>
+            </div>
+          </template>
         </Table>
       </div>
     </div>

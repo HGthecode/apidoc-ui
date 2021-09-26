@@ -320,6 +320,7 @@ export default defineComponent({
         sendRequest(url, formData);
       } else if (props.detail.paramType == "route") {
         // 路由参数，将参数拼接到url中
+        let params: any = {};
         state.paramFormData.forEach((item) => {
           const placeholderKeys = [
             `:${item.name}`,
@@ -327,16 +328,21 @@ export default defineComponent({
             `<${item.name}?>`,
             `[:${item.name}]`,
           ];
+          let isReplace = false;
           for (let i = 0; i < placeholderKeys.length; i++) {
             const key = placeholderKeys[i];
             if (url.indexOf(key) > -1) {
               const reg = new RegExp(key, "g");
               const value: any = item.default;
               url = url.replace(reg, value);
+              isReplace = true;
             }
           }
+          if (!isReplace) {
+            params[item.name] = item.default;
+          }
         });
-        sendRequest(url);
+        sendRequest(url, params);
       } else if (state.paramCode as string) {
         try {
           const paramJson = eval("(" + state.paramCode + ")");
@@ -365,7 +371,7 @@ export default defineComponent({
         });
       }
       // 合并全局请求参数
-      if (globalParams && globalParams.params && globalParams.params.length) {
+      if (data && globalParams && globalParams.params && globalParams.params.length) {
         globalParams.params.forEach((item) => {
           if (!data[item.name]) {
             data[item.name] = item.value;
