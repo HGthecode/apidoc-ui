@@ -56,4 +56,5 @@ export interface ApiEventItem {
   url?: string;
   method?: string;
   contentType?: string;
+  appKey?: string;
 }

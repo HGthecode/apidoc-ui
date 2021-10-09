@@ -19,3 +19,8 @@ declare type LabelValueOptions = {
 declare type ObjectType = {
   [key: string]: any;
 };
+
+declare interface SelectOptionType {
+  label: string;
+  value: string | number;
+}

@@ -11,7 +11,7 @@
     @cancel="onCancel"
   >
     <a-tabs :activeKey="currentTabKey" @change="onTabChange">
-      <a-tab-pane key="header" :tab="t('globalParam.header')">
+      <a-tab-pane key="headers" :tab="t('globalParam.header')">
         <a-alert
           type="info"
           show-icon
@@ -85,16 +85,15 @@ export default defineComponent({
     const paramsData = ref<DataItemType[]>([]);
     const headerTableRef = ref<HTMLElement | null>(null);
     const paramsTableRef = ref<HTMLElement | null>(null);
-    const currentTabKey = ref<TabKeys>("header");
+    const currentTabKey = ref<TabKeys>("headers");
 
     function handleData(globalParams: GlobalParamsState) {
-      if (globalParams.header && globalParams.header.length) {
-        headerData.value = globalParams.header.map((item) => {
+      if (globalParams.headers && globalParams.headers.length) {
+        headerData.value = globalParams.headers.map((item) => {
           return {
+            ...item,
             id: createRandKey(),
-            name: item.name,
-            value: item.value,
-            desc: item.desc,
+            appKey: item.appKey ? item.appKey : "global",
           };
         });
       }
@@ -102,10 +101,9 @@ export default defineComponent({
       if (globalParams.params && globalParams.params.length) {
         paramsData.value = globalParams.params.map((item) => {
           return {
+            ...item,
             id: createRandKey(),
-            name: item.name,
-            value: item.value,
-            desc: item.desc,
+            appKey: item.appKey ? item.appKey : "global",
           };
         });
       }
@@ -115,48 +113,26 @@ export default defineComponent({
       handleData(globalParams.value);
     });
     function handleDelete() {
-      if (currentTabKey.value === "header") {
-        if (config.value.headers && config.value.headers.length) {
-          headerData.value = config.value.headers.map((item) => {
-            return {
-              id: createRandKey(),
-              name: item.name,
-              value: item.value,
-              desc: item.desc,
-            };
-          });
-        } else {
-          headerData.value = [];
-        }
+      if (currentTabKey.value === "headers") {
+        headerData.value = [];
       } else if (currentTabKey.value === "params") {
-        if (config.value.parameters && config.value.parameters.length) {
-          paramsData.value = config.value.parameters.map((item) => {
-            return {
-              id: createRandKey(),
-              name: item.name,
-              value: item.value,
-              desc: item.desc,
-            };
-          });
-        } else {
-          paramsData.value = [];
-        }
+        paramsData.value = [];
       }
     }
 
     function handleOk() {
       const json = {
-        header: headerData.value,
+        headers: headerData.value,
         params: paramsData.value,
       };
       if (unref(headerTableRef)) {
-        json.header = (unref(headerTableRef) as any).getData();
+        json.headers = (unref(headerTableRef) as any).getData();
       }
       if (unref(paramsTableRef)) {
         json.params = (unref(paramsTableRef) as any).getData();
       }
       store.dispatch(`apidoc/${Types.SET_GLOBAL_PARAMS}`, json);
-      message.success("设置成功");
+      message.success(t("common.setSuccess"));
       onCancel();
     }
 

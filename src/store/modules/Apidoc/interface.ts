@@ -33,6 +33,7 @@ export interface ApidocState {
   authData: AuthDataState;
   apiAnalysis: ApiAnalysisData;
   currentApp: ConfigAppItem;
+  isReload: boolean;
 }
 
 export interface ApiAnalysisData {
@@ -50,7 +51,7 @@ export interface AuthDataState {
   [key: string]: string;
 }
 export interface GlobalParamsState {
-  header: ConfigGlobalParamItem[];
+  headers: ConfigGlobalParamItem[];
   params: ConfigGlobalParamItem[];
 }
 

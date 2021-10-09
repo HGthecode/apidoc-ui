@@ -3,7 +3,10 @@ import { MenuItemType } from "@/components/Menu/src/interface";
 import { createApiPageKey } from "@/utils";
 import { ApiAnalysisData } from "@/store/modules/Apidoc/interface";
 import { MdMenuItem } from "@/api/interface/markdown";
-import { ConfigAppItem } from "@/api/interface/config";
+import { ConfigAppItem, ConfigGlobalParamItem, ConfigInfo } from "@/api/interface/config";
+import Cache from "@/utils/cache";
+import * as Types from "./types";
+import { cloneDeep } from "lodash";
 
 interface ReturnHandleApiData {
   apiList: ApiItem[];
@@ -159,22 +162,108 @@ export function handleMdMenusData(data: MdMenuItem[]): any {
   return result;
 }
 
-export function handleConfigAppsData(data: ConfigAppItem[]): any {
-  let result = {
+interface HandleConfigAppDataResult {
+  count: number;
+  headers: ConfigGlobalParamItem[];
+  params: ConfigGlobalParamItem[];
+}
+export function handleConfigAppsData(data: ConfigAppItem[]): HandleConfigAppDataResult {
+  let result: HandleConfigAppDataResult = {
     count: 0,
+    headers: [],
+    params: [],
   };
-  function renderAppsData(list: ConfigAppItem[]): any {
+  function renderAppsData(list: ConfigAppItem[], appKey = ""): any {
     const mdMenus = list.map((item) => {
+      const currentAppKey = `${appKey}${appKey ? "," : ""}${item.folder}`;
       if (item.folder && !(item.items && item.items.length)) {
         result.count++;
+        if (item.headers && item.headers.length) {
+          for (let i = 0; i < item.headers.length; i++) {
+            const headerItem = item.headers[i];
+            result.headers.push({
+              ...headerItem,
+              appKey: currentAppKey,
+            });
+          }
+        }
+        if (item.parameters && item.parameters.length) {
+          for (let i = 0; i < item.parameters.length; i++) {
+            const paramsItem = item.parameters[i];
+            result.params.push({
+              ...paramsItem,
+              appKey: currentAppKey,
+            });
+          }
+        }
       }
       if (item.items && item.items.length) {
-        item.items = renderAppsData(item.items);
+        item.items = renderAppsData(item.items, currentAppKey);
       }
       return item;
     });
     return mdMenus;
   }
-  renderAppsData(data);
+  renderAppsData(data, "");
   return result;
+}
+
+interface handleInitGlobalParamsResult {
+  headers: ConfigGlobalParamItem[];
+  params: ConfigGlobalParamItem[];
+}
+export function handleInitGlobalParams(
+  config: ConfigInfo,
+  appHeaders?: ConfigGlobalParamItem[],
+  appParams?: ConfigGlobalParamItem[]
+): handleInitGlobalParamsResult {
+  const cacheGlobalParams = Cache.get(Types.GLOBAL_PARAMS);
+  let headers: ConfigGlobalParamItem[] = [];
+  let params: ConfigGlobalParamItem[] = [];
+  // 配置中的全局参数
+  if (config.headers && config.headers.length) {
+    headers = cloneDeep(config.headers);
+  }
+  if (config.parameters && config.parameters.length) {
+    params = cloneDeep(config.parameters);
+  }
+  // 应用配置中的全局参数
+  if (appHeaders && appHeaders.length) {
+    headers = [...headers, ...cloneDeep(appHeaders)];
+  }
+  if (appParams && appParams.length) {
+    params = [...params, ...cloneDeep(appParams)];
+  }
+
+  function mergeCacheParams(
+    currentParams: ConfigGlobalParamItem[],
+    field: "headers" | "params"
+  ): ConfigGlobalParamItem[] {
+    let data = cloneDeep(currentParams).map((p) => {
+      p.appDisabled = true;
+      return p;
+    });
+    if (cacheGlobalParams && cacheGlobalParams[field] && cacheGlobalParams[field].length) {
+      for (let i = 0; i < cacheGlobalParams[field].length; i++) {
+        const item = cacheGlobalParams[field][i];
+        const findIndex = data.findIndex((p) => {
+          if ((p.appKey == item.appKey || item.appKey == "global") && p.name == item.name) {
+            return true;
+          }
+          return false;
+        });
+        if (findIndex > -1) {
+          data[findIndex] = item;
+        } else {
+          data.push(item);
+        }
+      }
+    }
+    return data;
+  }
+  let globalParams = {
+    headers: mergeCacheParams(headers, "headers"),
+    params: mergeCacheParams(params, "params"),
+  };
+  return globalParams;
 }

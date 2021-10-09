@@ -226,6 +226,7 @@ export default defineComponent({
       returnString: "",
       globalParams: computed(() => store.state.apidoc.globalParams),
       isMobile: computed(() => store.state.app.isMobile),
+      appKey: computed(() => store.state.app.appKey),
       eventData: eventData,
     });
     const headersColumns = [
@@ -254,9 +255,9 @@ export default defineComponent({
       if (data && data.length) {
         // 合并全局参数
         const globalParams = state.globalParams;
-        if (globalParams && globalParams.header && globalParams.header.length) {
+        if (globalParams && globalParams.headers && globalParams.headers.length) {
           return data.map((item) => {
-            const globalParamFind = globalParams.header.find((p) => p.name === item.name);
+            const globalParamFind = globalParams.headers.find((p) => p.name === item.name);
             if (globalParamFind && globalParamFind.value) {
               item.default = globalParamFind.value;
             }
@@ -363,9 +364,13 @@ export default defineComponent({
       const headers: ObjectState = {};
       // 全局请求头参数
       const globalParams = state.globalParams;
-      if (globalParams && globalParams.header && globalParams.header.length) {
-        globalParams.header.forEach((item) => {
-          if (item.name && item.value) {
+      if (globalParams && globalParams.headers && globalParams.headers.length) {
+        globalParams.headers.forEach((item) => {
+          if (
+            item.name &&
+            item.value &&
+            (!item.appKey || item.appKey === "global" || item.appKey === state.appKey)
+          ) {
             headers[item.name] = item.value;
           }
         });
@@ -373,7 +378,10 @@ export default defineComponent({
       // 合并全局请求参数
       if (data && globalParams && globalParams.params && globalParams.params.length) {
         globalParams.params.forEach((item) => {
-          if (!data[item.name]) {
+          if (
+            !data[item.name] &&
+            (!item.appKey || item.appKey === "global" || item.appKey === state.appKey)
+          ) {
             data[item.name] = item.value;
           }
         });
@@ -396,7 +404,6 @@ export default defineComponent({
         headers,
         params: data,
       };
-
       // 执行前置方法
       if (props.detail.before && props.detail.before.length) {
         const beforeEvent = await handleRequestEvent(props.detail.before, json, store);

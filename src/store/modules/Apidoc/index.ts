@@ -14,7 +14,8 @@ import { handleApiData, handleMdMenusData } from "./helper";
 import { GetApiDataState, ApiItem } from "@/api/interface/apiData";
 import { MenuItemType } from "@/components/Menu/src/interface";
 import Cache from "@/utils/cache";
-import { ConfigAppItem } from "@/api/interface/config";
+import { ConfigAppItem, ConfigInfo } from "@/api/interface/config";
+import { cloneDeep } from "lodash";
 
 const state: ApidocState = {
   groups: [],
@@ -25,7 +26,7 @@ const state: ApidocState = {
   apiList: [],
   apiObject: {},
   globalParams: {
-    header: [],
+    headers: [],
     params: [],
   },
   authData: {},
@@ -44,6 +45,7 @@ const state: ApidocState = {
     path: "",
     title: "",
   },
+  isReload: false,
 };
 
 const apidoc: Module<ApidocState, GlobalState> = {
@@ -97,6 +99,44 @@ const apidoc: Module<ApidocState, GlobalState> = {
       Cache.set(Types.GLOBAL_PARAMS, data);
       commit(Types.SET_GLOBAL_PARAMS, data);
     },
+    // // 初始化全局参数
+    // [Types.INIT_GLOBAL_PARAMS]({ commit }, config: ConfigInfo) {
+    //   const cacheGlobalParams = Cache.get(Types.GLOBAL_PARAMS);
+    //   const globalParams = {
+    //     header: config.headers && config.headers.length ? cloneDeep(config.headers) : [],
+    //     params: config.parameters && config.parameters.length ? cloneDeep(config.parameters) : [],
+    //   };
+    //   if (cacheGlobalParams && cacheGlobalParams.header && cacheGlobalParams.header.length) {
+    //     const headerNames = globalParams.header.map((p: any) => p.name);
+    //     for (let i = 0; i < cacheGlobalParams.header.length; i++) {
+    //       const item = cacheGlobalParams.header[i];
+    //       const findIndex = headerNames.indexOf(item.name);
+    //       if (findIndex > -1) {
+    //         if (item.value) {
+    //           globalParams.header[findIndex] = item;
+    //         }
+    //       } else {
+    //         globalParams.header.push(item);
+    //       }
+    //     }
+    //   }
+    //   if (cacheGlobalParams && cacheGlobalParams.params && cacheGlobalParams.params.length) {
+    //     const paramsNames = globalParams.params.map((p: any) => p.name);
+    //     for (let i = 0; i < cacheGlobalParams.params.length; i++) {
+    //       const item = cacheGlobalParams.params[i];
+    //       const findIndex = paramsNames.indexOf(item.name);
+    //       if (findIndex > -1) {
+    //         if (item.value) {
+    //           globalParams.params[findIndex] = item;
+    //         }
+    //       } else {
+    //         globalParams.params.push(item);
+    //       }
+    //     }
+    //   }
+    //   Cache.set(Types.GLOBAL_PARAMS, globalParams);
+    //   commit(Types.SET_GLOBAL_PARAMS, globalParams);
+    // },
     // 设置权限token
     [Types.SET_AUTH_DATA]({ commit }, data: AuthDataState) {
       Cache.set(Types.AUTH_DATA, data);
@@ -105,6 +145,10 @@ const apidoc: Module<ApidocState, GlobalState> = {
     // 设置api分析数据
     [Types.SET_API_ANALYSIS]({ commit }, data: ApiAnalysisData) {
       commit(Types.SET_API_ANALYSIS, data);
+    },
+    // 设置isreload值
+    [Types.SET_ISRELOAD]({ commit }, flag: boolean) {
+      commit(Types.SET_ISRELOAD, flag);
     },
   },
   mutations: {
@@ -150,6 +194,10 @@ const apidoc: Module<ApidocState, GlobalState> = {
     // 设置当前app的参数
     [Types.SET_CURRENT_APP](state, data: ConfigAppItem) {
       state.currentApp = data;
+    },
+    // 设置isreload值
+    [Types.SET_ISRELOAD](state, flag: boolean) {
+      state.isReload = flag;
     },
   },
 };

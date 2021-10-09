@@ -3,6 +3,7 @@ export interface DataItemType {
   name: string;
   value?: string;
   desc: string;
+  appKey?: string;
 }
 
-export type TabKeys = "header" | "params";
+export type TabKeys = "headers" | "params";

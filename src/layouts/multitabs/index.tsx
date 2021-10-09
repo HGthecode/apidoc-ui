@@ -81,8 +81,6 @@ export default defineComponent({
             });
           }
           isInit = false;
-        } else if (isInit) {
-          isInit = false;
         }
       }
     );
@@ -112,12 +110,9 @@ export default defineComponent({
             });
           }
           isInit = false;
-        } else if (isInit) {
-          isInit = false;
         }
       }
     );
-
     const onRemove = (targetKey: string | MouseEvent) => {
       if (!((targetKey as string) && isString(targetKey))) {
         targetKey = state.activeKey;

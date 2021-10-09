@@ -145,7 +145,7 @@ const events = {
   ): Promise<EventResult> {
     return new Promise((resolve, reject) => {
       if (eventItem.key) {
-        setGolbalParam(store, "header", eventItem.key, value, eventItem.desc);
+        setGolbalParam(store, "headers", eventItem.key, value, eventItem.desc, eventItem.appKey);
         const res: EventResult = {
           event: eventItem,
           json,
@@ -164,7 +164,7 @@ const events = {
   ): Promise<EventResult> {
     return new Promise((resolve, reject) => {
       if (eventItem.key) {
-        setGolbalParam(store, "params", eventItem.key, value, eventItem.desc);
+        setGolbalParam(store, "params", eventItem.key, value, eventItem.desc, eventItem.appKey);
         const res: EventResult = {
           event: eventItem,
           json,
@@ -271,10 +271,18 @@ const events = {
               if (item.value && item.value?.indexOf("params.") > -1) {
                 itemValue = getObjectValueByKey(item.value, { params: requestParams });
               }
-              if (item.key && item.event === "setParam") {
-                params[item.key] = itemValue;
-              } else if (item.key && item.event === "setHeader") {
-                ajaxOptions.headers[item.key] = itemValue;
+              if (item.event === "setParam") {
+                if (item.key) {
+                  params[item.key] = itemValue;
+                } else {
+                  params = itemValue;
+                }
+              } else if (item.event === "setHeader") {
+                if (item.key) {
+                  ajaxOptions.headers[item.key] = itemValue;
+                } else {
+                  ajaxOptions.headers = itemValue;
+                }
               }
             }
           }

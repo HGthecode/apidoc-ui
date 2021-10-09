@@ -1,3 +1,5 @@
+import { ConfigAppItem } from "@/api/interface/config";
+import { cloneDeep } from "lodash";
 import { createApiPageKeyState, createMdPageKeyState } from "./interface";
 
 // 创建api接口页面的key
@@ -117,4 +119,94 @@ export const reloadHomePage = (): void => {
     toPath = url.split("#")[0];
   }
   window.location.href = toPath;
+};
+
+export const getAppsConfigItemByKey = (
+  apps: ConfigAppItem[],
+  appKey: string
+): ConfigAppItem | undefined => {
+  if (!(apps && apps.length && appKey)) {
+    return;
+  }
+  let list: ConfigAppItem[] = cloneDeep(apps);
+  let item: ConfigAppItem | undefined = undefined;
+  const keys = appKey.split(",");
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i];
+    const find = list.find((p) => p.folder === key);
+    if (find) {
+      list = find.items as ConfigAppItem[];
+      item = find;
+    }
+  }
+  return item;
+};
+
+export const getAppsConfigItemsByKey = (
+  apps: ConfigAppItem[],
+  appKey: string
+): ConfigAppItem[] | undefined => {
+  if (!(apps && apps.length && appKey)) {
+    return;
+  }
+  let items = [];
+  let list: ConfigAppItem[] = cloneDeep(apps);
+  let item: ConfigAppItem | undefined = undefined;
+  const keys = appKey.split(",");
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i];
+    const find = list.find((p) => p.folder === key);
+    if (find) {
+      list = find.items as ConfigAppItem[];
+      item = find;
+      items.push(item);
+    }
+  }
+  return items;
+};
+
+/**
+ * 替换apps配置的变量
+ * @param apps 应用配置列表
+ * @param appKey 当前key
+ * @param str 替换的内容
+ * @returns
+ */
+export const replaceAppConfigKeys = (
+  apps: ConfigAppItem[],
+  appKey: string,
+  str: string
+): string => {
+  if (!(apps && apps.length && appKey)) {
+    return "";
+  }
+  let text = str;
+  const appList = getAppsConfigItemsByKey(apps, appKey);
+  if (appList && appList.length) {
+    for (let i = 0; i < appList.length; i++) {
+      const item: any = appList[i];
+      for (const key in item) {
+        const keyStr = `\${app[${i}].${key}}`;
+        if (text.indexOf(keyStr) > -1) {
+          const reg = RegExpEscape(keyStr);
+          const exp = new RegExp(reg, "g");
+          text = text.replace(exp, item[key]);
+        }
+      }
+    }
+  }
+  return text;
+};
+
+const RegExpEscape = (s: string) => {
+  return s.replace(/[-\\/\\^$*+?.()|[\]{}]/g, "\\$&");
+};
+
+export const confirmEndingString = (str: string, target: string): boolean => {
+  const start = str.length - target.length;
+  const arr = str.substr(start, target.length);
+  if (arr == target) {
+    return true;
+  }
+  return false;
 };

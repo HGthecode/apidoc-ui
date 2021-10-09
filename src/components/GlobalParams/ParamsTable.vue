@@ -9,6 +9,15 @@
       :data-source="currentData"
       :scroll="tableScroll"
     >
+      <template #editRowAppKey="{ text, record }">
+        <app-select
+          :showLock="false"
+          :value="text"
+          :options="appSelectData"
+          :disabled="record.appDisabled"
+          @change="onAppChange(record, $event, 'appKey')"
+        />
+      </template>
       <template #editRowKey="{ text, record }">
         <TableInput :data="text" @change="onCellChange(record, $event, 'name')" />
       </template>
@@ -28,13 +37,18 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, reactive, toRefs, watch } from "vue";
+import { defineComponent, PropType, reactive, toRefs, watch, computed } from "vue";
 import { Button, Table } from "ant-design-vue";
 import TableInput from "@/components/TableInput";
 import { DataItemType } from "./interface";
 import { DeleteOutlined } from "@ant-design/icons-vue";
 import { createRandKey } from "@/utils";
 import { useI18n } from "@/hooks/useI18n";
+import AppSelect from "../AppSelect";
+import { ConfigAppItem } from "@/api/interface/config";
+import { useStore } from "vuex";
+import { GlobalState } from "@/store";
+import { cloneDeep } from "lodash";
 
 export default defineComponent({
   components: {
@@ -42,6 +56,7 @@ export default defineComponent({
     Table,
     TableInput,
     DeleteOutlined,
+    AppSelect,
   },
   props: {
     data: {
@@ -51,8 +66,19 @@ export default defineComponent({
   },
   setup(props) {
     const { t } = useI18n();
+    let store = useStore<GlobalState>();
+
     const state = reactive({
+      config: computed(() => store.state.app.config),
       columns: [
+        {
+          title: t("common.appOrVersion"),
+          dataIndex: "appKey",
+          width: 158,
+          slots: {
+            customRender: "editRowAppKey",
+          },
+        },
         {
           title: t("common.field"),
           dataIndex: "name",
@@ -80,6 +106,7 @@ export default defineComponent({
           title: t("common.action"),
           dataIndex: "id",
           width: 70,
+          align: "center",
           slots: {
             customRender: "actionRow",
           },
@@ -90,7 +117,23 @@ export default defineComponent({
         x: "700px",
         y: "260px",
       },
+      appSelectData: computed(() => {
+        const config = store.state.app.config;
+        const apps = cloneDeep(config.apps as ConfigAppItem[]);
+        return [
+          {
+            folder: "global",
+            title: t("globalParam.title"),
+          },
+          ...apps,
+        ];
+      }),
     });
+
+    function onAppChange(row: any, e: any, key: string) {
+      row[key] = e;
+    }
+
     function onCellChange(row: any, e: any, key: string) {
       const { value } = e.target;
       row[key] = value;
@@ -106,6 +149,7 @@ export default defineComponent({
         name: "",
         value: "",
         desc: "",
+        appKey: "global",
       });
     }
 
@@ -123,6 +167,7 @@ export default defineComponent({
     return {
       ...toRefs(state),
       onCellChange,
+      onAppChange,
       deleteRow,
       addRow,
       getData,

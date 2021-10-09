@@ -4,11 +4,12 @@
       :value="appKey"
       class="app-select_select"
       option-label-prop="label"
+      :disabled="disabled"
       @change="onChange"
     >
-      <template v-for="item in config.apps" :key="item.folder">
+      <template v-for="(item, index) in appList">
         <template v-if="item.items && item.items.length">
-          <a-select-opt-group :label="item.title">
+          <a-select-opt-group :label="item.title" :key="index">
             <a-select-option
               v-for="option in item.items"
               :key="`${item.folder},${option.folder}`"
@@ -16,18 +17,18 @@
               :label="`${item.title}-${option.title}`"
             >
               {{ option.title }}
-              <span v-if="option.hasPassword" class="app-select-option_icon"><LockOutlined /></span>
+              <span v-if="option.hasPassword && showLock" class="app-select-option_icon"
+                ><LockOutlined
+              /></span>
             </a-select-option>
           </a-select-opt-group>
         </template>
         <template v-else>
-          <a-select-option
-            :value="`${item.folder}`"
-            :label="`${item.title}`"
-            :key="`${item.folder}`"
-          >
+          <a-select-option :value="`${item.folder}`" :label="`${item.title}`" :key="`${index}`">
             {{ item.title }}
-            <span v-if="item.hasPassword" class="app-select-option_icon"><LockOutlined /></span>
+            <span v-if="item.hasPassword && showLock" class="app-select-option_icon"
+              ><LockOutlined
+            /></span>
           </a-select-option>
         </template>
       </template>
@@ -37,12 +38,12 @@
 
 <script lang="ts">
 import { Select } from "ant-design-vue";
-import { reactive, defineComponent, toRefs, computed } from "vue";
+import { reactive, defineComponent, toRefs, computed, PropType, watch } from "vue";
 import { useStore } from "vuex";
 import { GlobalState } from "@/store";
-// import { useRouter } from "vue-router";
 import * as Types from "@/store/modules/App/types";
 import { LockOutlined } from "@ant-design/icons-vue";
+import { ConfigAppItem } from "@/api/interface/config";
 
 export default defineComponent({
   components: {
@@ -51,17 +52,51 @@ export default defineComponent({
     ASelectOptGroup: Select.OptGroup,
     LockOutlined,
   },
-  setup() {
+  props: {
+    showLock: {
+      type: Boolean as PropType<boolean>,
+      required: false,
+      default: true,
+    },
+    value: String,
+    options: {
+      type: Array as PropType<ConfigAppItem[]>,
+      default: () => {
+        return [];
+      },
+    },
+    disabled: {
+      type: Boolean as PropType<boolean>,
+      default: false,
+    },
+  },
+  setup(props, { attrs }) {
     let store = useStore<GlobalState>();
     const state = reactive({
-      count: 0,
-      config: computed(() => store.state.app.config),
-      feConfig: computed(() => store.state.app.feConfig),
-      appKey: computed(() => store.state.app.appKey),
+      appKey: props.value,
+      appList: computed(() => {
+        if (props.options && props.options.length) {
+          return props.options;
+        }
+        const config = store.state.app.config;
+        return config.apps;
+      }),
     });
 
+    watch(
+      () => props.value,
+      (v) => {
+        state.appKey = v;
+      }
+    );
+
     const onChange = (appKey: string) => {
-      store.dispatch(`app/${Types.SET_APP_KEY}`, appKey);
+      if (attrs.onChange) {
+        const changeFun: any = attrs.onChange;
+        changeFun(appKey);
+      } else {
+        store.dispatch(`app/${Types.SET_APP_KEY}`, appKey);
+      }
     };
 
     return { ...toRefs(state), onChange };

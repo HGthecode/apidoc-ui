@@ -1,7 +1,7 @@
 <template>
   <div class="search-wraper">
     <a-space>
-      <app-select />
+      <app-select :value="appKey" />
       <a-input-search placeholder="名称 URL" @search="onSearch" :allowClear="true"></a-input-search>
     </a-space>
   </div>
@@ -25,6 +25,7 @@ export default defineComponent({
     let store = useStore<GlobalState>();
     const state = reactive({
       sideWidth: computed(() => store.state.app.sideWidth),
+      appKey: computed(() => store.state.app.appKey),
     });
 
     const onSearch = (keyword: string) => {

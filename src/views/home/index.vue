@@ -48,7 +48,7 @@
             <template #title> {{ t("common.type") }} </template>
             <div
               ref="methodChart"
-              :style="{ width: '100%', height: '172px', margin: '0 auto' }"
+              :style="{ width: '220px', height: '172px', margin: '0 auto' }"
             ></div>
           </a-card>
         </a-col>
@@ -113,6 +113,7 @@ import { GlobalState } from "@/store";
 import { Card, Row, Col, Avatar, Progress, Tag, Table, Empty } from "ant-design-vue";
 import * as echarts from "echarts";
 import { ConfigAppGroupItem } from "@/api/interface/config";
+import { throttle } from "lodash";
 
 export default defineComponent({
   name: "home",
@@ -182,7 +183,7 @@ export default defineComponent({
             type: "pie",
             radius: ["40%", "80%"],
             avoidLabelOverlap: false,
-            left: "8%",
+            left: "65px",
             itemStyle: {
               borderRadius: 10,
               borderColor: "#fff",

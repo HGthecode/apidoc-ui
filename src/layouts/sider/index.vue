@@ -6,7 +6,7 @@
     <div class="layout-side_header">
       <search @search="onSearch" />
     </div>
-    <a-tabs :activeKey="activeKey" @change="onTabChange">
+    <a-tabs v-model:activeKey="activeKey" @change="onTabChange">
       <a-tab-pane key="api" :tab="t('common.api')">
         <div class="layout-side_menus">
           <Menu
@@ -84,7 +84,7 @@ import Menu from "../../components/Menu";
 import { TagsOutlined, DownOutlined, UpOutlined, UndoOutlined } from "@ant-design/icons-vue";
 import TagsSelect from "@/components/TagsSelect";
 import { findNode } from "@/utils/helper/treeHelper";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import { createApiPageKey, createMdPageKey } from "@/utils";
 import { MdMenuItemState } from "@/store/modules/Apidoc/interface";
 import { MenuItemType } from "@/components/Menu/src/interface";
@@ -110,6 +110,7 @@ export default defineComponent({
   setup(props, { emit }) {
     const { t } = useI18n();
     const router = useRouter();
+    const route = useRoute();
     let store = useStore<GlobalState>();
     let menuData: MenuItemType[] = [];
     const tags: string[] = [];
@@ -128,7 +129,7 @@ export default defineComponent({
       keyword: "",
       tags: tags,
       openAllMenuFlag: false,
-      activeKey: "api",
+      activeKey: route.name === "MdDetail" ? "md" : "api",
     });
 
     const onDragLineChange = (x: number) => {
@@ -159,6 +160,7 @@ export default defineComponent({
           name: `ApiDetail`,
           query: {
             key: currentNode.key,
+            appKey: state.appKey,
           },
           params: {
             title: currentNode.title as string,

@@ -7,6 +7,7 @@ export interface MenuItemType {
   method?: string;
   url?: string;
   key?: string;
+  path?: string;
 }
 
 export interface MenuGroupType {

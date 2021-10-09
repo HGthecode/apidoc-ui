@@ -5,10 +5,11 @@ import { Store } from "vuex";
 
 export const setGolbalParam = (
   store: Store<any>,
-  type: "header" | "params",
+  type: "headers" | "params",
   key: string,
   value?: string,
-  desc?: string
+  desc?: string,
+  appKey?: string
 ): void => {
   const globalParams = Cache.get(GLOBAL_PARAMS);
   if (globalParams && globalParams[type] && globalParams[type].length) {
@@ -20,6 +21,7 @@ export const setGolbalParam = (
         name: key,
         value,
         desc,
+        appKey,
       });
     }
   } else {
@@ -28,9 +30,11 @@ export const setGolbalParam = (
         name: key,
         value,
         desc,
+        appKey,
       },
     ];
   }
+
   store.dispatch(`apidoc/${Types.SET_GLOBAL_PARAMS}`, globalParams);
 };
 

@@ -17,6 +17,7 @@ export interface ConfigInfo {
   parameters?: ConfigGlobalParamItem[];
   responses?: ConfigGlobalParamItem[];
   title?: string;
+  generator?: ConfigGeneratorItem[];
 }
 
 /**
@@ -25,10 +26,12 @@ export interface ConfigInfo {
 export interface ConfigAppItem {
   folder: string;
   groups?: ConfigAppGroupItem[];
-  path: string;
+  path?: string;
   title: string;
   hasPassword?: boolean;
   items?: ConfigAppItem[];
+  headers?: ConfigGlobalParamItem[];
+  parameters?: ConfigGlobalParamItem[];
 }
 
 /**
@@ -64,4 +67,12 @@ export interface ConfigGlobalParamItem {
   require: boolean;
   desc: string;
   value?: string;
+  appKey?: string;
+  appDisabled?: boolean;
+}
+
+export interface ConfigGeneratorItem {
+  title: string;
+  name: string;
+  files: ObjectType;
 }

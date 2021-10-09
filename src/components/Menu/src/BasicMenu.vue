@@ -24,6 +24,7 @@ import { MenuItemType } from "./interface";
 import { cloneDeep } from "lodash";
 import { filterTree, getTreeValueByField, findNode, getTreePath } from "@/utils/helper/treeHelper";
 import { useRoute, useRouter } from "vue-router";
+import * as ApidocTypes from "@/store/modules/Apidoc/types";
 
 export default defineComponent({
   components: {
@@ -64,6 +65,7 @@ export default defineComponent({
       feConfig: computed(() => store.state.app.feConfig),
       appKey: computed(() => store.state.app.appKey),
       theme: computed(() => store.state.app.theme),
+      isReload: computed(() => store.state.apidoc.isReload),
       openKeys: openKeys,
       openAllKeys: openKeys,
       selectedKeys: selectedKeys,
@@ -118,27 +120,40 @@ export default defineComponent({
     let init = true;
     watch<MenuItemType[]>(
       () => props.data,
-      (menuData) => {
-        if (init && route.query.key) {
-          const defaultOpenKeys = getTreePath(props.data, (item) => {
-            if (item.key === route.query.key) {
-              return true;
-            }
-            return false;
-          });
-          if (defaultOpenKeys.length) {
-            state.openKeys = defaultOpenKeys;
-            state.selectedKeys = [defaultOpenKeys[defaultOpenKeys.length - 1]];
-          } else {
+      () => {
+        if (state.isReload) {
+          setSelectedKey(route.query.key as string);
+        } else if (init && (route.query.key || (route.query.path && route.query.path))) {
+          const is = setSelectedKey(route.query.key as string);
+          if (!is) {
             router.push({
               name: "Home",
             });
           }
         }
+        store.dispatch(`apidoc/${ApidocTypes.SET_ISRELOAD}`, false);
         init = false;
-        // handleMenuData(menuData);
       }
     );
+    const setSelectedKey = (key?: string): boolean => {
+      const defaultOpenKeys = getTreePath(props.data, (item) => {
+        if (
+          (key && item.key === key) ||
+          (route.query.appKey && route.query.path && route.query.path === item.path)
+        ) {
+          return true;
+        }
+        return false;
+      });
+
+      if (defaultOpenKeys.length) {
+        state.openKeys = defaultOpenKeys;
+        state.selectedKeys = [defaultOpenKeys[defaultOpenKeys.length - 1]];
+        return true;
+      }
+      return false;
+    };
+
     const handleOpenAll = (flag: boolean) => {
       if (flag) {
         // 展开

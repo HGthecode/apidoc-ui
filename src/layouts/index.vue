@@ -35,7 +35,7 @@ import { AxiosError } from "axios";
 import VerifyAuth from "@/components/VerifyAuth";
 import ErrorCard from "@/components/Error";
 import { useLoading } from "@/components/Loading";
-import { handleConfigAppsData } from "@/store/modules/Apidoc/helper";
+import { handleConfigAppsData, handleInitGlobalParams } from "@/store/modules/Apidoc/helper";
 import { ThemeEnum } from "@/enums/appEnum";
 
 export default defineComponent({
@@ -123,6 +123,7 @@ export default defineComponent({
             document.title = res.title;
           }
 
+          // 默认选中的应用
           const appKey: string = route.query.appKey as string;
           if (appKey) {
             store.dispatch(`app/${Types.SET_APP_KEY}`, appKey);
@@ -141,40 +142,7 @@ export default defineComponent({
           };
           store.dispatch(`apidoc/${ApidocTypes.SET_API_ANALYSIS}`, apiAnalysis);
 
-          // 全局参数
-          const cacheGlobalParams = Cache.get(ApidocTypes.GLOBAL_PARAMS);
-          const globalParams = {
-            header: res.headers && res.headers.length ? cloneDeep(res.headers) : [],
-            params: res.parameters && res.parameters.length ? cloneDeep(res.parameters) : [],
-          };
-          if (cacheGlobalParams && cacheGlobalParams.header && cacheGlobalParams.header.length) {
-            const headerNames = globalParams.header.map((p: any) => p.name);
-            for (let i = 0; i < cacheGlobalParams.header.length; i++) {
-              const item = cacheGlobalParams.header[i];
-              const findIndex = headerNames.indexOf(item.name);
-              if (findIndex > -1) {
-                if (item.value) {
-                  globalParams.header[findIndex] = item;
-                }
-              } else {
-                globalParams.header.push(item);
-              }
-            }
-          }
-          if (cacheGlobalParams && cacheGlobalParams.params && cacheGlobalParams.params.length) {
-            const paramsNames = globalParams.params.map((p: any) => p.name);
-            for (let i = 0; i < cacheGlobalParams.params.length; i++) {
-              const item = cacheGlobalParams.params[i];
-              const findIndex = paramsNames.indexOf(item.name);
-              if (findIndex > -1) {
-                if (item.value) {
-                  globalParams.params[findIndex] = item;
-                }
-              } else {
-                globalParams.params.push(item);
-              }
-            }
-          }
+          const globalParams = handleInitGlobalParams(res, appData.headers, appData.params);
           store.dispatch(`apidoc/${ApidocTypes.SET_GLOBAL_PARAMS}`, globalParams);
         })
         .catch((err: AxiosError) => {
@@ -187,6 +155,7 @@ export default defineComponent({
     fetchConfig();
 
     const onReload = (tabKey: string) => {
+      store.dispatch(`apidoc/${ApidocTypes.SET_ISRELOAD}`, true);
       if (tabKey === "api") {
         state.appKey && fetchApiData(state.appKey, true);
       } else if (tabKey === "md") {
