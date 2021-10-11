@@ -81,7 +81,9 @@ export const getObjectValueByKey = (key: string, obj: ObjectType): any => {
     const keysArr = key.split(".");
     for (let i = 0; i < keysArr.length; i++) {
       const k = keysArr[i];
-      value = value[k];
+      if (k) {
+        value = value[k];
+      }
     }
   } else if (key) {
     value = value[key];

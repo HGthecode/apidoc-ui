@@ -252,9 +252,9 @@ export function handleInitGlobalParams(
           }
           return false;
         });
-        if (findIndex > -1) {
+        if (findIndex > -1 && item.value) {
           data[findIndex] = item;
-        } else {
+        } else if (item.value) {
           data.push(item);
         }
       }
