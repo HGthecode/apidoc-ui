@@ -124,7 +124,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, PropType, watchEffect, toRefs, computed } from "vue";
+import { defineComponent, reactive, PropType, watchEffect, toRefs, computed, watch } from "vue";
 import { ApiDetailState, FileData, UploadFileState } from "../interface";
 import { Table, Button, message, Upload, Alert, Empty } from "ant-design-vue";
 import { ReloadOutlined } from "@ant-design/icons-vue";
@@ -271,11 +271,14 @@ export default defineComponent({
       return [];
     }
 
-    watchEffect(() => {
-      if (props.detail.header) {
-        state.headerData = renderHeaderData(props.detail.header);
+    watch(
+      () => props.detail.header,
+      () => {
+        state.headerData = renderHeaderData(props.detail.header as ParamItem[]);
       }
-    });
+    );
+    state.headerData = renderHeaderData(props.detail.header as ParamItem[]);
+
     watchEffect(() => {
       if (props.detail.param) {
         const json = renderCodeJsonByParams(props.detail.param, true);
@@ -371,7 +374,7 @@ export default defineComponent({
             item.value &&
             (!item.appKey || item.appKey === "global" || item.appKey === state.appKey)
           ) {
-            headers[item.name] = item.value;
+            headers[item.name] = encodeURIComponent(item.value);
           }
         });
       }
@@ -389,7 +392,7 @@ export default defineComponent({
       if (state.headerData && state.headerData.length) {
         state.headerData.forEach((item) => {
           if (item.name && item.default) {
-            headers[item.name] = item.default;
+            headers[item.name] = encodeURIComponent(item.default);
           }
         });
       }
@@ -424,6 +427,7 @@ export default defineComponent({
         json.data = json.params;
         delete json.params;
       }
+
       Axios(url, json)
         .then((res) => {
           // 执行后置方法
