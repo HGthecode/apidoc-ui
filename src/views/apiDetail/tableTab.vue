@@ -20,7 +20,9 @@
         </Table>
       </div>
     </div>
-    <div v-if="detail.param && detail.param.length">
+
+    <markdown v-if="detail.paramMd" :md="detail.paramMd" />
+    <div v-else-if="detail.param && detail.param.length">
       <Title :title="t('apiPage.title.params')" />
       <div class="api-param-table">
         <Table
@@ -35,7 +37,7 @@
           childrenColumnName="children"
         >
           <template #requireCell="{ text }">
-            <CheckOutlined v-if="text" />
+            <CheckOutlined v-if="text && text == 1" />
           </template>
           <template #rowDesc="{ text, record }">
             <div>
@@ -49,7 +51,8 @@
       </div>
     </div>
 
-    <div v-if="detail.return && detail.return.length">
+    <markdown v-if="detail.returnMd" :md="detail.returnMd" />
+    <div v-else-if="detail.return && detail.return.length">
       <Title :title="t('apiPage.title.responses')" />
       <div class="api-param-table">
         <Table
@@ -74,6 +77,7 @@
         </Table>
       </div>
     </div>
+
     <markdown-modal ref="markdownModalRef" />
   </div>
 </template>

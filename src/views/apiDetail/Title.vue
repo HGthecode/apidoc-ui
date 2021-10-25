@@ -22,8 +22,10 @@ export default defineComponent({
 });
 </script>
 <style lang="less" scoped>
-.title-extra {
-  // padding-top: 5px;
-  line-height: 32px;
+.title {
+  margin-top: 24px;
+  .title-extra {
+    line-height: 32px;
+  }
 }
 </style>
