@@ -1,5 +1,11 @@
 import type { App } from "vue";
-import hljs from "highlight.js";
+// import hljs from "highlight.js";
+
+// import * as hljs from "highlight.js/lib/highlight.js";
+import * as hljs from "highlight.js/lib/core.js";
+import * as json from "highlight.js/lib/languages/json";
+hljs.registerLanguage("json", json);
+
 import "@/components/CodeHighlight/hljs.less";
 
 export function registerHighlight(app: App): void {

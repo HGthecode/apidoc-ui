@@ -6,7 +6,17 @@
 import { defineComponent, PropType, watchEffect, ref } from "vue";
 
 import marked from "marked";
-import hljs from "highlight.js";
+import * as hljs from "highlight.js/lib/core.js";
+import * as json from "highlight.js/lib/languages/json";
+import * as php from "highlight.js/lib/languages/php";
+import * as javascript from "highlight.js/lib/languages/javascript";
+import * as xml from "highlight.js/lib/languages/xml";
+
+hljs.registerLanguage("json", json);
+hljs.registerLanguage("php", php);
+hljs.registerLanguage("javascript", javascript);
+hljs.registerLanguage("xml", xml);
+
 marked.setOptions({
   highlight: function (code: string) {
     return hljs.highlightAuto(code).value;

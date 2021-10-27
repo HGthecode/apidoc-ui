@@ -24,3 +24,11 @@ declare interface SelectOptionType {
   label: string;
   value: string | number;
 }
+
+declare module "highlight.js/lib/core.js";
+declare module "highlight.js/lib/languages/json";
+declare module "highlight.js/lib/languages/htmlbars";
+declare module "highlight.js/lib/languages/php";
+declare module "highlight.js/lib/languages/javascript";
+declare module "highlight.js/lib/languages/php-template";
+declare module "highlight.js/lib/languages/xml";

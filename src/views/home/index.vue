@@ -44,16 +44,24 @@
           </div>
         </a-col>
         <a-col :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
-          <a-card class="mb-sm" :bodyStyle="{ textAlign: 'center', padding: '5px' }">
+          <a-card class="mb-sm" :bodyStyle="{ padding: '10px' }">
             <template #title> {{ t("common.type") }} </template>
-            <div
-              ref="methodChart"
-              :style="{ width: '220px', height: '172px', margin: '0 auto' }"
-            ></div>
+            <div v-if="Object.keys(apiAnalysis.apiMethodTotal).length" class="method-list">
+              <ul>
+                <li
+                  v-for="(number, key) in apiAnalysis.apiMethodTotal"
+                  :key="key"
+                  :class="[`method-color_${key}`]"
+                >
+                  <div class="name">{{ key }}</div>
+                  <div class="value">{{ number }}</div>
+                </li>
+              </ul>
+            </div>
           </a-card>
         </a-col>
         <a-col :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
-          <a-card class="mb-sm">
+          <a-card class="mb-sm" :bodyStyle="{ padding: '10px' }">
             <template #title> {{ t("apiPage.tag") }} </template>
             <div v-if="Object.keys(apiAnalysis.apiTagTotal).length" class="tags-wraper">
               <a-tag v-for="(number, key) in apiAnalysis.apiTagTotal" :key="key"
@@ -111,7 +119,7 @@ import { useI18n } from "@/hooks/useI18n";
 import { useStore } from "vuex";
 import { GlobalState } from "@/store";
 import { Card, Row, Col, Avatar, Progress, Tag, Table, Empty } from "ant-design-vue";
-import * as echarts from "echarts";
+// import * as echarts from "echarts";
 import { ConfigAppGroupItem } from "@/api/interface/config";
 import { throttle } from "lodash";
 
@@ -132,7 +140,7 @@ export default defineComponent({
     const { t } = useI18n();
     const store = useStore<GlobalState>();
     const methodChart = ref<HTMLElement>();
-    const methodChartOptions = ref<any>();
+    // const methodChartOptions = ref<any>();
 
     const state = reactive({
       apiAnalysis: computed(() => store.state.apidoc.apiAnalysis),
@@ -157,108 +165,11 @@ export default defineComponent({
       theme: computed(() => store.state.app.theme),
     });
 
-    function renderMethodChart() {
-      // 绘制图表
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      methodChartOptions.value = echarts.init(methodChart.value!);
-      const options: any = {
-        textStyle: {
-          color: state.theme == "dark" ? "#c5c5c5" : "#333333",
-        },
-        tooltip: {
-          trigger: "item",
-        },
-        legend: {
-          show: true,
-          top: "5%",
-          left: "left",
-          orient: "vertical",
-          textStyle: {
-            color: state.theme == "dark" ? "#c5c5c5" : "#333333",
-          },
-        },
-        series: [
-          {
-            name: "请求类型",
-            type: "pie",
-            radius: ["40%", "80%"],
-            avoidLabelOverlap: false,
-            left: "65px",
-            itemStyle: {
-              borderRadius: 10,
-              borderColor: "#fff",
-              borderWidth: 2,
-            },
-            label: {
-              show: false,
-              position: "center",
-            },
-            emphasis: {
-              label: {
-                show: true,
-                fontSize: "20",
-                fontWeight: "bold",
-              },
-            },
-            labelLine: {
-              show: false,
-            },
-            data: [],
-          },
-        ],
-      };
-      options.series[0].data = Object.keys(state.apiAnalysis.apiMethodTotal).map((key) => {
-        let color = "#87d068";
-        switch (key) {
-          case "GET":
-            color = "#87d068";
-            break;
-          case "POST":
-            color = "#2db7f5";
-            break;
-          case "PUT":
-            color = "#ff9800";
-            break;
-          case "DELETE":
-            color = "#ff4d4f";
-            break;
-        }
-        return {
-          name: key,
-          value: state.apiAnalysis.apiMethodTotal[key],
-          itemStyle: {
-            color: color,
-          },
-        };
-      });
-
-      methodChartOptions.value.setOption(options);
-    }
-
     onMounted(() => {
-      if (
-        state.apiAnalysis.apiMethodTotal &&
-        Object.keys(state.apiAnalysis.apiMethodTotal).length
-      ) {
-        renderMethodChart();
-      }
       if (state.apiAnalysis.apiGroupTotal && Object.keys(state.apiAnalysis.apiGroupTotal).length) {
         state.groupData = renderGroupData();
       }
     });
-    watch(
-      () => state.apiAnalysis.apiMethodTotal,
-      () => {
-        renderMethodChart();
-      }
-    );
-
-    watch(
-      () => state.theme,
-      () => {
-        renderMethodChart();
-      }
-    );
 
     function renderGroupData() {
       let data: any = [];

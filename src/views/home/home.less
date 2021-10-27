@@ -8,7 +8,7 @@
         }
     }
     .tags-wraper{
-        height: 130px;
+        height: 162px;
         overflow: hidden;
         overflow-y: auto;
         .ant-tag{
@@ -46,6 +46,36 @@
             border-bottom: 1px solid var(--color-line);
             h4{
                 margin-bottom: 0;
+            }
+        }
+    }
+}
+
+.method-list{
+    height: 162px;
+    &>ul{
+        padding-left: 0;
+        list-style-type:none;
+        &>li{
+            display: flex;
+            padding:5px 10px;
+            margin-bottom: 5px;
+            border-radius: 3px;
+            .name{
+                flex:1;
+                text-align: left;
+            }
+            &.method-color_GET {
+                background-color:lighten(#87d068,30%);
+            }
+            &.method-color_POST {
+                background-color:lighten(#2db7f5,30%);
+            }
+            &.method-color_PUT {
+                background-color: lighten(#ff9800,40%);
+            }
+            &.method-color_DELETE {
+                background-color: lighten(#ff4d4f,30%);
             }
         }
     }

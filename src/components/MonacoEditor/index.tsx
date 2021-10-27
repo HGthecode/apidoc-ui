@@ -61,6 +61,7 @@ export default defineComponent({
         automaticLayout: true,
         readOnly: props.readOnly,
         foldingStrategy: "indentation",
+        contextmenu:false,
         minimap: {
           enabled: false,
         },
