@@ -32,6 +32,7 @@ export interface ConfigAppItem {
   items?: ConfigAppItem[];
   headers?: ConfigGlobalParamItem[];
   parameters?: ConfigGlobalParamItem[];
+  host?: string;
 }
 
 /**

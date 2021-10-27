@@ -1,6 +1,7 @@
 import { ConfigAppItem } from "@/api/interface/config";
 import { cloneDeep } from "lodash";
 import { createApiPageKeyState, createMdPageKeyState } from "./interface";
+import { KEEPALIVE_PAGE_COMMA } from "@/store/modules/App/types";
 
 // 创建api接口页面的key
 export const createApiPageKey = (apiData: createApiPageKeyState): string => {
@@ -211,4 +212,18 @@ export const confirmEndingString = (str: string, target: string): boolean => {
     return true;
   }
   return false;
+};
+
+/**
+ * 转换keepAliveKey中的逗号
+ * @param key
+ * @param escape
+ * @returns
+ */
+export const replaceKeepAlivePageComma = (key: string, escape?: boolean): string => {
+  if (escape) {
+    const reg = new RegExp(KEEPALIVE_PAGE_COMMA, "g");
+    return key.replace(reg, ",");
+  }
+  return key.replace(/,/g, KEEPALIVE_PAGE_COMMA);
 };

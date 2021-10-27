@@ -141,6 +141,9 @@ import { handleRequestEvent, getEventMessage, ResultState } from "./handleEvent"
 import { useI18n } from "@/hooks/useI18n";
 import Title from "../Title.vue";
 import EventPopover from "./EventPopover.vue";
+import { getAppsConfigItemByKey } from "@/utils";
+import { ConfigAppItem } from "@/api/interface/config";
+import { useRoute } from "vue-router";
 
 interface EventDataState {
   before: ResultState;
@@ -212,6 +215,8 @@ export default defineComponent({
       });
     }
 
+    const route = useRoute();
+
     // const returnData:
     const state = reactive({
       headerData: headerData,
@@ -226,7 +231,13 @@ export default defineComponent({
       returnString: "",
       globalParams: computed(() => store.state.apidoc.globalParams),
       isMobile: computed(() => store.state.app.isMobile),
-      appKey: computed(() => store.state.app.appKey),
+      appKey: computed(() => {
+        if (route.query.appKey) {
+          return route.query.appKey;
+        }
+        return store.state.app.appKey;
+      }),
+      config: computed(() => store.state.app.config),
       eventData: eventData,
     });
     const headersColumns = [
@@ -426,6 +437,13 @@ export default defineComponent({
       if (method != "get" && json.params) {
         json.data = json.params;
         delete json.params;
+      }
+      const appConfig = getAppsConfigItemByKey(
+        state.config.apps as ConfigAppItem[],
+        state.appKey as string
+      );
+      if (appConfig && appConfig.host) {
+        json.baseURL = appConfig.host;
       }
 
       Axios(url, json)

@@ -26,7 +26,10 @@ if (localStorage.APIDOC_CONFIG) {
   if (apidocConfig.HTTP) {
     timeout = apidocConfig.HTTP.TIMEOUT ? apidocConfig.HTTP.TIMEOUT : timeout;
   }
-  if (apidocConfig.HTTP && apidocConfig.HTTP.HOSTS && isArray(apidocConfig.HTTP.HOSTS)) {
+  const cacheHost = Cache.get("HOST");
+  if (cacheHost) {
+    baseURL = cacheHost;
+  } else if (apidocConfig.HTTP && apidocConfig.HTTP.HOSTS && isArray(apidocConfig.HTTP.HOSTS)) {
     baseURL = apidocConfig.HTTP.HOSTS[0] && apidocConfig.HTTP.HOSTS[0].host;
   }
 }
@@ -39,12 +42,6 @@ const service = axios.create({
 // 请求拦截器
 service.interceptors.request.use(
   (config: AxiosRequestConfig) => {
-    // 重置host
-    const cacheHost = Cache.get("HOST");
-    if (cacheHost) {
-      config.baseURL = cacheHost;
-    }
-
     // 权限验证携带token
     if (config.url && checkToeknUrls.includes(config.url)) {
       const authData = Cache.get(AUTH_DATA);

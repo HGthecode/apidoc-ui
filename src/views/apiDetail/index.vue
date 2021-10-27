@@ -83,6 +83,7 @@ import * as Types from "@/store/modules/App/types";
 import { PageDataItemState } from "@/store/modules/App/interface";
 import Skeleton from "./skeleton.vue";
 import { useI18n } from "@/hooks/useI18n";
+import { replaceKeepAlivePageComma } from "@/utils/index";
 
 export default defineComponent({
   name: "ApiDetail",
@@ -139,7 +140,7 @@ export default defineComponent({
         detail = cloneDeep(state.apiObject[key]);
         store.dispatch(`app/${Types.ADD_PAGE_DATA}`, {
           ...detail,
-          key: fullPath,
+          key: replaceKeepAlivePageComma(fullPath),
         });
       }
       if (detail.menu_key) {
@@ -181,10 +182,13 @@ export default defineComponent({
       const { query } = route;
       const fullPath = route.fullPath;
       const key = query.key as string;
-      const oldData = JSON.stringify({ ...state.pageData[fullPath], menu_key: "" });
+      const pageDataKey = replaceKeepAlivePageComma(fullPath);
+
+      const oldData = JSON.stringify({ ...state.pageData[pageDataKey], menu_key: "" });
       const newData = JSON.stringify({ ...state.apiObject[key], menu_key: "" });
+
       if (
-        !(state.pageData[fullPath] && state.apiObject[key] && oldData === newData) &&
+        !(state.pageData[pageDataKey] && state.apiObject[key] && oldData === newData) &&
         state.apiObject[key]
       ) {
         state.isReload = true;

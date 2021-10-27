@@ -17,6 +17,9 @@
           :data-source="detail.header"
           childrenColumnName="children"
         >
+          <template #requireCell="{ text }">
+            <CheckOutlined v-if="text && text == 1" />
+          </template>
         </Table>
       </div>
     </div>

@@ -20,6 +20,7 @@ import { useStore } from "vuex";
 import { GlobalState } from "@/store";
 import { RouteLocationNormalizedLoaded } from "vue-router";
 import Skeleton from "@/views/apiDetail/skeleton.vue";
+import { replaceKeepAlivePageComma } from "@/utils/index";
 
 export default defineComponent({
   components: {
@@ -38,7 +39,8 @@ export default defineComponent({
 
     // 解析路由 key
     function parseRouteKey(route: RouteLocationNormalizedLoaded): string {
-      let key = route.fullPath;
+      let key = replaceKeepAlivePageComma(route.fullPath);
+
       if (route.meta.keepKey as string) {
         key = route.meta.keepKey + "";
       } else if (typeof route.meta.keepKey === "function") {
