@@ -75,7 +75,7 @@ export default defineComponent({
             });
             state.activeKey = route.fullPath;
           } else {
-            message.error(t("common.page.404"));
+            // message.error(t("common.page.404"));
             router.push({
               name: "Home",
             });
@@ -104,7 +104,7 @@ export default defineComponent({
             });
             state.activeKey = route.fullPath;
           } else {
-            message.error(t("common.page.404"));
+            // message.error(t("common.page.404"));
             router.push({
               name: "Home",
             });

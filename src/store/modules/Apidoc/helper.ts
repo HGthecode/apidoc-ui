@@ -3,7 +3,12 @@ import { MenuItemType } from "@/components/Menu/src/interface";
 import { createApiPageKey } from "@/utils";
 import { ApiAnalysisData } from "@/store/modules/Apidoc/interface";
 import { MdMenuItem } from "@/api/interface/markdown";
-import { ConfigAppItem, ConfigGlobalParamItem, ConfigInfo } from "@/api/interface/config";
+import {
+  ConfigAppGroupItem,
+  ConfigAppItem,
+  ConfigGlobalParamItem,
+  ConfigInfo,
+} from "@/api/interface/config";
 import Cache from "@/utils/cache";
 import * as Types from "./types";
 import { cloneDeep } from "lodash";
@@ -127,6 +132,7 @@ export function handleApiData(data: ApiDataInfo, appKey: string): ReturnHandleAp
         method: item.method as string,
         url: item.url,
         tag: item.tag,
+        controller: item.controller,
         key,
       };
       if (item.children && item.children.length) {
@@ -174,7 +180,7 @@ export function handleConfigAppsData(data: ConfigAppItem[]): HandleConfigAppData
     params: [],
   };
   function renderAppsData(list: ConfigAppItem[], appKey = ""): any {
-    const mdMenus = list.map((item) => {
+    const apps = list.map((item) => {
       const currentAppKey = `${appKey}${appKey ? "," : ""}${item.folder}`;
       if (item.folder && !(item.items && item.items.length)) {
         result.count++;
@@ -197,15 +203,32 @@ export function handleConfigAppsData(data: ConfigAppItem[]): HandleConfigAppData
           }
         }
       }
+      if (item.groups && item.groups.length) {
+        item.groups = handleConfigAppsGroupData(item.groups);
+      }
       if (item.items && item.items.length) {
         item.items = renderAppsData(item.items, currentAppKey);
       }
       return item;
     });
-    return mdMenus;
+    return apps;
   }
   renderAppsData(data, "");
   return result;
+}
+
+function handleConfigAppsGroupData(list: ConfigAppGroupItem[]) {
+  const groups = list.map((item) => {
+    item.label = item.title;
+    item.value = item.name;
+    item.key = item.name;
+    if (item.children && item.children.length) {
+      item.children = handleConfigAppsGroupData(item.children);
+    }
+
+    return item;
+  });
+  return groups;
 }
 
 interface handleInitGlobalParamsResult {

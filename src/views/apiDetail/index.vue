@@ -57,7 +57,7 @@
           <a-tab-pane key="json" :tab="t('apiPage.json')">
             <json-tab :detail="detail" />
           </a-tab-pane>
-          <a-tab-pane key="debug" :tab="t('apiPage.debug')">
+          <a-tab-pane v-if="detail.notDebug !== true" key="debug" :tab="t('apiPage.debug')">
             <debug-tab :detail="detail" :currentMethod="currentMethod" />
           </a-tab-pane>
         </a-tabs>
@@ -113,6 +113,7 @@ export default defineComponent({
     const methodList: string[] = [];
 
     const state = reactive({
+      config: computed(() => store.state.app.config),
       pageData: computed(() => store.state.app.pageData),
       apiObject: computed(() => store.state.apidoc.apiObject),
       detail: detail,

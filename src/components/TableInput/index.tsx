@@ -1,11 +1,11 @@
-import { defineComponent, ref, watchEffect } from "vue";
+import { defineComponent, ref, watchEffect, PropType } from "vue";
 import { Input } from "ant-design-vue";
 import style from "./index.module.less";
 
 export default defineComponent({
   props: {
     data: {
-      type: String,
+      type: [String, Number] as PropType<string | number>,
       default: "",
     },
     placeholder: {

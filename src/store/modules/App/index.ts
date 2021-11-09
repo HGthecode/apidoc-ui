@@ -57,6 +57,9 @@ const app: Module<AppState, GlobalState> = {
       if (localStorage.APIDOC_CONFIG) {
         const apidocConfig = JSON.parse(localStorage.APIDOC_CONFIG);
         commit(Types.SET_FE_CONFIG, apidocConfig);
+        if (apidocConfig && apidocConfig.MENU && apidocConfig.MENU.WIDTH) {
+          commit(Types.SET_SIDE_WIDTH, apidocConfig.MENU.WIDTH);
+        }
       }
     },
     // 设置前端配置

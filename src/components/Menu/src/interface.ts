@@ -8,6 +8,7 @@ export interface MenuItemType {
   url?: string;
   key?: string;
   path?: string;
+  controller?: string;
 }
 
 export interface MenuGroupType {

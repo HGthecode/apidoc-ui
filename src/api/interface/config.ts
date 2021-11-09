@@ -1,3 +1,5 @@
+import { FormItemType } from "@/components/DataForm/interface";
+
 export interface GetConfigState {
   lang?: string;
 }
@@ -41,6 +43,9 @@ export interface ConfigAppItem {
 export interface ConfigAppGroupItem {
   title: string;
   name: string;
+  label?: string;
+  value?: string;
+  key?: string;
   children?: ConfigAppGroupItem[];
 }
 
@@ -75,5 +80,43 @@ export interface ConfigGlobalParamItem {
 export interface ConfigGeneratorItem {
   title: string;
   name: string;
-  files: ObjectType;
+  files: ConfigGeneratorItemFilesItem[];
+  form?: ConfigGeneratorItemForm;
+  table?: ConfigGeneratorItemTable;
+}
+
+export interface ConfigGeneratorItemForm {
+  [key: string]: any;
+  items: FormItemType[];
+}
+
+export interface ConfigGeneratorItemTable {
+  field_types: any;
+  items: ConfigGeneratorItemTableItem[];
+}
+
+export interface ConfigGeneratorItemTableItem {
+  title: string;
+  model_path: string;
+  default_fields: any;
+  namespace?: string;
+  model_tpl?: string;
+  columns?: ConfigGeneratorItemTableColumn[];
+}
+
+export interface ConfigGeneratorItemTableColumn {
+  title: string;
+  field: string;
+  type: string;
+  slots?: any;
+  width?: number;
+  align?: string;
+}
+
+export interface ConfigGeneratorItemFilesItem {
+  name: string;
+  path: string;
+  namespace: string;
+  template?: string;
+  rules?: any;
 }

@@ -2,7 +2,6 @@
   <a-modal
     :visible="visible"
     :width="500"
-    :closable="false"
     :destroyOnClose="true"
     :maskClosable="false"
     :title="t('auth.title')"

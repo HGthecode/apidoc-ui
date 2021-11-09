@@ -32,8 +32,13 @@ export interface FeConfigState {
   LANG?: FeConfigLangState[];
   HTTP: FeConfigHTTPState;
   PUBLICPATH?: string;
+  MENU?: FeConfigMenuState;
 }
 
+export interface FeConfigMenuState {
+  SHOWURL: boolean;
+  WIDTH: number;
+}
 export interface FeConfigLangState {
   title: string;
   lang: string;

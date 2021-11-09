@@ -13,7 +13,17 @@
     <FileMarkdownOutlined v-else-if="item.path && item.type === 'md'" />
     <FolderOutlined v-else />
 
-    {{ title }}
+    <span>{{ title }} </span>
+    <span
+      v-if="item.controller && feConfig && feConfig.MENU && feConfig.MENU.SHOWURL"
+      class="menu-item-text"
+      >{{ item.controller }}
+    </span>
+    <span
+      v-if="item.url && feConfig && feConfig.MENU && feConfig.MENU.SHOWURL"
+      class="menu-item-text"
+      >{{ item.url }}
+    </span>
   </span>
 </template>
 <script lang="ts">
@@ -24,6 +34,8 @@ import {
   FolderOutlined,
   FileMarkdownOutlined,
 } from "@ant-design/icons-vue";
+import { useStore } from "vuex";
+import { GlobalState } from "@/store";
 
 export default defineComponent({
   components: {
@@ -41,13 +53,15 @@ export default defineComponent({
   },
   setup(props) {
     const { t } = useI18n();
+    let store = useStore<GlobalState>();
     const title = computed(() => {
       if (props.item.title === "未分组") {
         return t("common.notGroup");
       }
       return props.item.title;
     });
-    return { title };
+    const feConfig = computed(() => store.state.app.feConfig);
+    return { title, feConfig };
   },
 });
 </script>
@@ -73,5 +87,10 @@ export default defineComponent({
   border: 1px solid var(--text-light-grey);
   padding: 0px 10px;
   border-radius: 2px;
+}
+.menu-item-text {
+  color: #999;
+  margin-left: 10px;
+  display: inline-block;
 }
 </style>
