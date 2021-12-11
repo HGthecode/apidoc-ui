@@ -48,13 +48,20 @@
             <template #title> {{ t("common.type") }} </template>
             <div v-if="Object.keys(apiAnalysis.apiMethodTotal).length" class="method-list">
               <ul>
-                <li
-                  v-for="(number, key) in apiAnalysis.apiMethodTotal"
-                  :key="key"
-                  :class="[`method-color_${key}`]"
-                >
-                  <div class="name">{{ key }}</div>
-                  <div class="value">{{ number }}</div>
+                <li v-for="(number, key) in apiAnalysis.apiMethodTotal" :key="key">
+                  <div class="info">
+                    <div class="name">{{ key }}</div>
+                    <div class="value">{{ number }}</div>
+                  </div>
+                  <div
+                    class="bg"
+                    :style="{
+                      backgroundColor:
+                        feConfig.METHODCOLOR && feConfig.METHODCOLOR[key]
+                          ? feConfig.METHODCOLOR[key]
+                          : '',
+                    }"
+                  ></div>
                 </li>
               </ul>
             </div>
@@ -146,6 +153,7 @@ export default defineComponent({
       apiAnalysis: computed(() => store.state.apidoc.apiAnalysis),
       currentApp: computed(() => store.state.apidoc.currentApp),
       config: computed(() => store.state.app.config),
+      feConfig: computed(() => store.state.app.feConfig),
       groupColumns: [
         {
           title: "名称",

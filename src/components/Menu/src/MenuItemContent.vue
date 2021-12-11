@@ -7,9 +7,17 @@
     >
       <span class="method-icon_multiple">{{ item.method.split(",").length }} </span>
     </span>
-    <span v-else-if="item.method" :class="['api-method-icon', `method-color_${item.method}`]">{{
-      item.method
-    }}</span>
+    <span
+      v-else-if="item.method"
+      :class="['api-method-icon', `method-color_${item.method}`]"
+      :style="{
+        color:
+          feConfig.METHODCOLOR && feConfig.METHODCOLOR[item.method]
+            ? feConfig.METHODCOLOR[item.method]
+            : '',
+      }"
+      >{{ item.method }}</span
+    >
     <FileMarkdownOutlined v-else-if="item.path && item.type === 'md'" />
     <FolderOutlined v-else />
 
@@ -68,7 +76,7 @@ export default defineComponent({
 <style lang="less" scoped>
 .api-method-icon {
   display: inline-block;
-  width: 36px;
+  width: 40px;
   font-size: 12px;
 }
 .method-color_GET {

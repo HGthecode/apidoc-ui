@@ -2,7 +2,7 @@
   <div>
     <div v-if="headerData && headerData.length">
       <Title :title="t('apiPage.title.header')" />
-      <div class="api-param-table mb">
+      <div class="api-param-table mb-sm">
         <Table
           :columns="headersColumns"
           size="small"
@@ -92,7 +92,7 @@
         :eventData="eventData.after"
       />
     </Title>
-    <div v-if="returnData && returnData.status" class="mb">
+    <div v-if="returnData && returnData.status" class="mb-sm">
       <div class="mb-sm">
         <Alert
           :type="returnData.status >= 200 && returnData.status < 300 ? 'success' : 'error'"
@@ -292,11 +292,36 @@ export default defineComponent({
 
     watchEffect(() => {
       if (props.detail.param) {
-        const json = renderCodeJsonByParams(props.detail.param, true);
-        state.paramCode = formatJsonCode(json);
-        state.paramFormData = props.detail.param;
+        const paramFormData = handleParamData(props.detail.param);
+        if (props.detail.paramType === "formdata" || props.detail.paramType === "route") {
+          state.paramFormData = paramFormData;
+        } else {
+          const json = renderCodeJsonByParams(paramFormData, true);
+          state.paramCode = formatJsonCode(json);
+        }
       }
     });
+
+    function handleParamData(paramData: ParamItem[]): ParamItem[] {
+      const data = cloneDeep(paramData);
+      if (data && data.length) {
+        // 合并全局参数
+        const globalParams = state.globalParams;
+        if (globalParams && globalParams.params && globalParams.params.length) {
+          return data.map((item) => {
+            const globalParamFind = globalParams.params.find((p) => p.name === item.name);
+            if (globalParamFind && globalParamFind.value) {
+              item.default = globalParamFind.value;
+            }
+            return item;
+          });
+        } else {
+          return data;
+        }
+      }
+
+      return [];
+    }
 
     const tableScroll = {
       x: "700px",
@@ -409,9 +434,10 @@ export default defineComponent({
       }
 
       if (props.detail.paramType === "formdata") {
-        headers[method] = {
-          "Content-Type": "application/x-www-form-urlencoded",
-        };
+        headers["content-type"] = "application/x-www-form-urlencoded";
+      }
+      if (props.detail.contentType) {
+        headers["content-type"] = props.detail.contentType;
       }
       let json: any = {
         method,
@@ -445,7 +471,6 @@ export default defineComponent({
       if (appConfig && appConfig.host) {
         json.baseURL = appConfig.host;
       }
-
       Axios(url, json)
         .then((res) => {
           // 执行后置方法

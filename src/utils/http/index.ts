@@ -37,6 +37,7 @@ if (localStorage.APIDOC_CONFIG) {
 const service = axios.create({
   baseURL: baseURL,
   timeout: timeout,
+  withCredentials: true,
 });
 
 // 请求拦截器
@@ -77,7 +78,6 @@ service.interceptors.request.use(
         }
       }
     }
-
     return config;
   },
   (error) => {

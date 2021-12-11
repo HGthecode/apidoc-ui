@@ -257,9 +257,7 @@ const events = {
           headers: {},
         };
         if (eventItem.contentType) {
-          ajaxOptions.headers[method] = {
-            "Content-Type": eventItem.contentType,
-          };
+          ajaxOptions.headers["content-type"] = eventItem.contentType;
         }
         // 执行前置生成请求参数
         let params: ObjectType = {};

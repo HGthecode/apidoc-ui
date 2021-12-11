@@ -16,6 +16,7 @@ export interface ApiDetailState extends ApiItem {
   // param: ParamItem[];
   // return: ParamItem[];
   paramType?: string;
+  contentType?: string;
 }
 
 export interface UploadFileState {

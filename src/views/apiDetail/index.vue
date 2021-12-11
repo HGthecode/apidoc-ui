@@ -38,7 +38,20 @@
             }}</a-select-option>
           </a-select>
         </div>
-        <div v-else :class="['api-url-method', currentMethod]">
+        <div
+          v-else
+          :class="[
+            'api-url-method',
+            currentMethod,
+            { dark: feConfig.METHODCOLOR && feConfig.METHODCOLOR[detail.method] },
+          ]"
+          :style="{
+            backgroundColor:
+              feConfig.METHODCOLOR && feConfig.METHODCOLOR[detail.method]
+                ? feConfig.METHODCOLOR[detail.method]
+                : '',
+          }"
+        >
           {{ detail.method }}
         </div>
         <div :class="['api-url-input', { 'method-multiple': methodList.length > 0 }]">
@@ -116,6 +129,7 @@ export default defineComponent({
       config: computed(() => store.state.app.config),
       pageData: computed(() => store.state.app.pageData),
       apiObject: computed(() => store.state.apidoc.apiObject),
+      feConfig: computed(() => store.state.app.feConfig),
       detail: detail,
       currentKey: "",
       methodList: methodList,
