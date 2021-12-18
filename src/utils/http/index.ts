@@ -19,26 +19,28 @@ let apidocConfig: FeConfigState = {
   HTTP: {},
 };
 
-let timeout = 30000;
-let baseURL = "/";
+let axiosOptions: AxiosRequestConfig = {
+  baseURL: "",
+  timeout: 3000,
+};
+
 if (localStorage.APIDOC_CONFIG) {
   apidocConfig = JSON.parse(localStorage.APIDOC_CONFIG);
   if (apidocConfig.HTTP) {
-    timeout = apidocConfig.HTTP.TIMEOUT ? apidocConfig.HTTP.TIMEOUT : timeout;
+    axiosOptions.timeout = apidocConfig.HTTP.TIMEOUT ? apidocConfig.HTTP.TIMEOUT : 3000;
   }
   const cacheHost = Cache.get("HOST");
   if (cacheHost) {
-    baseURL = cacheHost;
+    axiosOptions.baseURL = cacheHost;
   } else if (apidocConfig.HTTP && apidocConfig.HTTP.HOSTS && isArray(apidocConfig.HTTP.HOSTS)) {
-    baseURL = apidocConfig.HTTP.HOSTS[0] && apidocConfig.HTTP.HOSTS[0].host;
+    axiosOptions.baseURL = apidocConfig.HTTP.HOSTS[0] && apidocConfig.HTTP.HOSTS[0].host;
+  }
+  if (apidocConfig.WITHCREDENTIALS) {
+    axiosOptions.withCredentials = apidocConfig.WITHCREDENTIALS;
   }
 }
 
-const service = axios.create({
-  baseURL: baseURL,
-  timeout: timeout,
-  withCredentials: true,
-});
+const service = axios.create(axiosOptions);
 
 // 请求拦截器
 service.interceptors.request.use(

@@ -1,5 +1,6 @@
 import { trim } from "../index";
 import Mock from "mockjs";
+import "./mockExtend";
 
 export function renderCodeJsonByParams<T>(params: T[], isMock?: boolean): objectState {
   let json: objectState = {};

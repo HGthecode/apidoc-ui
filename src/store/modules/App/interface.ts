@@ -33,6 +33,7 @@ export interface FeConfigState {
   HTTP: FeConfigHTTPState;
   PUBLICPATH?: string;
   MENU?: FeConfigMenuState;
+  WITHCREDENTIALS?: boolean;
 }
 
 export interface FeConfigMenuState {
