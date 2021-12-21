@@ -99,44 +99,6 @@ const apidoc: Module<ApidocState, GlobalState> = {
       Cache.set(Types.GLOBAL_PARAMS, data);
       commit(Types.SET_GLOBAL_PARAMS, data);
     },
-    // // 初始化全局参数
-    // [Types.INIT_GLOBAL_PARAMS]({ commit }, config: ConfigInfo) {
-    //   const cacheGlobalParams = Cache.get(Types.GLOBAL_PARAMS);
-    //   const globalParams = {
-    //     header: config.headers && config.headers.length ? cloneDeep(config.headers) : [],
-    //     params: config.parameters && config.parameters.length ? cloneDeep(config.parameters) : [],
-    //   };
-    //   if (cacheGlobalParams && cacheGlobalParams.header && cacheGlobalParams.header.length) {
-    //     const headerNames = globalParams.header.map((p: any) => p.name);
-    //     for (let i = 0; i < cacheGlobalParams.header.length; i++) {
-    //       const item = cacheGlobalParams.header[i];
-    //       const findIndex = headerNames.indexOf(item.name);
-    //       if (findIndex > -1) {
-    //         if (item.value) {
-    //           globalParams.header[findIndex] = item;
-    //         }
-    //       } else {
-    //         globalParams.header.push(item);
-    //       }
-    //     }
-    //   }
-    //   if (cacheGlobalParams && cacheGlobalParams.params && cacheGlobalParams.params.length) {
-    //     const paramsNames = globalParams.params.map((p: any) => p.name);
-    //     for (let i = 0; i < cacheGlobalParams.params.length; i++) {
-    //       const item = cacheGlobalParams.params[i];
-    //       const findIndex = paramsNames.indexOf(item.name);
-    //       if (findIndex > -1) {
-    //         if (item.value) {
-    //           globalParams.params[findIndex] = item;
-    //         }
-    //       } else {
-    //         globalParams.params.push(item);
-    //       }
-    //     }
-    //   }
-    //   Cache.set(Types.GLOBAL_PARAMS, globalParams);
-    //   commit(Types.SET_GLOBAL_PARAMS, globalParams);
-    // },
     // 设置权限token
     [Types.SET_AUTH_DATA]({ commit }, data: AuthDataState) {
       Cache.set(Types.AUTH_DATA, data);

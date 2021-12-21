@@ -1,6 +1,5 @@
 import { ApiDataInfo, ApiItem } from "@/api/interface/apiData";
 import { MenuItemType } from "@/components/Menu/src/interface";
-import { createApiPageKey } from "@/utils";
 import { ApiAnalysisData } from "@/store/modules/Apidoc/interface";
 import { MdMenuItem } from "@/api/interface/markdown";
 import {
@@ -48,7 +47,6 @@ export function handleApiData(data: ApiDataInfo, appKey: string): ReturnHandleAp
   // 递归处理数据
   function renderApiData(list: ApiItem[]): MenuItemType[] {
     const apiMenus = list.map((item) => {
-      let key = "";
       const method = item.method as string;
       let methodList: string[] = [];
 
@@ -83,12 +81,7 @@ export function handleApiData(data: ApiDataInfo, appKey: string): ReturnHandleAp
       } else if (item.url) {
         // api接口存入list和object
         res.apiList.push(item);
-        key = createApiPageKey({
-          appKey: appKey as string,
-          method: method as string,
-          url: item.url as string,
-        });
-        res.apiObject[key] = item;
+        res.apiObject[item.menu_key] = item;
         // 接口总数
         res.apiAnalysis.apiCount++;
         // 统计请求类型数量
@@ -133,7 +126,6 @@ export function handleApiData(data: ApiDataInfo, appKey: string): ReturnHandleAp
         url: item.url,
         tag: item.tag,
         controller: item.controller,
-        key,
       };
       if (item.children && item.children.length) {
         menuItem.children = renderApiData(item.children);

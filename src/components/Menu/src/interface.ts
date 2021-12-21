@@ -6,7 +6,6 @@ export interface MenuItemType {
   type: string;
   method?: string;
   url?: string;
-  key?: string;
   path?: string;
   controller?: string;
 }

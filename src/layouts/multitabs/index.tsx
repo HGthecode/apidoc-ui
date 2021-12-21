@@ -61,7 +61,7 @@ export default defineComponent({
       (menuData) => {
         if (isInit && route.name === "ApiDetail") {
           const currentNode = findNode<MenuItemType>(state.apiMenus, (node) => {
-            if (node.key === route.query.key) {
+            if (node.menu_key === route.query.key) {
               return true;
             }
             return false;

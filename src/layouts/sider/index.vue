@@ -85,7 +85,7 @@ import { TagsOutlined, DownOutlined, UpOutlined, UndoOutlined } from "@ant-desig
 import TagsSelect from "@/components/TagsSelect";
 import { findNode } from "@/utils/helper/treeHelper";
 import { useRouter, useRoute } from "vue-router";
-import { createApiPageKey, createMdPageKey } from "@/utils";
+import { createMdPageKey } from "@/utils";
 import { MdMenuItemState } from "@/store/modules/Apidoc/interface";
 import { MenuItemType } from "@/components/Menu/src/interface";
 import { useI18n } from "@/hooks/useI18n";
@@ -159,7 +159,7 @@ export default defineComponent({
         router.push({
           name: `ApiDetail`,
           query: {
-            key: currentNode.key,
+            key: currentNode.menu_key,
             appKey: state.appKey,
           },
           params: {

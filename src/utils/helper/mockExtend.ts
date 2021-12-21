@@ -34,4 +34,14 @@ Mock.Random.extend({
   idcard: function () {
     return createIdcard();
   },
+  regexp: function (e, n) {
+    let key = "regexp";
+    if (n) {
+      key = key + "|" + n;
+    }
+    const res = Mock.mock({
+      [key]: eval(e),
+    });
+    return res.regexp;
+  },
 });

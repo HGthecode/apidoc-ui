@@ -27,9 +27,9 @@ export function renderCodeJsonByParams<T>(params: T[], isMock?: boolean): object
         ? fieldValue
         : `${trim(fieldValue)}`;
       if (item.type == "object" && item.children && item.children.length) {
-        value = renderCodeJsonByParams(item.children);
+        value = renderCodeJsonByParams(item.children, isMock);
       } else if (item.type == "array" && item.children && item.children.length) {
-        const childrenData = renderCodeJsonByParams(item.children);
+        const childrenData = renderCodeJsonByParams(item.children, isMock);
         let childrenValue = null;
         if (item.childrenType == "array") {
           let arr = [];
@@ -47,7 +47,7 @@ export function renderCodeJsonByParams<T>(params: T[], isMock?: boolean): object
         }
         value = [childrenValue];
       } else if (item.type == "tree" && item.children && item.children.length) {
-        const childrenData = renderCodeJsonByParams(item.children);
+        const childrenData = renderCodeJsonByParams(item.children, isMock);
         value = [childrenData];
       }
       json[item.name] = value;

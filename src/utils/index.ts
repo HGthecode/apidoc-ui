@@ -1,16 +1,7 @@
 import { ConfigAppItem } from "@/api/interface/config";
 import { cloneDeep } from "lodash";
-import { createApiPageKeyState, createMdPageKeyState } from "./interface";
+import { createMdPageKeyState } from "./interface";
 import { KEEPALIVE_PAGE_COMMA } from "@/store/modules/App/types";
-
-// 创建api接口页面的key
-export const createApiPageKey = (apiData: createApiPageKeyState): string => {
-  let method = apiData.method;
-  if (method && method.indexOf(",") > -1) {
-    method = method.replace(/,/g, "");
-  }
-  return `${apiData.appKey}_${method}_${apiData.url}`;
-};
 
 // 创建md文档页面的key
 export const createMdPageKey = (apiData: createMdPageKeyState): string => {
@@ -35,9 +26,10 @@ export const copyTextToClipboard = (text: string): boolean => {
   element.selectionEnd = text.length;
   let isSuccess = false;
   try {
-    isSuccess = document.execCommand("copy");
+    document.execCommand("copy");
+    isSuccess = true;
   } catch (e) {
-    throw new Error(e);
+    throw new Error();
   }
   element.remove();
   if (originalRange && selection) {

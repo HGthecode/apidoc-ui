@@ -76,7 +76,7 @@ export default defineComponent({
 <style lang="less" scoped>
 .api-method-icon {
   display: inline-block;
-  width: 40px;
+  width: 44px;
   font-size: 12px;
 }
 .method-color_GET {

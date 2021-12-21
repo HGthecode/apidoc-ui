@@ -138,7 +138,7 @@ export default defineComponent({
     const setSelectedKey = (key?: string): boolean => {
       const defaultOpenKeys = getTreePath(props.data, (item) => {
         if (
-          (key && item.key === key) ||
+          (key && item.menu_key === key) ||
           (route.query.appKey && route.query.path && route.query.path === item.path)
         ) {
           return true;
@@ -178,6 +178,18 @@ export default defineComponent({
       state.selectedKeys = e.selectedKeys;
       emit("select", e);
     };
+
+    watch(
+      () => route.fullPath,
+      (v) => {
+        console.log(state.selectedKeys, route.query, v);
+        if (route.query.key) {
+          state.selectedKeys = [route.query.key as string];
+        } else {
+          state.selectedKeys = [];
+        }
+      }
+    );
 
     return { ...toRefs(state), onOpenChange, onSelect };
   },
