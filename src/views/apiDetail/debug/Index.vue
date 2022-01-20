@@ -244,6 +244,7 @@ export default defineComponent({
       }),
       config: computed(() => store.state.app.config),
       eventData: eventData,
+      feConfig: computed(() => store.state.app.feConfig),
     });
     const headersColumns = [
       {
@@ -423,7 +424,10 @@ export default defineComponent({
             item.value &&
             (!item.appKey || item.appKey === "global" || item.appKey === state.appKey)
           ) {
-            headers[item.name] = item.value;
+            headers[item.name] =
+              state.feConfig.HTTP.HEADERS_ENCODEURICOMPONENT !== false
+                ? encodeURIComponent(item.value)
+                : item.value;
           }
         });
       }
@@ -441,7 +445,10 @@ export default defineComponent({
       if (state.headerData && state.headerData.length) {
         state.headerData.forEach((item) => {
           if (item.name && item.default) {
-            headers[item.name] = item.default;
+            headers[item.name] =
+              state.feConfig.HTTP.HEADERS_ENCODEURICOMPONENT !== false
+                ? encodeURIComponent(item.default)
+                : item.default;
           }
         });
       }

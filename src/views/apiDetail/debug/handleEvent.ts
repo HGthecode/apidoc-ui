@@ -7,8 +7,8 @@ import md5 from "js-md5";
 import { t } from "@/hooks/useI18n";
 import Axios from "@/utils/http/index";
 import { isArray, isObject } from "lodash";
-import { DebugEventEnum } from "@/enums/debugEventEnum";
-import moduleName from "ant-design-vue";
+
+const feConfig = JSON.parse(localStorage.APIDOC_CONFIG);
 
 export type ResultStatus = "success" | "error" | "default";
 type EventName =
@@ -69,7 +69,8 @@ const events = {
   ): Promise<EventResult> {
     return new Promise((resolve, reject) => {
       if (eventItem.key) {
-        json.headers[eventItem.key] = value;
+        json.headers[eventItem.key] =
+          feConfig.HTTP.HEADERS_ENCODEURICOMPONENT !== false ? encodeURIComponent(value) : value;
         const res: EventResult = {
           event: eventItem,
           json,
@@ -277,7 +278,7 @@ const events = {
                 }
               } else if (item.event === "setHeader") {
                 if (item.key) {
-                  ajaxOptions.headers[item.key] = itemValue;
+                  ajaxOptions.headers[item.key] = encodeURIComponent(itemValue);
                 } else if (isObject(itemValue)) {
                   ajaxOptions.headers = itemValue;
                 }
@@ -304,7 +305,10 @@ const events = {
                   if (item.key && item.event === "setParam") {
                     json.params[item.key] = itemValue;
                   } else if (item.key && item.event === "setHeader") {
-                    json.headers[item.key] = itemValue;
+                    json.headers[item.key] =
+                      feConfig.HTTP.HEADERS_ENCODEURICOMPONENT !== false
+                        ? encodeURIComponent(itemValue)
+                        : itemValue;
                   }
                 }
               }

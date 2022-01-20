@@ -48,6 +48,7 @@ export interface FeConfigLangState {
 export interface FeConfigHTTPState {
   TIMEOUT?: number;
   HOSTS?: FeConfigHttpHosts[];
+  HEADERS_ENCODEURICOMPONENT?: boolean;
 }
 
 export interface FeConfigHttpHosts {
