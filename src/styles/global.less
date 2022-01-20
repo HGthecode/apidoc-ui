@@ -54,7 +54,8 @@ body{
 		}
 		.ant-input-affix-wrapper .ant-input-prefix, .ant-input-affix-wrapper .ant-input-suffix,
 		.ant-input-search-icon,
-		.ant-select-arrow{
+		.ant-select-arrow,
+		.ant-modal{
 			color:var(--text-color);
 			
 		}
@@ -191,6 +192,30 @@ body{
 			color:var(--text-color);
 		}
 
+		.ant-form-item-label > label,
+		.ant-select-tree li .ant-select-tree-node-content-wrapper,
+		.ant-select-tree{
+			color:var(--text-color)
+		}
+		.ant-select-tree li .ant-select-tree-node-content-wrapper:hover{
+			background-color: var(--bgcolor-grey);
+		}
+		.ant-select-tree li .ant-select-tree-node-content-wrapper.ant-select-tree-node-selected{
+			background-color: var(--bgcolor-grey);
+			color:var(--theme-color);
+		}
+		.ant-dropdown-menu{
+			background-color: var(--bgcolor-light);
+			
+		}
+		.ant-dropdown-menu-item, .ant-dropdown-menu-submenu-title{
+			color:var(--text-color)
+		}
+		.ant-dropdown-menu-item:hover, .ant-dropdown-menu-submenu-title:hover{
+			background-color: var(--bgcolor-grey);
+		}
+
+
 		
 	}
 }
@@ -299,6 +324,6 @@ body{
 	color: var(--text-color)!important;
 }
 .generator-modal{
-    max-width: 1200px;
+    max-width: 96%;
 }
 

@@ -44,7 +44,8 @@
           >
             <template #headerValue="{ text, record }">
               <Upload
-                v-if="record.type === 'file'"
+                v-if="record.type === 'file' || record.type === 'files'"
+                :multiple="record.type === 'files'"
                 :file-list="fileData[record.name]"
                 :remove="
                   (file) => {
@@ -53,13 +54,17 @@
                 "
                 :before-upload="
                   (file) => {
-                    fileBeforeUpload(file, record.name);
+                    fileBeforeUpload(file, record);
                     return false;
                   }
                 "
                 :name="record.name"
               >
-                <a-button> Select File </a-button>
+                <a-button>{{
+                  record.type === "files"
+                    ? t("apiPage.debug.selectFiles")
+                    : t("apiPage.debug.selectFile")
+                }}</a-button>
               </Upload>
               <TableInput
                 v-else
@@ -352,6 +357,14 @@ export default defineComponent({
             if (fileList && fileList.length) {
               formData.append(item.name, fileList[0]);
             }
+          } else if (item.type === "files") {
+            const fileList = state.fileData[item.name];
+            if (fileList && fileList.length) {
+              for (let i = 0; i < fileList.length; i++) {
+                const file = fileList[i];
+                formData.append(`${item.name}[]`, file);
+              }
+            }
           } else {
             const value: any = item.default;
             formData.append(item.name, value);
@@ -410,7 +423,7 @@ export default defineComponent({
             item.value &&
             (!item.appKey || item.appKey === "global" || item.appKey === state.appKey)
           ) {
-            headers[item.name] = encodeURIComponent(item.value);
+            headers[item.name] = item.value;
           }
         });
       }
@@ -428,7 +441,7 @@ export default defineComponent({
       if (state.headerData && state.headerData.length) {
         state.headerData.forEach((item) => {
           if (item.name && item.default) {
-            headers[item.name] = encodeURIComponent(item.default);
+            headers[item.name] = item.default;
           }
         });
       }
@@ -471,6 +484,7 @@ export default defineComponent({
       if (appConfig && appConfig.host) {
         json.baseURL = appConfig.host;
       }
+
       Axios(url, json)
         .then((res) => {
           // 执行后置方法
@@ -493,11 +507,12 @@ export default defineComponent({
         })
         .catch((err) => {
           state.loading = false;
+
           if (err.response) {
             state.returnData = err.response;
           } else {
             state.returnData = {
-              status: 500,
+              status: 404,
               message: err.message,
             };
           }
@@ -506,8 +521,16 @@ export default defineComponent({
       // const method = (props.detail.method as string) && props.detail.method.toLowerCase() : "";
     }
 
-    function fileBeforeUpload(file: UploadFileState, name: string): void {
-      state.fileData[name] = [file];
+    function fileBeforeUpload(file: UploadFileState, record: ParamItem): void {
+      if (
+        record.type === "files" &&
+        state.fileData[record.name] &&
+        state.fileData[record.name].length
+      ) {
+        state.fileData[record.name].push(file);
+      } else {
+        state.fileData[record.name] = [file];
+      }
     }
     function fileHandleRemove(file: UploadFileState, name: string): void {
       let fileList = state.fileData[name];

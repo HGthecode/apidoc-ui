@@ -1,4 +1,5 @@
 import { FormItemType } from "@/components/DataForm/interface";
+import { InputRuleItem } from "@/utils/interface";
 
 export interface GetConfigState {
   lang?: string;
@@ -102,6 +103,12 @@ export interface ConfigGeneratorItemTableItem {
   namespace?: string;
   model_tpl?: string;
   columns?: ConfigGeneratorItemTableColumn[];
+  default_values?: ObjectType[];
+  path?: string;
+  template?: string;
+  desc?: string;
+  model_rules?: InputRuleItem[];
+  table_rules?: InputRuleItem[];
 }
 
 export interface ConfigGeneratorItemTableColumn {

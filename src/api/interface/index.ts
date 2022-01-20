@@ -46,3 +46,8 @@ export interface CheckAuthState {
 export interface CheckAuthResponse {
   token: string;
 }
+
+export interface GeneratorParams {
+  form: ObjectType;
+  tables: any;
+}

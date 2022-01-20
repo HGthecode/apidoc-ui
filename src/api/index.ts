@@ -1,5 +1,5 @@
 import Axios from "@/utils/http/index";
-import { HttpResponse, CheckAuthState, CheckAuthResponse } from "./interface";
+import { HttpResponse, CheckAuthState, CheckAuthResponse, GeneratorParams } from "./interface";
 import { ConfigInfo, GetConfigState } from "./interface/config";
 import { GetApiDataState, ApiDataInfo } from "./interface/apiData";
 import { MdMenuItem, GetMdMenusState, GetMdDetailState, MdDetail } from "./interface/markdown";
@@ -45,6 +45,15 @@ export const checkAuth = (params: CheckAuthState): Promise<HttpResponse<CheckAut
   return Axios(Apis.VERIFY_AUTH.url, {
     method: Apis.VERIFY_AUTH.method,
     params: {
+      ...params,
+    },
+  });
+};
+
+export const generator = (params: GeneratorParams): Promise<HttpResponse<boolean>> => {
+  return Axios(Apis.GENERATOR.url, {
+    method: Apis.GENERATOR.method,
+    data: {
       ...params,
     },
   });

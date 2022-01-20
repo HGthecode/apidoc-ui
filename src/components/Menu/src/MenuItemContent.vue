@@ -65,6 +65,8 @@ export default defineComponent({
     const title = computed(() => {
       if (props.item.title === "未分组") {
         return t("common.notGroup");
+      } else if (!props.item.title && props.item.controller) {
+        return props.item.controller;
       }
       return props.item.title;
     });

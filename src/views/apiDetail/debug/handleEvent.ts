@@ -69,7 +69,7 @@ const events = {
   ): Promise<EventResult> {
     return new Promise((resolve, reject) => {
       if (eventItem.key) {
-        json.headers[eventItem.key] = encodeURIComponent(value);
+        json.headers[eventItem.key] = value;
         const res: EventResult = {
           event: eventItem,
           json,
@@ -251,7 +251,7 @@ const events = {
 
     return new Promise((resolve, reject) => {
       if (eventItem.url) {
-        const method = eventItem.method ? eventItem.method.toLowerCase() : "get";
+        const method = eventItem.method ? eventItem.method.toLowerCase() : json.method;
         let ajaxOptions: any = {
           method,
           headers: {},
@@ -277,7 +277,7 @@ const events = {
                 }
               } else if (item.event === "setHeader") {
                 if (item.key) {
-                  ajaxOptions.headers[item.key] = encodeURIComponent(itemValue);
+                  ajaxOptions.headers[item.key] = itemValue;
                 } else if (isObject(itemValue)) {
                   ajaxOptions.headers = itemValue;
                 }
@@ -304,7 +304,7 @@ const events = {
                   if (item.key && item.event === "setParam") {
                     json.params[item.key] = itemValue;
                   } else if (item.key && item.event === "setHeader") {
-                    json.headers[item.key] = encodeURIComponent(itemValue);
+                    json.headers[item.key] = itemValue;
                   }
                 }
               }

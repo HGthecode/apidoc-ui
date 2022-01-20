@@ -24,6 +24,10 @@ const Apis: ApiOptionState = {
     url: "/apidoc/verifyAuth",
     method: "post",
   },
+  GENERATOR: {
+    url: "/apidoc/generator",
+    method: "post",
+  },
 };
 
 export default Apis;

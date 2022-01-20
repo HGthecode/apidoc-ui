@@ -1,6 +1,6 @@
 import { ConfigAppItem } from "@/api/interface/config";
 import { cloneDeep } from "lodash";
-import { createMdPageKeyState } from "./interface";
+import { createMdPageKeyState, InputRuleItem } from "./interface";
 import { KEEPALIVE_PAGE_COMMA } from "@/store/modules/App/types";
 
 // 创建md文档页面的key
@@ -178,14 +178,26 @@ export const replaceAppConfigKeys = (
   let text = str;
   const appList = getAppsConfigItemsByKey(apps, appKey);
   if (appList && appList.length) {
-    for (let i = 0; i < appList.length; i++) {
+    for (let i = 0; i < 3; i++) {
       const item: any = appList[i];
-      for (const key in item) {
-        const keyStr = `\${app[${i}].${key}}`;
-        if (text.indexOf(keyStr) > -1) {
-          const reg = RegExpEscape(keyStr);
-          const exp = new RegExp(reg, "g");
-          text = text.replace(exp, item[key]);
+      if (item) {
+        for (const key in item) {
+          const keyStr = `\${app[${i}].${key}}`;
+          if (text.indexOf(keyStr) > -1) {
+            const reg = RegExpEscape(keyStr);
+            const exp = new RegExp(reg, "g");
+            text = text.replace(exp, item[key]);
+          }
+        }
+      } else {
+        const itemObj: any = appList[0];
+        for (const key in itemObj) {
+          const keyStr = `\\\${app[${i}].${key}}`;
+          if (text.indexOf(keyStr) > -1) {
+            const reg = RegExpEscape(keyStr);
+            const exp = new RegExp(reg, "g");
+            text = text.replace(exp, "");
+          }
         }
       }
     }
@@ -193,6 +205,11 @@ export const replaceAppConfigKeys = (
   return text;
 };
 
+/**
+ * 转义正则字符
+ * @param s
+ * @returns
+ */
 const RegExpEscape = (s: string) => {
   return s.replace(/[-\\/\\^$*+?.()|[\]{}]/g, "\\$&");
 };
@@ -276,4 +293,44 @@ export const createIdcard = () => {
     }
   }
   return idcard;
+};
+
+/**
+ * 驼峰转下划线
+ * @param camelStr
+ * @returns
+ */
+export const camelToUnderline = (camelStr: string): string => {
+  return camelStr
+    .replace(/[A-Z]/g, function (s) {
+      return " " + s.toLowerCase();
+    })
+    .trim()
+    .replaceAll(" ", "_");
+};
+
+/**
+ * 验证字符串是否符合传入的规则
+ * @param value
+ * @param rules
+ * @returns
+ */
+export const checkRules = (value: string, rules: InputRuleItem[]): string => {
+  let message = "";
+  if (rules && rules.length) {
+    for (let j = 0; j < rules.length; j++) {
+      const rule = rules[j];
+      if (rule.required && !(value || value == "0")) {
+        message = rule.message;
+        break;
+      } else if (rule.pattern) {
+        const reg = new RegExp(rule.pattern);
+        if (!reg.test(value)) {
+          message = rule.message;
+          break;
+        }
+      }
+    }
+  }
+  return message;
 };

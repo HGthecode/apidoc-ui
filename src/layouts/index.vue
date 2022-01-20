@@ -1,6 +1,6 @@
 <template>
   <div v-show="!initLoading" class="layout-container">
-    <layout-header />
+    <layout-header @reload="onReload" />
     <error-card
       v-if="
         !loading &&

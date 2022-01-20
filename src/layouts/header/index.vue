@@ -12,6 +12,7 @@
         <global-params />
         <host-select />
         <lang-select />
+        <generator @submitSuccess="onGeneratorSubmitSuccess" />
       </a-space>
       <!-- <a-button><GlobalOutlined />全局参数</a-button> -->
     </div>
@@ -32,6 +33,7 @@ import * as Types from "@/store/modules/App/types";
 
 import { useStore } from "vuex";
 import { GlobalState } from "@/store";
+import Generator from "@/components/Generator";
 
 export default defineComponent({
   components: {
@@ -44,9 +46,11 @@ export default defineComponent({
     HostSelect,
     MenuOutlined,
     LangSelect,
+    Generator,
     // GlobalOutlined,
   },
-  setup() {
+  emits: ["reload"],
+  setup(props, { emit }) {
     let store = useStore<GlobalState>();
     // const keepAlivePages: string[] = [];
     const state = reactive({
@@ -57,7 +61,11 @@ export default defineComponent({
       store.dispatch(`app/${Types.SET_IS_OPENSIDE}`, true);
     }
 
-    return { ...toRefs(state), onOpenSideMenu };
+    function onGeneratorSubmitSuccess() {
+      emit("reload", "api");
+    }
+
+    return { ...toRefs(state), onOpenSideMenu, onGeneratorSubmitSuccess };
   },
 });
 </script>

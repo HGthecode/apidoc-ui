@@ -31,7 +31,6 @@ export interface FeConfigState {
   CACHE?: FeConfigCecheState;
   LANG?: FeConfigLangState[];
   HTTP: FeConfigHTTPState;
-  PUBLICPATH?: string;
   MENU?: FeConfigMenuState;
   WITHCREDENTIALS?: boolean;
 }
