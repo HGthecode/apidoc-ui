@@ -10,7 +10,7 @@ export function renderCodeJsonByParams<T>(params: T[], isMock?: boolean): object
       if (isMock && item.mock) {
         fieldValue = Mock.mock(item.mock);
       }
-      if (!fieldValue) {
+      if (fieldValue === null) {
         switch (item.type) {
           case "int":
             fieldValue = 0;

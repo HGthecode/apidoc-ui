@@ -46,6 +46,7 @@ export interface ParamItem {
   require?: boolean;
   source?: string;
   type?: string;
+  mock?: string;
 }
 
 export interface ApiEventItem {

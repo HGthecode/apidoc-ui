@@ -44,7 +44,7 @@ export const copyTextToClipboard = (text: string): boolean => {
  * @param {string} s
  */
 export const trim = (s: string): string => {
-  if (s) {
+  if (s && s.replace) {
     return s.replace(/(^\s*)|(\s*$)/g, "");
   }
   return "";
@@ -243,7 +243,7 @@ export const getRandomNumber = (max: number, min?: number): number => {
 };
 
 // 根据前17位生成末位
-export const createIdcardEndNumber = (idcard: string) => {
+export const createIdcardEndNumber = (idcard: string): string | number => {
   let arrExp = [7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2]; // 加权因子
   let arrValid = [1, 0, "X", 9, 8, 7, 6, 5, 4, 3, 2]; // 校验码
   let sum = 0;
@@ -255,7 +255,7 @@ export const createIdcardEndNumber = (idcard: string) => {
 };
 
 // 生成身份证号
-export const createIdcard = () => {
+export const createIdcard = (): string => {
   let cityPrefixs = [
     11, 12, 13, 14, 15, 21, 22, 23, 31, 32, 33, 34, 35, 36, 37, 41, 42, 43, 44, 45, 46, 50, 51, 52,
     53, 54, 61, 62, 63, 64, 65, 71, 81, 82,

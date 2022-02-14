@@ -24,7 +24,7 @@
     </div>
     <div>
       <Title :title="t('apiPage.title.params')">
-        <a-button @click="onMockReload">
+        <a-button v-if="isMock" @click="onMockReload">
           <ReloadOutlined />{{ t("apiPage.debug.mock.reload") }}
         </a-button>
       </Title>
@@ -83,7 +83,10 @@
         />
       </div>
     </div>
-    <div class="mb-sm">
+    <div class="excute-buttons">
+      <a-button v-if="isMock" type="primary" :loading="loading" block @click="mockAndExcute">{{
+        t("apiPage.debug.mockAndExcute")
+      }}</a-button>
       <a-button type="primary" :loading="loading" block @click="excute">{{
         t("apiPage.debug.excute")
       }}</a-button>
@@ -149,6 +152,8 @@ import EventPopover from "./EventPopover.vue";
 import { getAppsConfigItemByKey } from "@/utils";
 import { ConfigAppItem } from "@/api/interface/config";
 import { useRoute } from "vue-router";
+import Mock from "mockjs";
+import "@/utils/helper/mockExtend";
 
 interface EventDataState {
   before: ResultState;
@@ -245,6 +250,7 @@ export default defineComponent({
       config: computed(() => store.state.app.config),
       eventData: eventData,
       feConfig: computed(() => store.state.app.feConfig),
+      isMock: false,
     });
     const headersColumns = [
       {
@@ -310,23 +316,34 @@ export default defineComponent({
 
     function handleParamData(paramData: ParamItem[]): ParamItem[] {
       const data = cloneDeep(paramData);
+      let isMock = false;
+      let res: ParamItem[] = [];
       if (data && data.length) {
         // 合并全局参数
         const globalParams = state.globalParams;
         if (globalParams && globalParams.params && globalParams.params.length) {
-          return data.map((item) => {
+          res = data.map((item) => {
             const globalParamFind = globalParams.params.find((p) => p.name === item.name);
             if (globalParamFind && globalParamFind.value) {
               item.default = globalParamFind.value;
             }
+            if (item.mock) {
+              isMock = true;
+            }
             return item;
           });
         } else {
-          return data;
+          res = data.map((item) => {
+            if (item.mock) {
+              isMock = true;
+              item.default = Mock.mock(item.mock);
+            }
+            return item;
+          });
         }
       }
-
-      return [];
+      state.isMock = isMock;
+      return res;
     }
 
     const tableScroll = {
@@ -406,6 +423,13 @@ export default defineComponent({
           message.error(t("apiPage.json.formatError"));
         }
       }
+    }
+
+    function mockAndExcute() {
+      onMockReload();
+      setTimeout(() => {
+        excute();
+      }, 200);
     }
 
     async function sendRequest(url: string, data?: any) {
@@ -559,9 +583,22 @@ export default defineComponent({
 
     function onMockReload() {
       if (props.detail.param) {
-        const json = renderCodeJsonByParams(props.detail.param, true);
-        state.paramCode = formatJsonCode(json);
+        if (props.detail.paramType === "formdata" || props.detail.paramType === "route") {
+          state.paramFormData = props.detail.param.map((p) => {
+            if (p.mock) {
+              p.default = Mock.mock(p.mock);
+            }
+            return p;
+          });
+        } else {
+          const json = renderCodeJsonByParams(props.detail.param, true);
+          state.paramCode = formatJsonCode(json);
+        }
       }
+      // if (props.detail.param) {
+      //   const json = renderCodeJsonByParams(props.detail.param, true);
+      //   state.paramCode = formatJsonCode(json);
+      // }
     }
 
     return {
@@ -577,6 +614,7 @@ export default defineComponent({
       formatJsonCode,
       onMockReload,
       t,
+      mockAndExcute,
     };
   },
 });
