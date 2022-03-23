@@ -41,12 +41,13 @@
         :ref="setTableRef"
         :data="item.default_fields"
         :option="item"
+        :index="index"
         :fieldTypes="currentGenerator.table.field_types"
       />
     </div>
     <template #footer>
       <a-button danger ghost @click="onCancelModal">{{ t("common.cancel") }}</a-button>
-      <a-button type="primary" @click="handleOk">{{ t("common.ok") }}</a-button>
+      <a-button :loading="loading" type="primary" @click="handleOk">{{ t("common.ok") }}</a-button>
     </template>
   </a-modal>
 </template>
@@ -67,6 +68,7 @@ import {
   Menu,
   Checkbox,
   notification,
+  Spin,
 } from "ant-design-vue";
 import useModal from "@/hooks/useModal";
 import { useStore } from "vuex";
@@ -109,6 +111,7 @@ export default defineComponent({
     [Menu.name]: Menu,
     [Menu.Item.name]: Menu.Item,
     [Checkbox.name]: Checkbox,
+    [Spin.name]: Spin,
     DataForm,
     DataTableEditor,
     FilesEditor,
@@ -120,10 +123,11 @@ export default defineComponent({
     const { visible, onShow, onCancel } = useModal();
     const formRef = ref();
     const filesRef = ref();
-    let tableRefs: any = [];
+    let tableRefs: any = {};
     const setTableRef = (el: any) => {
       if (el) {
-        tableRefs.push(el);
+        const index = el.$attrs.index;
+        tableRefs[index] = el;
       }
     };
 
@@ -154,66 +158,78 @@ export default defineComponent({
       formData: formData,
       formItems: formItems,
       tableItems: tableItems,
+      loading: false,
     });
 
     async function handleOk() {
-      const formValues = await formRef.value.onSubmit();
+      state.loading = true;
 
-      const fileDatas = filesRef.value.getData();
-      if (!fileDatas) {
-        return;
-      }
+      try {
+        const formValues = await formRef.value.onSubmit();
 
-      let tables = [];
-      if (tableRefs && tableRefs.length) {
-        let isError = false;
-        for (let i = 0; i < tableRefs.length; i++) {
-          const tableItem: any = tableRefs[i];
-          if (tableItem && tableItem.getData) {
-            const tableData = tableItem.getData();
-            if (tableData) {
-              tables.push(tableData);
-            } else {
-              isError = true;
-              break;
-            }
-          }
-        }
-        if (isError) {
+        const fileDatas = filesRef.value.getData();
+        if (!fileDatas) {
+          state.loading = false;
           return;
         }
-      }
 
-      const json = {
-        index: state.currentIndex,
-        form: formValues,
-        files: fileDatas,
-        tables: tables,
-      };
+        let tables = [];
 
-      generator(json)
-        .then(() => {
-          message.success(t("generator.submitSuccess"));
-          onCancelModal();
-          emit("submitSuccess");
-        })
-        .catch((err) => {
-          if (err.response) {
-            const message =
-              err.response && err.response.data && err.response.data.message
-                ? err.response.data.message
-                : err.message;
-            notification.error({
-              message: err.response.status,
-              description: message,
-            });
-          } else {
-            notification.error({
-              message: err.response.status,
-              description: err.message,
-            });
+        if (Object.keys(tableRefs).length) {
+          let isError = false;
+          for (const key in tableRefs) {
+            const tableItem: any = tableRefs[key];
+            if (tableItem && tableItem.getData) {
+              const tableData = tableItem.getData();
+              if (tableData) {
+                tables.push(tableData);
+              } else {
+                isError = true;
+                break;
+              }
+            }
           }
-        });
+          if (isError) {
+            state.loading = false;
+            return;
+          }
+        }
+
+        const json = {
+          index: state.currentIndex,
+          form: formValues,
+          files: fileDatas,
+          tables: tables,
+        };
+
+        generator(json)
+          .then(() => {
+            message.success(t("generator.submitSuccess"));
+            state.loading = false;
+            onCancelModal();
+            emit("submitSuccess");
+          })
+          .catch((err) => {
+            state.loading = false;
+            if (err.response) {
+              const message =
+                err.response && err.response.data && err.response.data.message
+                  ? err.response.data.message
+                  : err.message;
+              notification.error({
+                message: err.response.status,
+                description: message,
+              });
+            } else {
+              notification.error({
+                message: err.response.status,
+                description: err.message,
+              });
+            }
+          });
+      } catch (error) {
+        state.loading = false;
+      }
     }
 
     /**
@@ -221,7 +237,7 @@ export default defineComponent({
      */
     function onAppChange(appKey: string) {
       state.currentAppKey = appKey;
-      tableRefs = [];
+      tableRefs = {};
       const appConfig = getAppsConfigItemByKey(state.config.apps as ConfigAppItem[], appKey);
       if (appConfig as ConfigAppItem) {
         const groups = appConfig?.groups as ConfigAppGroupItem[];
@@ -248,7 +264,7 @@ export default defineComponent({
 
     function handleMenuClick(e: MenuInfo) {
       state.currentIndex = e.key;
-      tableRefs = [];
+      tableRefs = {};
       const generatorFind = state.config.generator && state.config.generator[e.key as number];
       if (generatorFind) {
         state.modalTitle = `${t("generator.title")} - ${generatorFind.title}`;

@@ -182,7 +182,6 @@ export default defineComponent({
     watch(
       () => route.fullPath,
       (v) => {
-        console.log(state.selectedKeys, route.query, v);
         if (route.query.key) {
           state.selectedKeys = [route.query.key as string];
         } else {

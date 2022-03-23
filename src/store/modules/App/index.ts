@@ -173,6 +173,12 @@ const app: Module<AppState, GlobalState> = {
     keepAliveKeys(state) {
       return ["home"].concat(Object.keys(state.pageData));
     },
+    config(state) {
+      return state.config;
+    },
+    appKey(state) {
+      return state.appKey;
+    },
   },
 };
 

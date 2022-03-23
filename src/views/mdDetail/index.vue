@@ -21,6 +21,8 @@ import * as Types from "@/store/modules/App/types";
 import Markdown, { MdAnchor } from "@/components/Markdown";
 import Cache from "@/utils/cache";
 import Skeleton from "@/views/apiDetail/skeleton.vue";
+import { AxiosError } from "axios";
+import { handleApidocHttpError } from "@/utils/http/handleError";
 
 export default defineComponent({
   components: {
@@ -58,16 +60,22 @@ export default defineComponent({
           appKey: appKey,
           path: query.path as string,
           lang: cacheLang,
-        }).then((res) => {
-          store.dispatch(`app/${Types.ADD_PAGE_DATA}`, {
-            ...state.pageData[key],
-            mdDetail: res.data.data.content as string,
-            appKey: state.appKey,
-            key,
+        })
+          .then((res) => {
+            store.dispatch(`app/${Types.ADD_PAGE_DATA}`, {
+              ...state.pageData[key],
+              mdDetail: res.data.data.content as string,
+              appKey: state.appKey,
+              key,
+            });
+            state.detail = state.pageData[key];
+            state.loading = false;
+          })
+          .catch((err: AxiosError) => {
+            handleApidocHttpError(err).then(() => {
+              fetchData();
+            });
           });
-          state.detail = state.pageData[key];
-          state.loading = false;
-        });
       }
     };
     fetchData();

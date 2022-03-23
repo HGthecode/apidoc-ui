@@ -93,6 +93,16 @@ service.interceptors.request.use(
 // 响应拦截器
 service.interceptors.response.use(
   (response: AxiosResponse) => {
+    if (
+      response.config &&
+      response.config.url &&
+      checkToeknUrls.includes(response.config.url) &&
+      response.data &&
+      response.data.code !== 0
+    ) {
+      //apidoc的接口
+      return Promise.reject({ response });
+    }
     return response;
   },
   (error) => {

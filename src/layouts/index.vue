@@ -13,7 +13,6 @@
       <layout-multitabs />
       <layout-content />
     </a-spin>
-    <verify-auth ref="verifyAuthRef" @check="onCheckAuth" />
   </div>
 </template>
 <script lang="ts">
@@ -32,11 +31,11 @@ import LayoutMultitabs from "./multitabs";
 import Cache from "@/utils/cache";
 import { cloneDeep } from "lodash";
 import { AxiosError } from "axios";
-import VerifyAuth from "@/components/VerifyAuth";
 import ErrorCard from "@/components/Error";
 import { useLoading } from "@/components/Loading";
 import { handleConfigAppsData, handleInitGlobalParams } from "@/store/modules/Apidoc/helper";
 import { ThemeEnum } from "@/enums/appEnum";
+import { handleApidocHttpError } from "@/utils/http/handleError";
 
 export default defineComponent({
   components: {
@@ -45,14 +44,12 @@ export default defineComponent({
     LayoutSider,
     LayoutMultitabs,
     [Spin.name]: Spin,
-    VerifyAuth,
     ErrorCard,
   },
   setup() {
     let store = useStore<GlobalState>();
     const route = useRoute();
     const theme = computed(() => store.state.app.theme);
-    const verifyAuthRef = ref<HTMLElement | null>(null);
     let initLoading = ref<boolean>(true);
     const error: AxiosError = {
       config: {},
@@ -94,12 +91,14 @@ export default defineComponent({
           closeFullLoading();
         })
         .catch((err: AxiosError) => {
-          const status = err.response && err.response.status ? err.response.status : 500;
-          if (status === 401) {
-            unref(verifyAuthRef) && (unref(verifyAuthRef) as any).onShow();
-          } else {
-            state.error = err;
-          }
+          handleApidocHttpError(err).then((res) => {
+            if (res === false) {
+              state.error = err;
+            } else {
+              fetchApiData(state.appKey);
+              fetchMdMenus(state.appKey);
+            }
+          });
 
           state.loading = false;
           closeFullLoading();
@@ -176,7 +175,7 @@ export default defineComponent({
       state.appKey && fetchApiData(state.appKey);
     };
 
-    return { ...toRefs(state), onReload, verifyAuthRef, onCheckAuth, initLoading };
+    return { ...toRefs(state), onReload, onCheckAuth, initLoading };
   },
 });
 </script>

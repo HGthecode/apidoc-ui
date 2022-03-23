@@ -398,6 +398,7 @@ export default defineComponent({
             `<${item.name}>`,
             `<${item.name}?>`,
             `[:${item.name}]`,
+            `{${item.name}}`,
           ];
           let isReplace = false;
           for (let i = 0; i < placeholderKeys.length; i++) {

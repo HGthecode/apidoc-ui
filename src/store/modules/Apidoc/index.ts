@@ -162,6 +162,11 @@ const apidoc: Module<ApidocState, GlobalState> = {
       state.isReload = flag;
     },
   },
+  getters: {
+    authData(state) {
+      return state.authData;
+    },
+  },
 };
 
 export default apidoc;
