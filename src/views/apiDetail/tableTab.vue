@@ -154,6 +154,10 @@ export default defineComponent({
         dataIndex: "default",
         align: "center",
         width: 100,
+        customRender: (e: any) => {
+          const { text } = e;
+          return text ? `${text}` : "";
+        },
       },
       {
         title: t("common.desc"),
