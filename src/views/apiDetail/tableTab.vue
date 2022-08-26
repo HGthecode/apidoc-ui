@@ -156,7 +156,7 @@ export default defineComponent({
         width: 100,
         customRender: (e: any) => {
           const { text } = e;
-          return text ? `${text}` : "";
+          return typeof text == "boolean" ? `${text}` : text;
         },
       },
       {

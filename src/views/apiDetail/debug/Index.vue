@@ -280,7 +280,15 @@ export default defineComponent({
         const globalParams = state.globalParams;
         if (globalParams && globalParams.headers && globalParams.headers.length) {
           return data.map((item) => {
-            const globalParamFind = globalParams.headers.find((p) => p.name === item.name);
+            const globalParamFind = globalParams.headers.find((p) => {
+              if (
+                p.name === item.name &&
+                (!p.appKey || p.appKey === "global" || p.appKey === state.appKey)
+              ) {
+                return true;
+              }
+              return false;
+            });
             if (globalParamFind && globalParamFind.value) {
               item.default = globalParamFind.value;
             }
@@ -323,7 +331,11 @@ export default defineComponent({
         const globalParams = state.globalParams;
         if (globalParams && globalParams.params && globalParams.params.length) {
           res = data.map((item) => {
-            const globalParamFind = globalParams.params.find((p) => p.name === item.name);
+            const globalParamFind = globalParams.params.find(
+              (p) =>
+                p.name === item.name &&
+                (!p.appKey || p.appKey === "global" || p.appKey === state.appKey)
+            );
             if (globalParamFind && globalParamFind.value) {
               item.default = globalParamFind.value;
             }
