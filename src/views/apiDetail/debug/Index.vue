@@ -29,10 +29,7 @@
         </a-button>
       </Title>
       <div class="mb-sm">
-        <div
-          v-if="detail.paramType === 'formdata' || detail.paramType === 'route'"
-          class="param-box"
-        >
+        <div v-if="detail.paramType === 'formdata'" class="param-box">
           <Table
             :columns="headersColumns"
             size="small"
@@ -313,7 +310,7 @@ export default defineComponent({
     watchEffect(() => {
       if (props.detail.param) {
         const paramFormData = handleParamData(props.detail.param);
-        if (props.detail.paramType === "formdata" || props.detail.paramType === "route") {
+        if (props.detail.paramType === "formdata") {
           state.paramFormData = paramFormData;
         } else {
           const json = renderCodeJsonByParams(paramFormData, true);
@@ -377,8 +374,27 @@ export default defineComponent({
       state.paramCode = code;
     }
 
+    function replaceRouteParam(url: string, key: string, value: any) {
+      const placeholderKeys = [`:${key}`, `<${key}>`, `<${key}?>`, `[:${key}]`, `{${key}}`];
+      let isReplace = false;
+      for (let i = 0; i < placeholderKeys.length; i++) {
+        const key = placeholderKeys[i];
+        if (url.indexOf(key) > -1) {
+          const reg = new RegExp(key, "g");
+          url = url.replace(reg, value);
+          isReplace = true;
+        }
+      }
+
+      return {
+        url,
+        isReplace,
+      };
+    }
+
     function excute() {
       let url = props.detail.url as string;
+
       if (props.detail.paramType == "formdata") {
         const formData = new FormData();
         state.paramFormData.forEach((item) => {
@@ -396,41 +412,28 @@ export default defineComponent({
               }
             }
           } else {
-            const value: any = item.default;
-            formData.append(item.name, value);
+            const routeData = replaceRouteParam(url, item.name, item.default);
+            url = routeData.url;
+            if (!routeData.isReplace) {
+              const value: any = item.default;
+              formData.append(item.name, value);
+            }
           }
         });
         sendRequest(url, formData);
-      } else if (props.detail.paramType == "route") {
-        // 路由参数，将参数拼接到url中
-        let params: any = {};
-        state.paramFormData.forEach((item) => {
-          const placeholderKeys = [
-            `:${item.name}`,
-            `<${item.name}>`,
-            `<${item.name}?>`,
-            `[:${item.name}]`,
-            `{${item.name}}`,
-          ];
-          let isReplace = false;
-          for (let i = 0; i < placeholderKeys.length; i++) {
-            const key = placeholderKeys[i];
-            if (url.indexOf(key) > -1) {
-              const reg = new RegExp(key, "g");
-              const value: any = item.default;
-              url = url.replace(reg, value);
-              isReplace = true;
-            }
-          }
-          if (!isReplace) {
-            params[item.name] = item.default;
-          }
-        });
-        sendRequest(url, params);
       } else if (state.paramCode as string) {
         try {
           const paramJson = eval("(" + state.paramCode + ")");
-          sendRequest(url, paramJson);
+          let json: any = {};
+          for (const key in paramJson) {
+            const value = paramJson[key];
+            const routeData = replaceRouteParam(url, key, value);
+            url = routeData.url;
+            if (!routeData.isReplace) {
+              json[key] = value;
+            }
+          }
+          sendRequest(url, json);
         } catch (error) {
           state.loading = false;
           message.error(t("apiPage.json.formatError"));
