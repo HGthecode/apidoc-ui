@@ -1,22 +1,28 @@
 <template>
-  <div :class="['code-edit-wraper', { mobile: isMobile }]">
-    <div class="code-edit-box">
-      <monaco-editor :code="code" :readOnly="readOnly" @change="onCodeChange" />
+  <div :class="['code-edit-wraper', appStore.device]">
+    <div class="code-edit-box" @mouseover="onHover" @mouseleave="onMouseleave">
+      <monaco-editor
+        :code="props.code"
+        :readOnly="props.readOnly"
+        @change="onCodeChange"
+        :height="height"
+        :language="language"
+      />
     </div>
     <div class="code-edit-actins">
       <a-button class="full-button" size="small" @click="openModalView">
         <span><FullscreenOutlined /></span>
       </a-button>
       <a-button class="copy-button" size="small" @click="onCopy">
-        <span v-if="isCopySuccess"><CheckOutlined /></span>
+        <span v-if="state.isCopySuccess"><CheckOutlined /></span>
         <span v-else><CopyOutlined /></span>
       </a-button>
     </div>
   </div>
   <a-modal
-    v-model:visible="visible"
+    v-model:visible="state.visible"
     centered
-    :title="title"
+    :title="props.title"
     width="90%"
     :footer="false"
     :bodyStyle="{ padding: '10px' }"
@@ -27,104 +33,92 @@
         @change="onCodeChange"
         :readOnly="readOnly"
         height="calc(100vh - 150px)"
+        :language="language"
       />
     </div>
   </a-modal>
 </template>
 
-<script lang="ts">
-import { defineComponent, PropType, ref, computed } from "vue";
-import { Button, Modal } from "ant-design-vue";
-import { CopyOutlined, CheckOutlined, FullscreenOutlined } from "@ant-design/icons-vue";
-import { copyTextToClipboard } from "@/utils";
-import MonacoEditor from "@/components/MonacoEditor";
-import * as Monaco from "monaco-editor";
-import { useStore } from "vuex";
-import { GlobalState } from "@/store";
+<script lang="ts" setup>
+  import { CopyOutlined, CheckOutlined, FullscreenOutlined } from '@ant-design/icons-vue'
+  import MonacoEditor from '/@/components/MonacoEditor'
+  import { useAppStore } from '/@/store/modules/app'
+  import { useApidocStore } from '/@/store/modules/apidoc'
+  import { copyTextToClipboard } from '/@/utils/helper/index'
+  import { debounce } from 'lodash-es'
+  const appStore = useAppStore()
+  const apidocStore = useApidocStore()
 
-export default defineComponent({
-  components: {
-    [Button.name]: Button,
-    [Modal.name]: Modal,
-    CopyOutlined,
-    CheckOutlined,
-    FullscreenOutlined,
-    MonacoEditor,
-  },
-  props: {
-    lang: {
-      type: String as PropType<string>,
-      default: "json",
+  const props = withDefaults(
+    defineProps<{
+      language?: string
+      code: string
+      title?: string
+      onChange?: (value: string) => void
+      readOnly: boolean
+      height?: string
+      hoverTipsParams?: any
+    }>(),
+    {
+      language: 'json',
     },
-    code: {
-      type: String as PropType<string>,
-      default: "",
-    },
-    title: {
-      type: String as PropType<string>,
-      default: "",
-    },
-    onChange: {
-      type: Function as PropType<
-        (value: string, event: Monaco.editor.IModelContentChangedEvent) => void
-      >,
-      required: true,
-    },
-    readOnly: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  setup(props, { attrs }) {
-    const store = useStore<GlobalState>();
-    const isCopySuccess = ref(false);
-    const visible = ref(false);
-    const isMobile = computed(() => store.state.app.isMobile);
+  )
 
-    function onCopy() {
-      props.code && copyTextToClipboard(props.code);
-      isCopySuccess.value = true;
-      setTimeout(() => {
-        isCopySuccess.value = false;
-      }, 1000);
-    }
+  const state = reactive<{
+    visible: boolean
+    isCopySuccess: boolean
+  }>({
+    visible: false,
+    isCopySuccess: false,
+  })
 
-    function openModalView() {
-      visible.value = true;
-    }
+  const onCodeChange = (code: string) => {
+    props.onChange && props.onChange(code)
+  }
 
-    function onCodeChange(code: string, event: Monaco.editor.IModelContentChangedEvent) {
-      props.onChange(code, event);
-    }
-    return { onCopy, visible, isCopySuccess, openModalView, onCodeChange, isMobile };
-  },
-});
+  const openModalView = () => {
+    state.visible = true
+  }
+
+  function onCopy() {
+    props.code && copyTextToClipboard(props.code)
+    state.isCopySuccess = true
+    setTimeout(() => {
+      state.isCopySuccess = false
+    }, 1000)
+  }
+  const onHover = debounce(() => {
+    apidocStore.setCurrentEditorHoverTipsParams(props.hoverTipsParams)
+  }, 300)
+  const onMouseleave = () => {
+    apidocStore.setCurrentEditorHoverTipsParams(undefined)
+  }
 </script>
 
 <style lang="less" scoped>
-.code-edit-wraper {
-  position: relative;
+  .code-edit-wraper {
+    position: relative;
 
-  .code-edit-actins {
-    position: absolute;
-    top: 5px;
-    right: 15px;
-    display: none;
-  }
-  &.mobile,
-  &:hover {
     .code-edit-actins {
-      display: block;
+      position: absolute;
+      top: 0;
+      right: 15px;
+      display: none;
+    }
+    &.mobile,
+    &:hover {
+      .code-edit-actins {
+        display: block;
+      }
     }
   }
-}
-.code-edit-box {
-  border: 1px solid var(--color-line);
-  pre {
-    margin-bottom: 0;
+  .code-edit-box {
+    border: 1px solid @input-border-color;
+    pre {
+      margin-bottom: 0;
+    }
+    .hljs {
+      background: @background-color-base;
+    }
   }
-  .hljs {
-    background: var(--code-bgcolor);
-  }
-}
 </style>

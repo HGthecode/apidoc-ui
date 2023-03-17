@@ -1,41 +1,21 @@
-import { ApiDataInfo, ApiItem } from "@/api/interface/apiData";
-import { MenuItemType } from "@/components/Menu/src/interface";
-import { ApiAnalysisData } from "@/store/modules/Apidoc/interface";
-import { MdMenuItem } from "@/api/interface/markdown";
-import {
-  ConfigAppGroupItem,
-  ConfigAppItem,
-  ConfigGlobalParamItem,
-  ConfigInfo,
-} from "@/api/interface/config";
-import Cache from "@/utils/cache";
-import * as Types from "./types";
-import { cloneDeep } from "lodash";
+import { ApiMenuItem, ApiMenusResult, DocMenusItem } from '../../../api/apidocApi/types'
+import { Dashboard } from './types'
 
 interface ReturnHandleApiData {
-  apiList: ApiItem[];
-  apiMenus: MenuItemType[];
-  apiObject: ApiObject;
-  apiAnalysis: ApiAnalysisData;
-}
-
-interface ApiObject {
-  [key: string]: ApiItem;
+  apiMenus: ApiMenuItem[]
+  dashboard: Dashboard
 }
 
 /**
- * 处理apiData接口响应数据
+ * 处理apiMenus接口响应数据
  * @param data
- * @param appKey
  * @returns
  */
-export function handleApiData(data: ApiDataInfo, appKey: string): ReturnHandleApiData {
-  const apiData = data.data;
+export function handleApiData(data: ApiMenusResult): ReturnHandleApiData {
+  const apiData = data.data
   const res: ReturnHandleApiData = {
-    apiList: [],
     apiMenus: [],
-    apiObject: {},
-    apiAnalysis: {
+    dashboard: {
       apiCount: 0,
       apiMethodTotal: {},
       controllerGroupTotal: {},
@@ -43,242 +23,124 @@ export function handleApiData(data: ApiDataInfo, appKey: string): ReturnHandleAp
       apiTagTotal: {},
       apiAuthorTotal: {},
     },
-  };
+  }
   // 递归处理数据
-  function renderApiData(list: ApiItem[]): MenuItemType[] {
+  function renderApiData(list: ApiMenuItem[]): ApiMenuItem[] {
     const apiMenus = list.map((item) => {
-      const method = item.method as string;
-      let methodList: string[] = [];
+      const method = item.method
+      let methodList: string[] = []
 
-      let type = "folder";
+      let type = 'folder'
       if (item.controller) {
-        type = "controller";
-      } else if (method && method.indexOf(",") > -1) {
-        type = "multiple";
-        methodList = method.split(",");
+        type = 'controller'
+      } else if (method && method.indexOf(',') > -1 && typeof method == 'string') {
+        type = 'multiple'
+        methodList = method.split(',')
+      } else if (method && typeof method == 'object' && method.length) {
+        type = 'multiple'
+        methodList = method
       } else if (method) {
-        type = "api";
-        methodList = [method];
+        type = 'api'
+        methodList = [method as string]
       }
-      if (type === "controller" && item.group) {
+      if (type === 'controller' && item.group) {
         // 控制器分组
-        const groupName = item.group;
+        const groupName = item.group
         // 分组下的api数量
-        const childrenApiCount = item.children && item.children.length ? item.children.length : 0;
-        if (res.apiAnalysis.apiGroupTotal[groupName]) {
-          res.apiAnalysis.apiGroupTotal[groupName] =
-            res.apiAnalysis.apiGroupTotal[groupName] + childrenApiCount;
+        const childrenApiCount = item.children && item.children.length ? item.children.length : 0
+        if (res.dashboard.apiGroupTotal[groupName]) {
+          res.dashboard.apiGroupTotal[groupName] =
+            res.dashboard.apiGroupTotal[groupName] + childrenApiCount
         } else {
-          res.apiAnalysis.apiGroupTotal[groupName] = childrenApiCount;
+          res.dashboard.apiGroupTotal[groupName] = childrenApiCount
         }
         // 分组下的控制器数量
-        if (res.apiAnalysis.controllerGroupTotal[groupName]) {
-          res.apiAnalysis.controllerGroupTotal[groupName] =
-            res.apiAnalysis.controllerGroupTotal[groupName] + 1;
+        if (res.dashboard.controllerGroupTotal[groupName]) {
+          res.dashboard.controllerGroupTotal[groupName] =
+            res.dashboard.controllerGroupTotal[groupName] + 1
         } else {
-          res.apiAnalysis.controllerGroupTotal[groupName] = 1;
+          res.dashboard.controllerGroupTotal[groupName] = 1
         }
       } else if (item.url) {
-        // api接口存入list和object
-        res.apiList.push(item);
-        res.apiObject[item.menu_key] = item;
         // 接口总数
-        res.apiAnalysis.apiCount++;
+        res.dashboard.apiCount++
         // 统计请求类型数量
         if (methodList && methodList.length) {
           for (let i = 0; i < methodList.length; i++) {
-            const methodItem = methodList[i];
-            if (res.apiAnalysis.apiMethodTotal[methodItem]) {
-              res.apiAnalysis.apiMethodTotal[methodItem] =
-                res.apiAnalysis.apiMethodTotal[methodItem] + 1;
+            const methodItem = methodList[i]
+            if (res.dashboard.apiMethodTotal[methodItem]) {
+              res.dashboard.apiMethodTotal[methodItem] =
+                res.dashboard.apiMethodTotal[methodItem] + 1
             } else {
-              res.apiAnalysis.apiMethodTotal[methodItem] = 1;
+              res.dashboard.apiMethodTotal[methodItem] = 1
             }
           }
         }
         // tag统计
         if (item.tag && item.tag.length) {
           for (let i = 0; i < item.tag.length; i++) {
-            const tagItem = item.tag[i];
-            if (res.apiAnalysis.apiTagTotal[tagItem]) {
-              res.apiAnalysis.apiTagTotal[tagItem] = res.apiAnalysis.apiTagTotal[tagItem] + 1;
+            const tagItem = item.tag[i]
+            if (res.dashboard.apiTagTotal[tagItem]) {
+              res.dashboard.apiTagTotal[tagItem] = res.dashboard.apiTagTotal[tagItem] + 1
             } else {
-              res.apiAnalysis.apiTagTotal[tagItem] = 1;
+              res.dashboard.apiTagTotal[tagItem] = 1
             }
           }
         }
         // 作者接口数量统计
         if (item.author) {
-          if (res.apiAnalysis.apiAuthorTotal[item.author]) {
-            res.apiAnalysis.apiAuthorTotal[item.author] =
-              res.apiAnalysis.apiAuthorTotal[item.author] + 1;
+          if (res.dashboard.apiAuthorTotal[item.author]) {
+            res.dashboard.apiAuthorTotal[item.author] =
+              res.dashboard.apiAuthorTotal[item.author] + 1
           } else {
-            res.apiAnalysis.apiAuthorTotal[item.author] = 1;
+            res.dashboard.apiAuthorTotal[item.author] = 1
           }
         }
       }
       // api接口菜单数据
-      const menuItem: MenuItemType = {
+      const menuItem: ApiMenuItem = {
+        name: item.name,
         title: item.title,
-        menu_key: item.menu_key,
+        menuKey: item.menuKey,
         type: type,
         method: item.method as string,
         url: item.url,
         tag: item.tag,
         controller: item.controller,
-      };
-      if (item.children && item.children.length) {
-        menuItem.children = renderApiData(item.children);
       }
-      return menuItem;
-    });
+      if (item.children && item.children.length) {
+        menuItem.children = renderApiData(item.children)
+      }
+      return menuItem
+    })
 
-    return apiMenus;
+    return apiMenus
   }
-  res.apiMenus = renderApiData(apiData);
-  return res;
+  res.apiMenus = renderApiData(apiData)
+  return res
 }
 
-export function handleMdMenusData(data: MdMenuItem[]): any {
-  let result = {
+export function handleDocMenusData(data: ApiMenuItem[]): {
+  menus: ApiMenuItem[]
+  count: number
+} {
+  const result = {
     menus: [],
     count: 0,
-  };
-  function renderMdMenuData(list: MdMenuItem[]): any {
+  }
+  function renderDocMenuData(list: DocMenusItem[]): any {
     const mdMenus = list.map((item) => {
       if (item.path) {
-        result.count++;
+        result.count++
       }
       if (item.children && item.children.length) {
-        item.children = renderMdMenuData(item.children);
+        item.children = renderDocMenuData(item.children)
       }
-      return item;
-    });
-    return mdMenus;
-  }
-  result.menus = renderMdMenuData(data);
-  return result;
-}
-
-interface HandleConfigAppDataResult {
-  count: number;
-  headers: ConfigGlobalParamItem[];
-  params: ConfigGlobalParamItem[];
-}
-export function handleConfigAppsData(data: ConfigAppItem[]): HandleConfigAppDataResult {
-  let result: HandleConfigAppDataResult = {
-    count: 0,
-    headers: [],
-    params: [],
-  };
-  function renderAppsData(list: ConfigAppItem[], appKey = ""): any {
-    const apps = list.map((item) => {
-      const currentAppKey = `${appKey}${appKey ? "," : ""}${item.folder}`;
-      if (item.folder && !(item.items && item.items.length)) {
-        result.count++;
-        if (item.headers && item.headers.length) {
-          for (let i = 0; i < item.headers.length; i++) {
-            const headerItem = item.headers[i];
-            result.headers.push({
-              ...headerItem,
-              appKey: currentAppKey,
-            });
-          }
-        }
-        if (item.parameters && item.parameters.length) {
-          for (let i = 0; i < item.parameters.length; i++) {
-            const paramsItem = item.parameters[i];
-            result.params.push({
-              ...paramsItem,
-              appKey: currentAppKey,
-            });
-          }
-        }
-      }
-      if (item.groups && item.groups.length) {
-        item.groups = handleConfigAppsGroupData(item.groups);
-      }
-      if (item.items && item.items.length) {
-        item.items = renderAppsData(item.items, currentAppKey);
-      }
-      return item;
-    });
-    return apps;
-  }
-  renderAppsData(data, "");
-  return result;
-}
-
-function handleConfigAppsGroupData(list: ConfigAppGroupItem[]) {
-  const groups = list.map((item) => {
-    item.label = item.title;
-    item.value = item.name;
-    item.key = item.name;
-    if (item.children && item.children.length) {
-      item.children = handleConfigAppsGroupData(item.children);
-    }
-
-    return item;
-  });
-  return groups;
-}
-
-interface handleInitGlobalParamsResult {
-  headers: ConfigGlobalParamItem[];
-  params: ConfigGlobalParamItem[];
-}
-export function handleInitGlobalParams(
-  config: ConfigInfo,
-  appHeaders?: ConfigGlobalParamItem[],
-  appParams?: ConfigGlobalParamItem[]
-): handleInitGlobalParamsResult {
-  const cacheGlobalParams = Cache.get(Types.GLOBAL_PARAMS);
-  let headers: ConfigGlobalParamItem[] = [];
-  let params: ConfigGlobalParamItem[] = [];
-  // 配置中的全局参数
-  if (config.headers && config.headers.length) {
-    headers = cloneDeep(config.headers);
-  }
-  if (config.parameters && config.parameters.length) {
-    params = cloneDeep(config.parameters);
-  }
-  // 应用配置中的全局参数
-  if (appHeaders && appHeaders.length) {
-    headers = [...headers, ...cloneDeep(appHeaders)];
-  }
-  if (appParams && appParams.length) {
-    params = [...params, ...cloneDeep(appParams)];
+      return item
+    })
+    return mdMenus
   }
 
-  function mergeCacheParams(
-    currentParams: ConfigGlobalParamItem[],
-    field: "headers" | "params"
-  ): ConfigGlobalParamItem[] {
-    let data = cloneDeep(currentParams).map((p) => {
-      p.appDisabled = true;
-      return p;
-    });
-    if (cacheGlobalParams && cacheGlobalParams[field] && cacheGlobalParams[field].length) {
-      for (let i = 0; i < cacheGlobalParams[field].length; i++) {
-        const item = cacheGlobalParams[field][i];
-        const findIndex = data.findIndex((p) => {
-          if ((p.appKey == item.appKey || item.appKey == "global") && p.name == item.name) {
-            return true;
-          }
-          return false;
-        });
-        if (findIndex > -1 && item.value) {
-          data[findIndex] = item;
-        } else if (item.value) {
-          data.push(item);
-        }
-      }
-    }
-    return data;
-  }
-  let globalParams = {
-    headers: mergeCacheParams(headers, "headers"),
-    params: mergeCacheParams(params, "params"),
-  };
-  return globalParams;
+  result.menus = renderDocMenuData(data)
+  return result
 }

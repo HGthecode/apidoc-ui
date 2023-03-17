@@ -1,31 +1,18 @@
-import "@/styles/index.less";
-import { createApp } from "vue";
-import App from "./App.vue";
-import { getCacheToStore } from "@/utils/bootstrap";
-// import "./registerServiceWorker";
-import router from "./router";
-import store from "./store";
-import * as Types from "@/store/modules/App/types";
-import { registerHighlight } from "@/directives/highlight";
+import { createApp } from 'vue'
+import App from './App.vue'
+import router from './router'
+import piniaStore from './store'
+import './assets/icons/iconfont/iconfont.css'
+import './styles/index.less'
+import 'ant-design-vue/dist/antd.less'
 
-import { setupI18n } from "@/locales/setupI18n";
+import 'ant-design-vue/es/message/style/css'
 
-async function bootstrap() {
-  const app = createApp(App);
+// 支持SVG
+import 'virtual:svg-icons-register'
 
-  store.dispatch(`app/${Types.GET_FE_CONFIG}`);
+import { setupI18n } from '/@/locales/setupI18n'
 
-  getCacheToStore();
-
-  registerHighlight(app);
-
-  setupI18n(app);
-
-  app.use(store);
-
-  app.use(router);
-
-  app.mount("#app");
-}
-
-void bootstrap();
+const app = createApp(App)
+setupI18n(app)
+app.use(router).use(piniaStore).mount('#app')

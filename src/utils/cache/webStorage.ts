@@ -1,22 +1,22 @@
 export interface CreateStorageParams {
-  prefixKey: string;
-  storage: Storage;
+  prefixKey: string
+  storage: Storage
 }
 
 export const createStorage = ({
-  prefixKey = "",
+  prefixKey = '',
   storage = localStorage,
 }: CreateStorageParams): any => {
   const WebStorage = class WebStorage {
-    private prefixKey?: string;
-    private storage: Storage;
+    private prefixKey?: string
+    private storage: Storage
 
     constructor() {
-      this.prefixKey = prefixKey;
-      this.storage = storage;
+      this.prefixKey = prefixKey
+      this.storage = storage
     }
     private getKey(key: string) {
-      return `${this.prefixKey}${key}`.toUpperCase();
+      return `${this.prefixKey}${key}`.toUpperCase()
     }
     /**
      *
@@ -31,28 +31,28 @@ export const createStorage = ({
         value,
         time: Date.now(),
         expire: expire ? new Date().getTime() + expire * 1000 : null,
-      });
+      })
 
-      this.storage.setItem(this.getKey(key), stringData);
+      this.storage.setItem(this.getKey(key), stringData)
     }
     get(key: string, def: any = null): any {
-      const val = this.storage.getItem(this.getKey(key));
-      if (!val) return def;
+      const val = this.storage.getItem(this.getKey(key))
+      if (!val) return def
 
       try {
-        const data = JSON.parse(val);
-        const { value, expire } = data;
+        const data = JSON.parse(val)
+        const { value, expire } = data
         if (!expire || expire >= new Date().getTime()) {
-          return value;
+          return value
         }
-        this.remove(key);
+        this.remove(key)
       } catch (e) {
-        return def;
+        return def
       }
     }
     remove(key: string): void {
-      this.storage.removeItem(this.getKey(key));
+      this.storage.removeItem(this.getKey(key))
     }
-  };
-  return new WebStorage();
-};
+  }
+  return new WebStorage()
+}

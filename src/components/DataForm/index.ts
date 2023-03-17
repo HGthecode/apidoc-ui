@@ -1,3 +1,3 @@
-import DataForm from "./DataForm";
+import DataForm from './DataForm.vue'
 
-export default DataForm;
+export default DataForm

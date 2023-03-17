@@ -1,43 +1,22 @@
-import { createRouter, RouteRecordRaw, createWebHashHistory } from "vue-router";
-import BasicLayout from "../layouts/index.vue";
+import { createRouter, createWebHashHistory } from 'vue-router'
+import routes from './root'
 
-export const routes: Array<RouteRecordRaw> = [
-  {
-    path: "/",
-    name: "index",
-    component: BasicLayout,
-    meta: {},
-    redirect: "/home",
-    children: [
-      {
-        path: "/home",
-        name: "Home",
-        component: () => import(/* webpackChunkName: "home" */ "../views/home/index.vue"),
-        meta: {
-          keepKey: "home",
-          affix: true,
-        },
-      },
+import NProgress from 'nprogress'
+import 'nprogress/nprogress.css'
 
-      {
-        path: "/api",
-        name: "ApiDetail",
-        component: () => import(/* webpackChunkName: "apiDetail" */ "../views/apiDetail/index.vue"),
-        meta: {},
-      },
-      {
-        path: "/md",
-        name: "MdDetail",
-        component: () => import(/* webpackChunkName: "mdDetail" */ "../views/mdDetail/index.vue"),
-      },
-    ],
-  },
-];
-
+//导入生成的路由数据
 const router = createRouter({
-  // history: createWebHistory(process.env.BASE_URL),
   history: createWebHashHistory(),
   routes,
-});
+})
 
-export default router;
+router.beforeEach((_to, _from, next) => {
+  NProgress.start() // 进度条开始
+  next()
+})
+
+router.afterEach(() => {
+  NProgress.done() // 进度条结束
+})
+
+export default router

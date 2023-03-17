@@ -1,78 +1,66 @@
 <template>
   <a-modal
-    :visible="visible"
-    :width="isMobile ? '90%' : 900"
-    :destroyOnClose="true"
-    :title="title"
+    :visible="state.visible"
+    :width="appStore.device == DeviceEnum.MOBILE ? '90%' : 900"
+    :maskClosable="false"
+    :title="props.title"
+    destroyOnClose
     @cancel="onCancel"
   >
     <div>
-      <markdown :md="md" />
+      <markdown :md="props.md" />
     </div>
     <template #footer>
-      <a-button @click="onCancel">{{ t("common.close") }}</a-button>
+      <a-button @click="onCancel">{{ t('common.close') }}</a-button>
     </template>
   </a-modal>
+  <div></div>
 </template>
 
-<script lang="ts">
-import { defineComponent, ref, computed } from "vue";
-import { Modal, Input, Button } from "ant-design-vue";
-import useModal from "@/hooks/useModal";
-import { useStore } from "vuex";
-import { GlobalState } from "@/store";
-import Markdown from "./Markdown.vue";
-import { getMdDetail } from "@/api";
-import { useI18n } from "@/hooks/useI18n";
-import Cache from "@/utils/cache";
+<script lang="ts" setup>
+  import { useI18n } from '/@/hooks/useI18n'
+  import { useAppStore } from '/@/store'
+  import { DeviceEnum } from '/@/enums/appEnum'
 
-export default defineComponent({
-  components: {
-    [Modal.name]: Modal,
-    [Button.name]: Button,
-    [Input.Password.name]: Input.Password,
-    Markdown,
-  },
-  emits: ["check"],
-  setup() {
-    const { t } = useI18n();
-    const store = useStore<GlobalState>();
-    const { visible, onShow, onCancel } = useModal();
-    const title = ref<string>("");
-    const md = ref<string>("");
-    const loading = ref<boolean>(false);
-    const isMobile = computed(() => store.state.app.isMobile);
-    const appKey = computed(() => store.state.app.appKey);
-    const cacheLang = Cache.get("LANG");
+  const appStore = useAppStore()
 
-    function show(text: string, modalTitle = "说明", mdRef = "") {
-      title.value = modalTitle;
-      loading.value = true;
-      onShow();
-      if (mdRef) {
-        getMdDetail({
-          appKey: appKey.value,
-          path: mdRef,
-          lang: cacheLang,
-        }).then((res) => {
-          md.value = res.data.data.content;
-          loading.value = false;
-        });
-      } else {
-        md.value = text;
-      }
-    }
+  const { t } = useI18n()
 
-    return {
-      visible,
-      onShow,
-      onCancel,
-      title,
-      md,
-      show,
-      isMobile,
-      t,
-    };
-  },
-});
+  const props = defineProps({
+    onCancel: {
+      type: Function,
+      default: () => {
+        return
+      },
+    },
+    title: {
+      type: String,
+      default: '',
+    },
+    md: {
+      type: String,
+      default: '',
+    },
+  })
+
+  // const apidocStore = useApidocStore()
+
+  const state = reactive<{
+    visible: boolean
+    title: string
+    md: string
+  }>({
+    visible: false,
+    title: '',
+    md: '',
+  })
+
+  onMounted(() => {
+    state.visible = true
+  })
+
+  const onCancel = () => {
+    props.onCancel && props.onCancel()
+    state.visible = false
+  }
 </script>

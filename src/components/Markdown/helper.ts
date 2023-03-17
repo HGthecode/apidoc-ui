@@ -1,115 +1,115 @@
-import { trim } from "@/utils";
+import { trim } from 'lodash-es'
 
 interface ItemState {
-  title: string;
-  level: number;
-  index?: number;
-  children?: ItemState[];
+  title: string
+  level: number
+  index?: number
+  children?: ItemState[]
 }
 
 // 将一级二级标题数据处理成树结构
 export function handleNavTree(mdContent: string): ItemState[] {
-  let navs = getTitle(mdContent);
-  let navLevel = [2, 3];
-  let retNavs: any = [];
-  let toAppendNavList;
+  const navs = getTitle(mdContent)
+  const navLevel = [2, 3]
+  let retNavs: any = []
+  let toAppendNavList
   navLevel.forEach((level) => {
     // 遍历一级二级标题，将同一级的标题组成新数组
     toAppendNavList = find(navs, {
       level: level,
-    });
+    })
     if (retNavs.length === 0) {
       // 处理一级标题
-      retNavs = retNavs.concat(toAppendNavList);
+      retNavs = retNavs.concat(toAppendNavList)
     } else {
       // 处理二级标题，并将二级标题添加到对应的父级标题的children中
       toAppendNavList.forEach((item: any) => {
-        item = Object.assign(item);
-        let parentNavIndex = getParentIndex(navs, item.index);
-        return appendToParentNav(retNavs, parentNavIndex, item);
-      });
+        item = Object.assign(item)
+        const parentNavIndex = getParentIndex(navs, item.index)
+        return appendToParentNav(retNavs, parentNavIndex, item)
+      })
     }
-  });
-  return retNavs;
+  })
+  return retNavs
 }
 
 function getTitle(content: string) {
-  let nav = [];
+  let nav: ItemState[] = []
 
-  let tempArr: ItemState[] = [];
+  const tempArr: ItemState[] = []
   content.replace(/(#+)[^#][^\n]*?(?:\n)/g, function (match, m1) {
-    let title = match.replace("\n", "");
-    let level = m1.length;
-    title = title.replace(/^#+/, "").replace(/\([^)]*?\)/, "");
+    let title = match.replace('\n', '')
+    const level = m1.length
+    title = title.replace(/^#+/, '').replace(/\([^)]*?\)/, '')
     tempArr.push({
       title: trim(title),
       level: level,
       children: [],
-    });
-    return "";
-  });
+    })
+    return ''
+  })
 
   // 只处理一级二级标题，以及添加与id对应的index值
-  nav = tempArr.filter((item) => item.level === 2 || item.level === 3);
-  let index = 0;
+  nav = tempArr.filter((item) => item.level === 2 || item.level === 3)
+  let index = 0
   return (nav = nav.map((item) => {
-    item.index = index++;
-    return item;
-  }));
+    item.index = index++
+    return item
+  }))
 }
 
 function find(arr: any, condition: any) {
   return arr.filter((item: any) => {
-    for (let key in condition) {
+    for (const key in condition) {
       // eslint-disable-next-line no-prototype-builtins
       if (condition.hasOwnProperty(key) && condition[key] !== item[key]) {
-        return false;
+        return false
       }
     }
-    return true;
-  });
+    return true
+  })
 }
 
 function getParentIndex(nav: any, endIndex: number) {
   for (let i = endIndex - 1; i >= 0; i--) {
     if (nav[endIndex].level > nav[i].level) {
-      return nav[i].index;
+      return nav[i].index
     }
   }
 }
 function appendToParentNav(nav: any, parentIndex: number, newNav: any) {
-  let index = findIndex(nav, {
+  const index = findIndex(nav, {
     index: parentIndex,
-  });
-  nav[index].children = nav[index].children.concat(newNav);
+  })
+  nav[index].children = nav[index].children.concat(newNav)
 }
 
 function findIndex(arr: any, condition: any) {
-  let ret = -1;
+  let ret = -1
   arr.forEach((item: any, index: number) => {
-    for (let key in condition) {
+    for (const key in condition) {
       // eslint-disable-next-line no-prototype-builtins
       if (condition.hasOwnProperty(key) && condition[key] !== item[key]) {
-        return false;
+        return false
       }
     }
-    ret = index;
-  });
-  return ret;
+    ret = index
+  })
+  return ret
 }
 
 export const goAnchor = (selector: string): void => {
   // 移动距离
-  let top = 0;
+  let top = 0
   // 当前滚动条位置
   const scrollTop =
-    document.documentElement.scrollTop || window.pageYOffset || document.body.scrollTop;
+    document.documentElement.scrollTop || window.pageYOffset || document.body.scrollTop
   // 若为指定距离
-  if (typeof selector === "number") {
-    top = selector - scrollTop;
+  if (typeof selector === 'number') {
+    top = selector - scrollTop
   } else {
-    const anchor: any = document.querySelector(selector) || { offsetTop: 0 };
-    top = anchor.offsetTop - scrollTop;
+    const anchor: any = document.querySelector(selector) || { offsetTop: 0 }
+    top = anchor.offsetTop - scrollTop
   }
-  window.scrollBy({ top, behavior: "smooth" });
-};
+  window.scrollBy({ top, behavior: 'smooth' })
+}

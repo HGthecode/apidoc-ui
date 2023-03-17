@@ -1,23 +1,27 @@
-import type { App } from "vue";
-import type { I18n, I18nOptions } from "vue-i18n";
-import { createI18n } from "vue-i18n";
-import Cache from "@/utils/cache";
+import type { App } from 'vue'
+import type { I18n, I18nOptions } from 'vue-i18n'
+import { createI18n } from 'vue-i18n'
+import Cache from '/@/utils/cache'
+import { FeConfig } from '/@/store/modules/app/types'
+import { APP_LANG } from '/@/store/modules/app/types'
 
-export let i18n: ReturnType<typeof createI18n>;
+declare const apidocFeConfig: FeConfig
+
+export let i18n: ReturnType<typeof createI18n>
 
 async function createI18nOptions(): Promise<I18nOptions> {
-  const cacheLang = Cache.get("LANG");
-  const locale = cacheLang ? cacheLang : "zh-cn";
-  // const defaultLocal = await import(`./lang/${locale}.ts`);
-  // const message = defaultLocal.default ?? {};
-  let message = {};
-  if (localStorage.APIDOC_CONFIG) {
-    const apidocConfig = JSON.parse(localStorage.APIDOC_CONFIG);
-    if (apidocConfig.LANG) {
-      const lanOption = apidocConfig.LANG.find((p: any) => p.lang === locale);
-      if (lanOption) {
-        message = lanOption.messages;
-      }
+  const feConfig: FeConfig = apidocFeConfig
+
+  const cacheLang = Cache.get(APP_LANG)
+  const locale = cacheLang ? cacheLang : 'zh-cn'
+  let message = {}
+  if (feConfig.LANG && feConfig.LANG.length) {
+    const find = feConfig.LANG.find((p) => p.lang === locale)
+
+    if (find && find.messages) {
+      message = find.messages
+    } else if (feConfig.LANG[0] && feConfig.LANG[0].messages) {
+      message = feConfig.LANG[0].messages
     }
   }
 
@@ -31,12 +35,12 @@ async function createI18nOptions(): Promise<I18nOptions> {
     silentTranslationWarn: true, // true - warning off
     missingWarn: false,
     silentFallbackWarn: true,
-  };
+  }
 }
 
 // setup i18n instance with glob
 export async function setupI18n(app: App): Promise<void> {
-  const options = await createI18nOptions();
-  i18n = createI18n(options) as I18n;
-  app.use(i18n);
+  const options = await createI18nOptions()
+  i18n = createI18n(options) as I18n
+  app.use(i18n)
 }

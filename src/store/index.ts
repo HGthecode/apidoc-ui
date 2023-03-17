@@ -1,27 +1,8 @@
-import { createStore } from "vuex";
-import { AppState } from "./modules/App/interface";
-import { ApidocState } from "./modules/Apidoc/interface";
+import { createPinia } from 'pinia'
+import { useAppStore } from './modules/app'
+import { useApidocStore } from './modules/apidoc'
 
-import app from "./modules/App";
-import apidoc from "./modules/Apidoc";
+const pinia = createPinia()
 
-// 全局状态
-export interface GlobalState {
-  app: AppState;
-  apidoc: ApidocState;
-}
-
-export interface ObjectState {
-  [key: string]: any;
-}
-
-const store = createStore<GlobalState>({
-  mutations: {},
-  actions: {},
-  modules: {
-    app,
-    apidoc,
-  },
-});
-
-export default store;
+export { useAppStore, useApidocStore }
+export default pinia

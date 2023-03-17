@@ -14,39 +14,35 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, watchEffect, ref, onMounted } from "vue";
-import { handleNavTree } from "./helper";
-import { Anchor } from "ant-design-vue";
+  import { defineComponent, PropType, watchEffect, ref } from 'vue'
+  import { handleNavTree } from './helper'
 
-export default defineComponent({
-  components: {
-    [Anchor.name]: Anchor,
-    [Anchor.Link.name]: Anchor.Link,
-  },
-  props: {
-    md: {
-      type: String as PropType<string>,
-      default: "",
+  export default defineComponent({
+    components: {},
+    props: {
+      md: {
+        type: String as PropType<string>,
+        default: '',
+      },
     },
-  },
-  setup(props) {
-    const pageContainer = ref();
-    const navs = ref();
+    setup(props) {
+      const pageContainer = ref()
+      const navs = ref()
 
-    watchEffect(() => {
-      navs.value = handleNavTree(props.md);
-    });
+      watchEffect(() => {
+        navs.value = handleNavTree(props.md)
+      })
 
-    const handleClick = (e: Event, link: any) => {
-      e.preventDefault();
-    };
+      const handleClick = (e: Event) => {
+        e.preventDefault()
+      }
 
-    return {
-      navs,
-      pageContainer,
-      handleClick,
-    };
-  },
-});
+      return {
+        navs,
+        pageContainer,
+        handleClick,
+      }
+    },
+  })
 </script>
 <style lang="less" scoped></style>

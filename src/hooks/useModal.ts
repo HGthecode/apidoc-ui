@@ -1,24 +1,24 @@
-import { ref, Ref } from "vue";
+import { ref, Ref } from 'vue'
 
 interface Types {
-  visible: Ref<boolean>;
-  onShow: () => void;
-  onCancel: () => void;
+  visible: Ref<boolean>
+  onShow: () => void
+  onCancel: () => void
 }
 export default (): Types => {
-  const visible = ref(false);
+  const visible = ref(false)
 
   function onShow() {
-    visible.value = true;
+    visible.value = true
   }
 
   function onCancel() {
-    visible.value = false;
+    visible.value = false
   }
 
   return {
     visible,
     onShow,
     onCancel,
-  };
-};
+  }
+}

@@ -1,3 +1,3 @@
-import LangSelect from "./LangSelect.vue";
+import LangSelect from './LangSelect.vue'
 
-export default LangSelect;
+export default LangSelect

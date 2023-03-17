@@ -1,197 +1,150 @@
 <template>
   <a-menu
     mode="inline"
-    :theme="theme"
+    :theme="appStore.theme"
     :forceSubMenuRender="false"
     :openKeys="openKeys"
     :selectedKeys="selectedKeys"
-    @openChange="onOpenChange"
+    @open-change="onOpenChange"
     @select="onSelect"
   >
-    <template v-for="item in menuData" :key="item.menu_key">
+    <template v-for="item in menuData" :key="item.menuKey">
       <BasicSubMenuItem :item="item" />
     </template>
   </a-menu>
 </template>
 
-<script lang="ts">
-import { reactive, defineComponent, toRefs, computed, PropType, watchEffect, watch } from "vue";
-import { Menu } from "ant-design-vue";
-import { useStore } from "vuex";
-import { GlobalState } from "@/store";
-import BasicSubMenuItem from "./BasicSubMenuItem.vue";
-import { MenuItemType } from "./interface";
-import { cloneDeep } from "lodash";
-import { filterTree, getTreeValueByField, findNode, getTreePath } from "@/utils/helper/treeHelper";
-import { useRoute, useRouter } from "vue-router";
-import * as ApidocTypes from "@/store/modules/Apidoc/types";
+<script setup lang="ts">
+  import BasicSubMenuItem from './BasicSubMenuItem.vue'
 
-export default defineComponent({
-  components: {
-    [Menu.name]: Menu,
-    [Menu.ItemGroup.name]: Menu.ItemGroup,
-    [Menu.Item.name]: Menu.Item,
-    BasicSubMenuItem,
-  },
-  emits: ["select", "mouseUpChange", "mouseMoveChange"],
-  props: {
-    data: {
-      type: Array as PropType<MenuItemType[]>,
-      default: () => [],
-    },
-    keyword: {
-      type: String,
-      default: "",
-    },
-    tags: {
-      type: Array as PropType<string[]>,
-      default: () => [],
-    },
-    toggleOpenAll: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  setup(props, { emit }) {
-    const route = useRoute();
-    const router = useRouter();
+  import { filterTree, getTreePath, getTreeValueByField } from '/@/utils/helper/treeHelper'
+  import { cloneDeep } from 'lodash-es'
+  import { ApiMenuItem } from '/@/api/apidocApi/types'
+  import { useAppStore } from '/@/store/modules/app'
+  const appStore = useAppStore()
 
-    let store = useStore<GlobalState>();
-    const openKeys: string[] = [];
-    const selectedKeys: string[] = [];
+  interface Props {
+    data: ApiMenuItem[]
+    keyword?: string
+    tags?: string[]
+    openAll: boolean
+    type?: string
+    defaultSelectedKey?: string
+  }
+  const props = withDefaults(defineProps<Props>(), {
+    openAll: false,
+  })
+  const emit = defineEmits<{
+    (event: 'select', e: any): void
+  }>()
 
-    const state = reactive({
-      menuData: props.data,
-      feConfig: computed(() => store.state.app.feConfig),
-      appKey: computed(() => store.state.app.appKey),
-      theme: computed(() => store.state.app.theme),
-      isReload: computed(() => store.state.apidoc.isReload),
-      openKeys: openKeys,
-      openAllKeys: openKeys,
-      selectedKeys: selectedKeys,
-    });
+  const openKeys = ref<string[]>([])
+  const openAllKeys = ref<string[]>([])
+  const selectedKeys = ref<string[]>([])
 
-    // 是否满足过滤条件
-    function hasKeyword(item: MenuItemType, keyword?: string, tags: string[] = []): boolean {
-      let hasTag = false;
-      if (tags.length) {
-        hasTag = tags.some((value) => {
-          return item.tag && item.tag.indexOf(value) > -1;
-        });
-      }
-      const hasKeyword =
-        keyword &&
-        ((item.title && item.title.indexOf(keyword) > -1) ||
-          (item.url && item.url.indexOf(keyword) > -1));
+  const onOpenChange = (keys: string[]) => {
+    openKeys.value = keys
+  }
+  const onSelect = (e: any) => {
+    selectedKeys.value = [e.key]
+    emit('select', e)
+  }
 
-      if (keyword && tags.length && hasKeyword && hasTag) {
-        return true;
-      } else if (keyword && !tags.length && hasKeyword) {
-        return true;
-      } else if (!keyword && tags.length && hasTag) {
-        return true;
-      }
+  let menuData = ref<ApiMenuItem[]>([])
 
-      return false;
+  function hasKeyword(item: ApiMenuItem, keyword?: string, tags: string[] = []): boolean {
+    let hasTag = false
+    if (tags.length) {
+      hasTag = tags.some((value) => {
+        return item.tag && item.tag.indexOf(value) > -1
+      })
+    }
+    const hasKeyword =
+      keyword &&
+      ((item.title && item.title.indexOf(keyword) > -1) ||
+        (item.url && item.url.indexOf(keyword) > -1))
+
+    if (keyword && tags.length && hasKeyword && hasTag) {
+      return true
+    } else if (keyword && !tags.length && hasKeyword) {
+      return true
+    } else if (!keyword && tags.length && hasTag) {
+      return true
     }
 
-    const handleMenuData = (data: MenuItemType[], keyword?: string, tags?: string[]) => {
-      let menuData = cloneDeep(data);
-      if (keyword || tags?.length) {
-        menuData = filterTree<MenuItemType>(
-          menuData,
-          (node: MenuItemType) => {
-            if (hasKeyword(node, keyword, tags)) {
-              return true;
-            }
-            return false;
-          },
-          "children"
-        );
-      }
-      state.menuData = menuData;
-      state.openAllKeys = [];
-    };
+    return false
+  }
 
-    const onOpenChange = (openKeys: string[]) => {
-      state.openKeys = openKeys;
-    };
-
-    let init = true;
-    watch<MenuItemType[]>(
-      () => props.data,
-      () => {
-        if (state.isReload) {
-          setSelectedKey(route.query.key as string);
-        } else if (init && (route.query.key || (route.query.path && route.query.path))) {
-          const is = setSelectedKey(route.query.key as string);
-          if (!is) {
-            router.push({
-              name: "Home",
-            });
+  const handleMenuData = (data: ApiMenuItem[], keyword?: string, tags?: string[]) => {
+    let menuList = cloneDeep(data)
+    if (keyword || tags?.length) {
+      menuList = filterTree<ApiMenuItem>(
+        menuList,
+        (node: ApiMenuItem) => {
+          if (hasKeyword(node, keyword, tags)) {
+            return true
           }
-        }
-        store.dispatch(`apidoc/${ApidocTypes.SET_ISRELOAD}`, false);
-        init = false;
+          return false
+        },
+        'children',
+      )
+    }
+    menuData.value = menuList
+    openAllKeys.value = []
+    handleDefaultSelected()
+  }
+
+  const handleOpenAll = (flag: boolean) => {
+    if (flag) {
+      // 展开
+      if (!openAllKeys.value.length && menuData.value.length) {
+        openAllKeys.value = getTreeValueByField(menuData.value)
       }
-    );
-    const setSelectedKey = (key?: string): boolean => {
-      const defaultOpenKeys = getTreePath(props.data, (item) => {
-        if (
-          (key && item.menu_key === key) ||
-          (route.query.appKey && route.query.path && route.query.path === item.path)
-        ) {
-          return true;
-        }
-        return false;
-      });
+      openKeys.value = openAllKeys.value
+    } else {
+      // 收起
+      openKeys.value = []
+    }
+  }
 
-      if (defaultOpenKeys.length) {
-        state.openKeys = defaultOpenKeys;
-        state.selectedKeys = [defaultOpenKeys[defaultOpenKeys.length - 1]];
-        return true;
+  // 默认选中
+  const handleDefaultSelected = () => {
+    if (props.defaultSelectedKey) {
+      selectedKeys.value = [props.defaultSelectedKey] as string[]
+      if (menuData.value && menuData.value.length) {
+        let defaultOpenKeys = getTreePath(menuData.value, (item) => {
+          if (props.defaultSelectedKey && item.menuKey === props.defaultSelectedKey) {
+            return true
+          }
+          return false
+        })
+        defaultOpenKeys.pop()
+        openKeys.value = [...new Set([...openKeys.value, ...defaultOpenKeys])]
       }
-      return false;
-    };
+    } else {
+      selectedKeys.value = []
+    }
+  }
 
-    const handleOpenAll = (flag: boolean) => {
-      if (flag) {
-        // 展开
-        if (!state.openAllKeys.length && state.menuData.length) {
-          state.openAllKeys = getTreeValueByField(state.menuData);
-        }
-        state.openKeys = state.openAllKeys;
-      } else {
-        // 收起
-        state.openKeys = [];
-      }
-    };
+  watch(
+    () => [props.data, props.keyword, props.tags],
+    () => {
+      handleMenuData(props.data, props.keyword, props.tags)
+    },
+  )
+  if (props.data) {
+    handleMenuData(props.data, props.keyword, props.tags)
+  }
 
-    watchEffect(() => {
-      handleMenuData(props.data, props.keyword, props.tags);
-    });
-    watchEffect(() => {
-      handleOpenAll(props.toggleOpenAll);
-    });
-
-    const onSelect = (e: any) => {
-      state.selectedKeys = e.selectedKeys;
-      emit("select", e);
-    };
-
-    watch(
-      () => route.fullPath,
-      (v) => {
-        if (route.query.key) {
-          state.selectedKeys = [route.query.key as string];
-        } else {
-          state.selectedKeys = [];
-        }
-      }
-    );
-
-    return { ...toRefs(state), onOpenChange, onSelect };
-  },
-});
+  watch(
+    () => props.defaultSelectedKey,
+    () => {
+      selectedKeys.value = [props.defaultSelectedKey as string]
+    },
+  )
+  watchEffect(() => {
+    handleOpenAll(props.openAll)
+  })
 </script>
+
 <style lang="less" scoped></style>

@@ -1,19 +1,19 @@
 <template>
   <div class="app-select">
     <a-select
-      :value="appKey"
+      :value="value"
       class="app-select_select"
       option-label-prop="label"
       :disabled="disabled"
       @change="onChange"
     >
-      <template v-for="(item, index) in appList">
+      <template v-for="(item, index) in appOptions">
         <template v-if="item.items && item.items.length">
           <a-select-opt-group :label="item.title" :key="index">
             <a-select-option
               v-for="option in item.items"
-              :key="`${item.folder},${option.folder}`"
-              :value="`${item.folder},${option.folder}`"
+              :key="`${item.key},${option.key}`"
+              :value="`${item.key},${option.key}`"
               :label="`${item.title}-${option.title}`"
             >
               {{ option.title }}
@@ -24,7 +24,7 @@
           </a-select-opt-group>
         </template>
         <template v-else>
-          <a-select-option :value="`${item.folder}`" :label="`${item.title}`" :key="`${index}`">
+          <a-select-option :value="`${item.key}`" :label="`${item.title}`" :key="`${index}`">
             {{ item.title }}
             <span v-if="item.hasPassword && showLock" class="app-select-option_icon"
               ><LockOutlined
@@ -36,83 +36,70 @@
   </div>
 </template>
 
-<script lang="ts">
-import { Select } from "ant-design-vue";
-import { reactive, defineComponent, toRefs, computed, PropType, watch } from "vue";
-import { useStore } from "vuex";
-import { GlobalState } from "@/store";
-import * as Types from "@/store/modules/App/types";
-import { LockOutlined } from "@ant-design/icons-vue";
-import { ConfigAppItem } from "@/api/interface/config";
+<script setup lang="ts">
+  import { LockOutlined } from '@ant-design/icons-vue'
+  import { AppItem } from '/@/api/globalApi/types'
+  import { useAppStore } from '/@/store/modules/app'
+  import { useI18n } from '/@/hooks/useI18n'
 
-export default defineComponent({
-  components: {
-    ASelect: Select,
-    ASelectOption: Select.Option,
-    ASelectOptGroup: Select.OptGroup,
-    LockOutlined,
-  },
-  props: {
-    showLock: {
-      type: Boolean as PropType<boolean>,
-      required: false,
-      default: true,
-    },
-    value: String,
-    options: {
-      type: Array as PropType<ConfigAppItem[]>,
-      default: () => {
-        return [];
-      },
-    },
-    disabled: {
-      type: Boolean as PropType<boolean>,
-      default: false,
-    },
-  },
-  setup(props, { attrs }) {
-    let store = useStore<GlobalState>();
-    const state = reactive({
-      appKey: props.value,
-      appList: computed(() => {
-        if (props.options && props.options.length) {
-          return props.options;
-        }
-        const config = store.state.app.config;
-        return config.apps;
-      }),
-    });
+  const { t } = useI18n()
+  const appStore = useAppStore()
 
-    watch(
-      () => props.value,
-      (v) => {
-        state.appKey = v;
-      }
-    );
+  interface Props {
+    showLock?: boolean
+    value?: string
+    options?: AppItem[]
+    disabled?: boolean
+    showAllOption?: boolean
+  }
+  const props = withDefaults(defineProps<Props>(), {
+    showLock: false,
+    value: '',
+    disabled: false,
+    showAllOption: false,
+  })
+  const emit = defineEmits<{
+    (event: 'change', appKey: string): void
+  }>()
 
-    const onChange = (appKey: string) => {
-      if (attrs.onChange) {
-        const changeFun: any = attrs.onChange;
-        changeFun(appKey);
-      } else {
-        store.dispatch(`app/${Types.SET_APP_KEY}`, appKey);
-      }
-    };
+  const appOptions = ref<AppItem[]>([])
 
-    return { ...toRefs(state), onChange };
-  },
-});
+  const onChange = (appKey: string) => {
+    emit('change', appKey)
+  }
+
+  const handleOptions = (options: AppItem[]) => {
+    let list: AppItem[] = []
+    if (props.showAllOption) {
+      list.push({
+        key: 'all',
+        title: t('common.allAppOption'),
+        path: '',
+      })
+    }
+    if (options && options.length) {
+      list = list.concat(options)
+    } else {
+      list = list.concat(appStore.serverConfig.apps)
+    }
+    appOptions.value = list
+  }
+
+  watchEffect(() => {
+    handleOptions(props.options as AppItem[])
+  })
 </script>
+
 <style lang="less" scoped>
-.app-select {
-  display: inline-block;
-  &_select {
-    width: 140px;
+  .app-select {
+    display: inline-block;
+    &_select {
+      width: 140px;
+    }
+    &-option_icon {
+      position: absolute;
+      right: 10px;
+      // color: var(--text-light-grey);
+    }
   }
-  &-option_icon {
-    position: absolute;
-    right: 10px;
-    color: var(--text-light-grey);
-  }
-}
 </style>

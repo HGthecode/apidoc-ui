@@ -1,20 +1,8 @@
-import {
-  defineComponent,
-  ref,
-  onMounted,
-  watch,
-  onBeforeUnmount,
-  shallowRef,
-  PropType,
-  computed,
-} from "vue";
-
-import * as Monaco from "monaco-editor";
-
-import { copyTextToClipboard } from "@/utils";
-import { useStore } from "vuex";
-import { GlobalState } from "@/store";
-import { ThemeEnum, MonacoEditorThemeEnum } from "@/enums/appEnum";
+import { defineComponent, ref, onMounted, watch, onBeforeUnmount, shallowRef, PropType } from 'vue'
+import { IDisposable } from 'monaco-editor'
+import { monaco } from './customMonaco'
+import { ThemeEnum, MonacoEditorThemeEnum } from '/@/enums/appEnum'
+import { useAppStore } from '/@/store/modules/app'
 
 export default defineComponent({
   props: {
@@ -23,78 +11,80 @@ export default defineComponent({
       required: true,
     },
     onChange: {
-      type: Function as PropType<
-        (value: string, event: Monaco.editor.IModelContentChangedEvent) => void
-      >,
-      required: true,
+      type: Function as PropType<(value: string) => void>,
     },
     height: {
       type: String as PropType<string>,
-      default: "260px",
+      default: '260px',
     },
     readOnly: {
       type: Boolean,
       default: false,
     },
+    language: {
+      type: String as PropType<string>,
+      default: 'json',
+    },
   },
   setup(props) {
-    let store = useStore<GlobalState>();
-    const editorRef = shallowRef();
-    const isCopySuccess = ref(false);
-    const containerRef = ref();
-    const theme = computed(() => store.state.app.theme);
+    const appStore = useAppStore()
 
-    let _subscription: Monaco.IDisposable | undefined;
-    let __prevent_trigger_change_event = false;
-
+    const editorRef = shallowRef()
+    const containerRef = ref()
+    let _subscription: IDisposable | undefined
+    let _hoverId: IDisposable | undefined
+    let __prevent_trigger_change_event = false
     function getMonacoEditorTheme(theme: ThemeEnum): MonacoEditorThemeEnum {
-      const key = theme.toUpperCase() as "DARK" | "LIGHT";
-      return MonacoEditorThemeEnum[key];
+      const key = theme.toUpperCase() as 'DARK' | 'LIGHT'
+      return MonacoEditorThemeEnum[key]
     }
 
     onMounted(() => {
-      const editor = (editorRef.value = Monaco.editor.create(containerRef.value, {
+      const editor = (editorRef.value = monaco.editor.create(containerRef.value, {
         value: props.code,
-        language: "json",
+        language: props.language,
         formatOnPaste: true,
         tabSize: 2,
-        automaticLayout: true,
+        automaticLayout: false,
         readOnly: props.readOnly,
-        foldingStrategy: "indentation",
-        contextmenu:false,
+        foldingStrategy: 'indentation',
+        contextmenu: false,
         minimap: {
           enabled: false,
         },
-        theme: getMonacoEditorTheme(theme.value),
-      }));
+        theme: getMonacoEditorTheme(appStore.theme),
+        scrollBeyondLastLine: false,
+      }))
 
       _subscription = editor.onDidChangeModelContent((event) => {
-        if (!__prevent_trigger_change_event) {
-          props.onChange(editor.getValue(), event);
+        if (!__prevent_trigger_change_event && props.onChange) {
+          props.onChange(editor.getValue(), event)
         }
-      });
-    });
+      })
+    })
 
     onBeforeUnmount(() => {
-      if (_subscription) _subscription.dispose();
-    });
+      if (_subscription) _subscription.dispose()
+
+      if (_hoverId) _hoverId.dispose()
+    })
 
     watch(
-      () => theme.value,
+      () => appStore.theme,
       (v) => {
-        const theme = getMonacoEditorTheme(v);
-        Monaco.editor.setTheme(theme);
-      }
-    );
+        const theme = getMonacoEditorTheme(v)
+        monaco.editor.setTheme(theme)
+      },
+    )
 
     watch(
       () => props.code,
       (v) => {
-        const editor = editorRef.value;
-        const model = editor.getModel();
+        const editor = editorRef.value
+        const model = editor.getModel()
         if (v !== model.getValue()) {
-          editor.pushUndoStop();
-          __prevent_trigger_change_event = true;
+          editor.pushUndoStop()
+          __prevent_trigger_change_event = true
           model.pushEditOperations(
             [],
             [
@@ -102,26 +92,18 @@ export default defineComponent({
                 range: model.getFullModelRange(),
                 text: v,
               },
-            ]
-          );
-          editor.pushUndoStop();
-          __prevent_trigger_change_event = false;
+            ],
+          )
+          editor.pushUndoStop()
+          __prevent_trigger_change_event = false
         }
-      }
-    );
-
-    function onCopy() {
-      props.code && copyTextToClipboard(props.code);
-      isCopySuccess.value = true;
-      setTimeout(() => {
-        isCopySuccess.value = false;
-      }, 1000);
-    }
+      },
+    )
 
     return () => {
       return (
-        <div class="code-editor-wraper" style={{ height: props.height }} ref={containerRef}></div>
-      );
-    };
+        <div class='code-editor-wraper' style={{ height: props.height }} ref={containerRef}></div>
+      )
+    }
   },
-});
+})

@@ -1,37 +1,15 @@
 <template>
-  <a-menu-item :key="item.menu_key">
+  <a-menu-item :key="item.menuKey" :title="item.title" :url="item.url">
     <MenuItemContent v-bind="$props" :item="item" />
   </a-menu-item>
 </template>
 
-<script lang="ts">
-import { reactive, defineComponent, toRefs } from "vue";
-import { Menu } from "ant-design-vue";
-import MenuItemContent from "./MenuItemContent.vue";
-
-export default defineComponent({
-  components: {
-    [Menu.Item.name]: Menu.Item,
-    MenuItemContent,
-  },
-  emits: ["mouseUpChange", "mouseMoveChange"],
-  props: {
-    item: {
-      type: Object,
-      default: () => {
-        return {};
-      },
-    },
-    keyword: {
-      type: String,
-      default: "",
-    },
-  },
-  setup() {
-    const state = reactive({});
-
-    return { ...toRefs(state) };
-  },
-});
+<script lang="ts" setup>
+  import MenuItemContent from './MenuItemContent.vue'
+  import { ApiMenuItem } from '/@/api/apidocApi/types'
+  interface Props {
+    item: ApiMenuItem
+  }
+  withDefaults(defineProps<Props>(), {})
 </script>
 <style lang="less" scoped></style>

@@ -1,13 +1,14 @@
 <template>
-  <div v-if="langList && langList.length > 1" class="lang-select">
+  <div v-if="state.langOptions && state.langOptions.length > 1" class="lang-select">
     <a-select
-      v-model:value="currentLang"
-      :class="['lang-select_select', { mobile: isMobile }]"
+      :value="state.locale"
+      :class="['lang-select_select', appStore.device]"
       option-label-prop="label"
       @select="onChange"
+      :getPopupContainer="(triggerNode) => triggerNode.parentNode"
     >
       <a-select-option
-        v-for="item in langList"
+        v-for="item in state.langOptions"
         :key="item.lang"
         :value="`${item.lang}`"
         :label="`${item.title}`"
@@ -17,73 +18,61 @@
   </div>
 </template>
 
-<script lang="ts">
-import { Select, Modal } from "ant-design-vue";
-import { reactive, defineComponent, toRefs, computed } from "vue";
-import { useStore } from "vuex";
-import { GlobalState } from "@/store";
-import Cache from "@/utils/cache";
-import { useI18n } from "@/hooks/useI18n";
-import { reloadHomePage } from "@/utils";
+<script lang="ts" setup>
+  import { reloadHomePage } from '/@/utils/helper'
+  import { APP_LANG } from '/@/store/modules/app/types'
 
-export default defineComponent({
-  components: {
-    ASelect: Select,
-    ASelectOption: Select.Option,
-  },
-  setup() {
-    const { t } = useI18n();
-    let store = useStore<GlobalState>();
-    const state = reactive({
-      count: 0,
-      config: computed(() => store.state.app.config),
-      feConfig: computed(() => store.state.app.feConfig),
-      currentLang: "",
-      isMobile: computed(() => store.state.app.isMobile),
-    });
-    const langList = computed(() => {
-      if (state.feConfig.LANG && state.feConfig.LANG.length) {
-        return state.feConfig.LANG;
-      }
-      return [];
-    });
-    const cacheLang = Cache.get("LANG");
-    state.currentLang = cacheLang ? cacheLang : "zh-cn";
+  import { useAppStore } from '/@/store/modules/app'
+  import { Lang } from '/@/store/modules/app/types'
+  import Cache from '/@/utils/cache'
+  import { Modal } from 'ant-design-vue'
+  import { useI18n } from '/@/hooks/useI18n'
+  const { t } = useI18n()
 
-    const onChange = (currentLang: string) => {
-      if (cacheLang === currentLang) {
-        return false;
-      }
-      const find = langList.value.find((p) => p.lang === currentLang);
-      const langTitle = find && find.title ? find.title : "";
+  const appStore = useAppStore()
+  let locale = Cache.get(APP_LANG)
+  if (!locale && appStore.feConfig && appStore.feConfig.LANG && appStore.feConfig.LANG.length) {
+    locale = appStore.feConfig.LANG[0].lang
+  }
 
-      Modal.confirm({
-        title: t("lang.change.confirm.title", { langTitle }),
-        content: t("lang.change.confirm.content"),
-        okText: t("common.ok"),
-        cancelText: t("common.cancel"),
-        onOk() {
-          Cache.set("LANG", currentLang);
-          reloadHomePage();
-        },
-        onCancel() {
-          state.currentLang = cacheLang;
-        },
-      });
-    };
+  const state = reactive<{
+    langOptions: Lang[]
+    locale: string
+  }>({
+    langOptions: appStore.feConfig.LANG,
+    locale: locale,
+  })
 
-    return { ...toRefs(state), onChange, langList };
-  },
-});
+  const onChange = (key: string) => {
+    if (locale === key) {
+      return false
+    }
+    const find = state.langOptions.find((p) => p.lang === key)
+    const langTitle = find && find.title ? find.title : ''
+
+    Modal.confirm({
+      title: t('lang.change.confirm.title', { langTitle }),
+      content: t('lang.change.confirm.content'),
+      okText: t('common.ok'),
+      cancelText: t('common.cancel'),
+      onOk() {
+        Cache.set(APP_LANG, key)
+        reloadHomePage()
+      },
+      onCancel() {
+        // state.locale = locale
+      },
+    })
+  }
 </script>
 <style lang="less" scoped>
-.lang-select {
-  display: inline-block;
-  &_select {
-    width: 100px;
-    &.mobile {
-      width: 86px;
+  .lang-select {
+    display: inline-block;
+    &_select {
+      width: 100px;
+      &.mobile {
+        width: 86px;
+      }
     }
   }
-}
 </style>

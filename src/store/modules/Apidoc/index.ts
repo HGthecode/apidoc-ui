@@ -1,172 +1,188 @@
-import { Module } from "vuex";
-import { GlobalState } from "../../index";
-import * as Types from "./types";
+import { defineStore } from 'pinia'
+import piniaStore from '/@/store/index'
+import { ApidocState, GLOBALPARAMS } from './types'
+import { ConfigGlobalParams } from '/@/api/globalApi/types'
+import apidocApi from '../../../api/apidocApi'
 import {
-  ApidocState,
-  MdMenuItemState,
-  ApiObjectState,
-  GlobalParamsState,
-  AuthDataState,
-  ApiAnalysisData,
-} from "./interface";
-import * as API from "@/api";
-import { handleApiData, handleMdMenusData } from "./helper";
-import { GetApiDataState, ApiItem } from "@/api/interface/apiData";
-import { MenuItemType } from "@/components/Menu/src/interface";
-import Cache from "@/utils/cache";
-import { ConfigAppItem, ConfigInfo } from "@/api/interface/config";
-import { cloneDeep } from "lodash";
-
-const state: ApidocState = {
-  groups: [],
-  data: [],
-  tags: [],
-  mdMenus: [],
-  apiMenus: [],
-  apiList: [],
-  apiObject: {},
-  globalParams: {
-    headers: [],
-    params: [],
-  },
-  authData: {},
-  apiAnalysis: {
-    apiCount: 0,
-    apiMethodTotal: {},
-    controllerGroupTotal: {},
-    apiGroupTotal: {},
-    apiTagTotal: {},
-    apiAuthorTotal: {},
-    docsCount: 0,
-    appCount: 0,
-  },
-  currentApp: {
-    folder: "",
-    path: "",
-    title: "",
-  },
-  isReload: false,
-};
-
-const apidoc: Module<ApidocState, GlobalState> = {
-  namespaced: true,
-  state,
+  DocMenusItem,
+  ApiMenusParams,
+  ApiMenusResult,
+  DocMenusParams,
+} from '../../../api/apidocApi/types'
+import { handleApiData, handleDocMenusData } from './helper'
+import Cache from '/@/utils/cache'
+import { IResponse } from '/@/utils/http/axios/type'
+import { handleApidocHttpError } from '/@/utils/http/axios/handleError'
+import { useAppOutsideStore } from '/@/store/modules/app/index'
+import { ConfigGlobalParamItem, ConfigResult } from '/@/api/globalApi/types'
+import { createRandKey } from '/@/utils/helper'
+export const useApidocStore = defineStore('apidoc', {
+  state: (): ApidocState => ({
+    apiMenus: [],
+    dashboard: {
+      apiCount: 0,
+      apiMethodTotal: {},
+      controllerGroupTotal: {},
+      apiGroupTotal: {},
+      apiTagTotal: {},
+      apiAuthorTotal: {},
+      docsCount: 0,
+      appCount: 0,
+    },
+    docsMenus: [],
+    globalParams: {
+      header: [],
+      query: [],
+      body: [],
+    },
+    currentEditorHoverTipsParams: {},
+  }),
+  getters: {},
   actions: {
-    // 获取api文档数据
-    [Types.GET_API_DATA]({ commit }, params: GetApiDataState) {
-      return new Promise((resolve, reject) => {
-        API.getApiData(params)
-          .then((res) => {
-            const { apiList, apiMenus, apiObject, apiAnalysis } = handleApiData(
-              res.data.data,
-              params.appKey
-            );
-            commit(Types.SET_API_LIST, apiList);
-            commit(Types.SET_API_OBJECT, apiObject);
-            commit(Types.SET_API_MENUS, apiMenus);
-            commit(Types.SET_API_TAGS, res.data.data.tags);
-            commit(Types.SET_API_ANALYSIS, apiAnalysis);
-            commit(Types.SET_CURRENT_APP, res.data.data.app);
-            // commit(Types.SET_API_DATA, res.data.data);
-            resolve(res.data.data);
-          })
-          .catch((err) => {
-            reject(err);
-          });
-      });
+    // Update app settings
+    updateSettings(partial: Partial<ApidocState>) {
+      // @ts-ignore-next-line
+      this.$patch(partial)
     },
-    // 获取md文档数据
-    [Types.GET_MD_MENUS]({ commit }, params) {
+    setDashboard(data) {
+      this.dashboard = { ...this.dashboard, ...data }
+    },
+    fetchApiMenus(params: ApiMenusParams) {
       return new Promise((resolve, reject) => {
-        API.getMdMenus(params)
-          .then((res) => {
-            const { menus, count } = handleMdMenusData(res.data.data);
-            const apiAnalysis = {
-              ...state.apiAnalysis,
+        apidocApi
+          .getApiMenus(params)
+          .then((res: IResponse<ApiMenusResult>) => {
+            const { apiMenus, dashboard } = handleApiData(res.data)
+            this.apiMenus = apiMenus
+            this.dashboard = { ...this.dashboard, ...dashboard }
+            resolve(res)
+          })
+          .catch((error) => {
+            const appStore = useAppOutsideStore()
+            handleApidocHttpError(error).then((res) => {
+              if (res === false) {
+                appStore.setGlobalError(error)
+              } else {
+                this.fetchApiMenus(params)
+              }
+            })
+            reject(error)
+          })
+      })
+    },
+    fetchDocsMenus(params: DocMenusParams) {
+      return new Promise((resolve, reject) => {
+        apidocApi
+          .getDocMenus(params)
+          .then((res: IResponse<DocMenusItem[]>) => {
+            const { menus, count } = handleDocMenusData(res.data)
+            this.docsMenus = menus
+            this.dashboard = {
+              ...this.dashboard,
               docsCount: count,
-            };
-            commit(Types.SET_API_ANALYSIS, apiAnalysis);
-            commit(Types.GET_MD_MENUS, menus);
-            resolve(res.data.data);
+            }
+
+            resolve(res)
           })
-          .catch((err) => {
-            reject(err);
-          });
-      });
+          .catch((error) => {
+            const appStore = useAppOutsideStore()
+            handleApidocHttpError(error).then((res) => {
+              if (res === false) {
+                appStore.setGlobalError(error)
+              } else {
+                this.fetchDocsMenus(params)
+              }
+            })
+            reject(error)
+          })
+      })
     },
-    // 设置全局参数
-    [Types.SET_GLOBAL_PARAMS]({ commit }, data: GlobalParamsState) {
-      Cache.set(Types.GLOBAL_PARAMS, data);
-      commit(Types.SET_GLOBAL_PARAMS, data);
+    setGlobalParams(data: ConfigGlobalParams) {
+      this.globalParams = data
+      Cache.set(GLOBALPARAMS, data)
     },
-    // 设置权限token
-    [Types.SET_AUTH_DATA]({ commit }, data: AuthDataState) {
-      Cache.set(Types.AUTH_DATA, data);
-      commit(Types.SET_AUTH_DATA, data);
-    },
-    // 设置api分析数据
-    [Types.SET_API_ANALYSIS]({ commit }, data: ApiAnalysisData) {
-      commit(Types.SET_API_ANALYSIS, data);
-    },
-    // 设置isreload值
-    [Types.SET_ISRELOAD]({ commit }, flag: boolean) {
-      commit(Types.SET_ISRELOAD, flag);
-    },
-  },
-  mutations: {
-    // 设置api数据
-    [Types.SET_API_DATA](state, data: ApidocState) {
-      state.groups = data.groups;
-      state.data = data.data;
-      state.tags = data.tags;
-    },
-    // 设置md菜单数据
-    [Types.GET_MD_MENUS](state, data: MdMenuItemState[]) {
-      state.mdMenus = data;
-    },
+    initGlobalParams(config: ConfigResult) {
+      const cacheParams = Cache.get(GLOBALPARAMS)
+      const appStore = useAppOutsideStore()
+      const getGlobalParams = (paramType: 'header' | 'query' | 'body') => {
+        const cacheParamsByKey = {}
+        if (cacheParams && cacheParams[paramType]) {
+          for (let i = 0; i < cacheParams[paramType].length; i++) {
+            const item = cacheParams[paramType][i]
+            const itemAppKey = item.appKey ? item.appKey : ''
+            const key = `${itemAppKey}_${item.name}`
+            cacheParamsByKey[key] = item
+          }
+        }
 
-    // 设置api接口数据列表
-    [Types.SET_API_LIST](state, data: ApiItem[]) {
-      state.apiList = data;
-    },
-    // 设置api接口数据对象
-    [Types.SET_API_OBJECT](state, data: ApiObjectState) {
-      state.apiObject = data;
-    },
-    // 设置api接口数据列表
-    [Types.SET_API_MENUS](state, data: MenuItemType[]) {
-      state.apiMenus = data;
-    },
-    // 设置可选的tags
-    [Types.SET_API_TAGS](state, tags: string[]) {
-      state.tags = tags;
-    },
-    // 设置全局参数
-    [Types.SET_GLOBAL_PARAMS](state, data: GlobalParamsState) {
-      state.globalParams = data;
-    },
-    // 设置权限token
-    [Types.SET_AUTH_DATA](state, data: AuthDataState) {
-      state.authData = data;
-    },
-    // 设置api分析数据
-    [Types.SET_API_ANALYSIS](state, data: ApiAnalysisData) {
-      state.apiAnalysis = { ...state.apiAnalysis, ...data };
-    },
-    // 设置当前app的参数
-    [Types.SET_CURRENT_APP](state, data: ConfigAppItem) {
-      state.currentApp = data;
-    },
-    // 设置isreload值
-    [Types.SET_ISRELOAD](state, flag: boolean) {
-      state.isReload = flag;
-    },
-  },
-  getters: {
-    authData(state) {
-      return state.authData;
-    },
-  },
-};
+        const globalParams: ConfigGlobalParamItem[] = []
+        // 合并全局配置
+        if (config.params && config.params[paramType]) {
+          const params = config.params[paramType] as ConfigGlobalParamItem[]
+          for (let i = 0; i < params.length; i++) {
+            const item = params[i]
+            item.id = createRandKey()
+            item.appKey = 'all'
+            item.addSource = 'config'
+            item.require = true
+            const cacheKey = `${item.appKey}_${item.name}`
+            if (cacheParamsByKey[cacheKey]) {
+              item.value = cacheParamsByKey[cacheKey].value
+              delete cacheParamsByKey[cacheKey]
+            } else {
+              item.value = item.default
+            }
 
-export default apidoc;
+            globalParams.push(item)
+          }
+        }
+        // 合并每个应用配置
+        if (appStore.appObject) {
+          for (const key in appStore.appObject) {
+            const appItem = appStore.appObject[key]
+            if (appItem.params && appItem.params[paramType]) {
+              const params = appItem.params[paramType] as ConfigGlobalParamItem[]
+              for (let i = 0; i < params.length; i++) {
+                const item = params[i]
+                item.id = createRandKey()
+                item.addSource = 'config'
+                item.appKey = key
+                item.require = true
+                const cacheKey = `${key}_${item.name}`
+                if (cacheParamsByKey[cacheKey]) {
+                  item.value = cacheParamsByKey[cacheKey].value
+                  delete cacheParamsByKey[cacheKey]
+                } else {
+                  item.value = item.default
+                }
+                globalParams.push(item)
+              }
+            }
+          }
+        }
+        if (Object.keys(cacheParamsByKey).length) {
+          for (const key in cacheParamsByKey) {
+            const item = cacheParamsByKey[key]
+            if (item.addSource != 'config') {
+              globalParams.push(item)
+            }
+          }
+        }
+        return globalParams
+      }
+      const json = {
+        header: getGlobalParams('header'),
+        query: getGlobalParams('query'),
+        body: getGlobalParams('body'),
+      }
+      this.setGlobalParams(json)
+    },
+    setCurrentEditorHoverTipsParams(params) {
+      this.currentEditorHoverTipsParams = params
+    },
+  },
+})
+
+export function useApidocOutsideStore() {
+  return useApidocStore(piniaStore)
+}

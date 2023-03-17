@@ -1,36 +1,87 @@
-// 获取配置信息
-export const GET_CONFIG_INFO = "GET_CONFIG_INFO";
+import { RouteLocationNormalized } from 'vue-router'
+import { ObjectType } from '/#/index'
+import { ConfigResult } from '/@/api/globalApi/types'
+import { ApiDetailParamItem } from '/@/api/apidocApi/types'
+import { ThemeEnum } from '/@/enums/appEnum'
+import { AxiosError } from 'axios'
+import { AppObject } from './helper'
+export const APP_THEME = 'APP_THEME'
+export const APP_LANG = 'APP_LANG'
 
-export const GET_API_DATA = "GET_API_DATA";
+export const APP_AUTH = 'APP_AUTH'
 
-export const GET_FE_CONFIG = "GET_FE_CONFIG";
+export interface AppState {
+  theme: ThemeEnum
+  title: string
+  device: string
+  feConfig: FeConfig
+  multiTabs: RouteLocationNormalized[]
+  appKey: string
+  serverConfig: ConfigResult
+  sideWidth: number
+  lang: string
+  keepAliveKeys: string[]
+  appAuth: ObjectType<string>
+  globalError: AxiosError
+  appObject: ObjectType<AppObject>
+  keepPages: any
+  apidocHost: string
+  [key: string]: unknown
+}
 
-export const SET_FE_CONFIG = "SET_FE_CONFIG";
+export interface FeConfig {
+  TITLE: string
+  HTTP: Http
+  AUTH?: Auth
+  CACHE?: Cache
+  LANG: Lang[]
+  METHOD_COLOR?: ObjectType<string>
+  MENU?: Menu
+  API_DETAIL_TABS?: string[]
+  DEBUG_EVENTS?: ObjectType<(value: string) => any>
+  LOAD_SCRIPTS?: string[]
+  MOCK_EXTENDS?: ObjectType<(value: string) => any>
+  CUSTOM_METHODS?: CustomMethods
+  SHOW_VERSION?: boolean
+}
 
-export const SET_CONFIG_INFO = "SET_CONFIG_INFO";
+interface CustomMethods {
+  RESPONSES_VIEW?: (any) => string | ObjectType<any>
+  HANDEL_APIFIELD_MD?: (any) => string | ObjectType<any>
+  HANDEL_APIFIELD_DESC?: (any) => string | ObjectType<any>
+  HANDEL_API_MD?: (any) => string | ObjectType<any>
+  HANDEL_API_DESC?: (any) => string | ObjectType<any>
+  RENDER_HOVER_TIPS_CONTENT?: (item: ApiDetailParamItem, t: any) => string
+}
 
-export const SET_APP_TITLE = "SET_APP_TITLE";
+interface Auth {
+  ERROR_STATUS?: number
+  ERROR_CODE_FIELD?: string
+}
 
-export const SET_APP_THEME = "SET_APP_THEME";
+interface Http {
+  HOSTS?: HostItem[]
+  TIMEOUT?: number
+  WITHCREDENTIALS?: boolean
+  ENCODEURICOMPONENT?: boolean
+}
 
-export const APP_THEME = "APP_THEME";
+export interface HostItem {
+  title: string
+  host: string
+}
 
-export const SET_SIDE_WIDTH = "SET_SIDE_WIDTH";
+interface Menu {
+  SHOWURL: boolean
+  WIDTH: number
+}
 
-export const SET_APP_KEY = "SET_APP_KEY";
+interface Cache {
+  PREFIX: string
+}
 
-export const SET_PAGE_DATA = "SET_PAGE_DATA";
-
-export const ADD_PAGE_DATA = "ADD_PAGE_DATA";
-
-export const REMOVE_PAGE_DATA = "REMOVE_PAGE_DATA";
-
-export const SET_KEEPALIVE_PAGES = "SET_KEEPALIVE_PAGES";
-
-export const SET_IS_MOBILE = "SET_IS_MOBILE";
-
-export const SET_IS_OPENSIDE = "SET_IS_OPENSIDE";
-
-export const SET_APIDETAIL_INIT_STATE = "SET_APIDETAIL_INIT_STATE";
-
-export const KEEPALIVE_PAGE_COMMA = "@COMMA";
+export interface Lang {
+  title: string
+  lang: string
+  messages: ObjectType<string>
+}
