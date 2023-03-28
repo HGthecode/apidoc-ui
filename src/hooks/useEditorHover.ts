@@ -5,8 +5,9 @@ export default (): void => {
   monaco.languages.registerHoverProvider('json', {
     provideHover: (model, position) => {
       const hoverDom = model.getWordAtPosition(position)
+
       if (hoverDom && hoverDom.word && apidocStore.currentEditorHoverTipsParams) {
-        const key = `${hoverDom.word}_${hoverDom.startColumn}`
+        const key = `${hoverDom.word}_${position.lineNumber}_${hoverDom.startColumn}`
         const contents = apidocStore.currentEditorHoverTipsParams[key]
         return {
           contents: contents,

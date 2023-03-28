@@ -109,13 +109,22 @@ function renderHoverTipsContent(item: ApiDetailParamItem, t) {
 }
 
 //将参数处理成editor Hover提示的参数
-export function handleHoverTipsParams(detailParams: ApiDetailParamItem[], startColumn = 3) {
+export function handleHoverTipsParams(
+  detailParams: ApiDetailParamItem[],
+  startColumn = 3,
+  startLine = 2,
+) {
   const tipsParamsByKey = {}
   const { t } = useI18n()
   const appStore = useAppStore()
+  let lineNumber = startLine
   for (let i = 0; i < detailParams.length; i++) {
     const item = detailParams[i]
-    const key = `${item.name}_${startColumn}`
+    let currentLine = lineNumber + i
+    if (item.childrenType == 'array') {
+      currentLine = currentLine + 1
+    }
+    const key = `${item.name}_${currentLine}_${startColumn}`
     let content = ''
     if (
       appStore.feConfig.CUSTOM_METHODS &&
@@ -132,11 +141,16 @@ export function handleHoverTipsParams(detailParams: ApiDetailParamItem[], startC
     ]
     if (item.children && item.children.length) {
       const addStartColumn = item.type && ['array', 'tree'].includes(item.type) ? 2 : 1
-      const childrenObj = handleHoverTipsParams(item.children, startColumn + addStartColumn)
+      const childrenObj = handleHoverTipsParams(
+        item.children,
+        startColumn + addStartColumn,
+        currentLine + addStartColumn,
+      )
       for (const key in childrenObj) {
         const cItem = childrenObj[key]
         tipsParamsByKey[key] = cItem
       }
+      lineNumber = lineNumber + Object.keys(childrenObj).length + addStartColumn + 1
     }
   }
   return tipsParamsByKey

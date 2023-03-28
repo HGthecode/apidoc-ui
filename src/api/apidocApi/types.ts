@@ -68,6 +68,7 @@ export interface ApiDetailParamItem {
   type?: string
   children?: ApiDetailParamItem[]
   mock?: string
+  childrenType?: string
   [key: string]: unknown
 }
 

@@ -16,6 +16,7 @@
             :readOnly="true"
             :title="t('apiPage.responses')"
             height="300px"
+            :hoverTipsParams="state.responsesTipsParams"
           />
         </div>
         <div v-else class="api-param-empty">
@@ -67,6 +68,9 @@
   import NumberBadge from '/@/components/NumberBadge'
   import { useAppStore } from '/@/store'
   import ResultStatus from './ResultStatus.vue'
+  import { ObjectType } from '/#/index'
+  import { IMarkdownString } from 'monaco-editor'
+  import { handleHoverTipsParams } from '/@/utils/helper/codeHelper'
 
   const appStore = useAppStore()
 
@@ -91,6 +95,7 @@
     responsesHtml: string
     showCodeEditor: boolean
     resultStatus: 'success' | 'error' | 'info'
+    responsesTipsParams: ObjectType<IMarkdownString[]>
   }>({
     events: {
       before: [],
@@ -101,6 +106,7 @@
     responsesHtml: '',
     showCodeEditor: true,
     resultStatus: 'info',
+    responsesTipsParams: {},
   })
 
   if (props.detail.before) {
@@ -109,6 +115,12 @@
   if (props.detail.after) {
     state.events.after = props.detail.after as ApiDetailEventItem[]
   }
+
+  watchEffect(() => {
+    if (props.detail.responseSuccess) {
+      state.responsesTipsParams = handleHoverTipsParams(props.detail.responseSuccess)
+    }
+  })
 
   const onTabChange = (key) => {
     if (key === 'responses') {
