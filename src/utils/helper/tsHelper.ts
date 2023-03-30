@@ -16,20 +16,6 @@ function pad(num = 2) {
   return ' '.repeat(num)
 }
 
-// function getFullObjectFromArray(arr = []) {
-//   if (arr.length === 0) {
-//     return {}
-//   } else {
-//     if (typeof arr[0] !== 'object') {
-//       return arr[0]
-//     } else {
-//       return arr.reduce((pre, next) => {
-//         return Object.assign(pre, next)
-//       }, {})
-//     }
-//   }
-// }
-
 const defaultConfig = {
   outputIndent: 2,
   rootName: 'RootName',
@@ -84,7 +70,7 @@ export function transformTsByParams<T>(params: T[], config: ConfigType): any[] {
           })
           subs += `${childrenResult}`
         } else {
-          result += `${padContent}${item.name}${require}: any[];\n`
+          result += `${padContent}${item.name}${require}: any;\n`
         }
       } else {
         result += `${padContent}${item.name}${require}: string;\n`

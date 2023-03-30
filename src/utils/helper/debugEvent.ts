@@ -48,7 +48,7 @@ const customEvents = feConfig.DEBUG_EVENTS ? feConfig.DEBUG_EVENTS : {}
 const events: EventItem = {
   setHeader({ event, config, value }): Promise<EventResult> {
     return new Promise((resolve, reject) => {
-      if (event.key) {
+      if (event.key && value !== undefined) {
         config.headers[event.key] =
           feConfig?.HTTP.ENCODEURICOMPONENT !== false ? encodeURIComponent(value) : value
         const res: EventResult = {
@@ -64,7 +64,7 @@ const events: EventItem = {
   },
   setQuery({ event, config, value }): Promise<EventResult> {
     return new Promise((resolve, reject) => {
-      if (event.key) {
+      if (event.key && value !== undefined) {
         config.params[event.key] = value
         const res: EventResult = {
           event,
@@ -79,7 +79,7 @@ const events: EventItem = {
   },
   setBody({ event, config, value }): Promise<EventResult> {
     return new Promise((resolve, reject) => {
-      if (event.key) {
+      if (event.key && value !== undefined) {
         config.data[event.key] = value
         const res: EventResult = {
           event: event,
@@ -139,7 +139,7 @@ const events: EventItem = {
   },
   setGlobalHeader({ event, config, value }): Promise<EventResult> {
     return new Promise((resolve, reject) => {
-      if (event.key) {
+      if (event.key && value !== undefined) {
         setGolbalParam('header', event.key, value, event.desc, event.appKey)
         const res: EventResult = {
           event,
@@ -154,7 +154,7 @@ const events: EventItem = {
   },
   setGlobalQuery({ event, config, value }): Promise<EventResult> {
     return new Promise((resolve, reject) => {
-      if (event.key) {
+      if (event.key && value !== undefined) {
         setGolbalParam('query', event.key, value, event.desc, event.appKey)
         const res: EventResult = {
           event,
@@ -169,7 +169,7 @@ const events: EventItem = {
   },
   setGlobalBody({ event, config, value }): Promise<EventResult> {
     return new Promise((resolve, reject) => {
-      if (event.key) {
+      if (event.key && value !== undefined) {
         setGolbalParam('body', event.key, value, event.desc, event.appKey)
         const res: EventResult = {
           event,

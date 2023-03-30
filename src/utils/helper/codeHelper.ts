@@ -33,7 +33,7 @@ export function renderCodeJsonByParams<T>(
       if (item.type === 'array' && (fieldValue === 'array' || !fieldValue)) {
         fieldValue = []
       }
-      let value = ['int', 'float', 'boolean', 'array'].includes(item.type)
+      let value = ['int', 'float', 'boolean', 'array', 'object'].includes(item.type)
         ? fieldValue
         : `${trim(fieldValue)}`
       if (item.type == 'object' && item.children && item.children.length) {

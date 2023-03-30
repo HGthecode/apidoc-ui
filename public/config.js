@@ -51,7 +51,6 @@ window.apidocFeConfig = {
   // （选配）调试时事件，处理参数值的方法
   DEBUG_EVENTS:{
     md5(param){
-      console.log('md5事件',param);
       return new Promise((resolve, reject) => {
         const {config,event}=param
         if (event.key) {
