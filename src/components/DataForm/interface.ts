@@ -14,6 +14,7 @@ export interface FormItemType {
   onChange?: (appKey: string) => void
   props?: ObjectType<any>
   rules?: any
+  default?: any
 }
 
 export enum FormInputType {

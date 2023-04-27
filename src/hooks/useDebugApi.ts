@@ -265,7 +265,7 @@ export default (): Types => {
                 formData.append(`${item.name}[]`, file)
               }
             }
-          } else {
+          } else if (item.default || item.default == 0 || typeof item.default == 'boolean') {
             const value: any = item.default
             formData.append(item.name, value)
           }

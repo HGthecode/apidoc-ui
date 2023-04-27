@@ -260,17 +260,22 @@
 
           ...generatorFind.form.items,
         ]
+        let defaultValues = {}
         state.formItems = items.map((item) => {
           if (item.type === 'app-select') {
             item.onChange = (appKey: string) => {
               onAppChange(appKey)
             }
           }
+          if (item.default) {
+            defaultValues[item.field] = item.default
+          }
           return item
         })
         state.formData = {
           appKey: appStore.appKey,
           group: '',
+          ...defaultValues,
         }
       }
       if (generatorFind.table && generatorFind.table.items) {

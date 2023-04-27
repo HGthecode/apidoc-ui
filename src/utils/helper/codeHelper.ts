@@ -40,22 +40,21 @@ export function renderCodeJsonByParams<T>(
         value = renderCodeJsonByParams(item.children, isMock)
       } else if (item.type == 'array' && item.children && item.children.length) {
         const childrenData = renderCodeJsonByParams(item.children, isMock)
-        let childrenValue: any = null
-        if (item.childrenType == 'array') {
-          const arr: any = []
-          for (const key in childrenData) {
-            arr.push(childrenData[key])
-          }
-
-          childrenValue = arr
-        } else if (item.childrenType == 'string') {
-          childrenValue = ''
-        } else if (item.childrenType == 'int') {
-          childrenValue = null
-        } else {
-          childrenValue = childrenData
+        const arr: any = []
+        for (const key in childrenData) {
+          arr.push(childrenData[key])
         }
-        value = [childrenValue]
+        if (item.childrenType == 'array') {
+          value = [arr]
+        } else if (item.childrenType == 'string' || item.childrenType == 'int') {
+          if (arr.length) {
+            value = arr
+          } else {
+            value = null
+          }
+        } else {
+          value = [childrenData]
+        }
       } else if (item.type == 'tree' && item.children && item.children.length) {
         const childrenData = renderCodeJsonByParams(item.children, isMock)
         value = [childrenData]

@@ -9,7 +9,8 @@
       bordered
       :pagination="false"
       size="small"
-      v-bind="props.tableProps"
+      defaultExpandAllRows
+      v-bind="tableProps"
       :data-source="props.data"
       :columns="props.columns"
     >
@@ -27,7 +28,8 @@
           <span v-else>{{ obj.text }}</span>
         </template>
         <div v-else-if="obj.column.dataIndex === 'desc'">
-          <span v-html="renderDesc(obj.text)"></span>&nbsp;&nbsp;
+          <span v-if="obj.record.html" v-html="obj.record.html"></span>
+          <span v-else v-html="renderDesc(obj.text)"></span>&nbsp;&nbsp;
           <a v-if="obj.record.md || obj.record.mdRef" @click="onShowMdDetail(obj.record)">{{
             t('common.view')
           }}</a>
@@ -60,6 +62,15 @@
     }>(),
     {},
   )
+  let tableProps = ref({})
+  function handleTableProps() {
+    let defaultProps = appStore.feConfig.API_TABLE_PROPS || {}
+    if (props.tableProps) {
+      defaultProps = { ...defaultProps, ...props.tableProps }
+    }
+    tableProps.value = defaultProps
+  }
+  handleTableProps()
   const slots = useSlots()
   function onShowMdDetail(record) {
     let md = record.md

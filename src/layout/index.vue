@@ -1,12 +1,12 @@
 <template>
-  <layout-header />
+  <layout-header @reload-menu="onReloadMenu" />
   <loading-card v-if="state.loading" />
   <error-card
     v-else-if="appStore.globalError && appStore.globalError.response"
     :error="appStore.globalError"
   />
   <template v-else>
-    <layout-sider />
+    <layout-sider ref="sider" />
     <layout-multitabs />
     <layout-content />
   </template>
@@ -26,6 +26,7 @@
 
   import { useRoute } from 'vue-router'
   const route = useRoute()
+  const sider = ref()
 
   useDevice()
   useWebsiteService()
@@ -68,6 +69,12 @@
         }
       })
     })
+
+  const onReloadMenu = () => {
+    console.log('6666')
+
+    sider.value.onReload()
+  }
 </script>
 
 <style lang="less" scoped></style>

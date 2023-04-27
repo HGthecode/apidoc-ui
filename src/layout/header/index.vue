@@ -19,7 +19,7 @@
         >
         <host-select />
         <lang-select />
-        <tools-menu />
+        <tools-menu @reload-menu="onReloadMenu" />
         <!-- <user-menu /> -->
 
         <!-- <global-params />
@@ -49,12 +49,19 @@
 
   const appStore = useAppStore()
 
+  const emit = defineEmits<{
+    (event: 'reloadMenu'): void
+  }>()
+
   const onOpenSide = () => {
     appStore.toggleOpenSide(true)
   }
 
   const onShowGlobalParamsModal = () => {
     showGlobalParamsModal({})
+  }
+  const onReloadMenu = () => {
+    emit('reloadMenu')
   }
 </script>
 

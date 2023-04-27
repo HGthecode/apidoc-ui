@@ -175,6 +175,9 @@
       },
     })
   }
+  defineExpose({
+    onReload,
+  })
 </script>
 
 <style lang="less" scoped>

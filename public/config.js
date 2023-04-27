@@ -12,7 +12,7 @@ window.apidocFeConfig = {
     HOSTS:[
       {
         title:"tp6",
-        host:"http://tp6.apidoc-demo.com"
+        host:"http://localhost:8787"
       }
     ],
     // 接口响应超时时间
@@ -44,6 +44,11 @@ window.apidocFeConfig = {
   },
   // 接口详情页的tab顺序
   API_DETAIL_TABS:["table", "json", "ts", "debug"],
+  // 接口详情表格属性
+  API_TABLE_PROPS:{
+    // 是否默认展开所有行
+    defaultExpandAllRows:true
+  },
   // 加载外部js文件
   LOAD_SCRIPTS:[
     "./utils/md5.js",

@@ -38,6 +38,7 @@ export interface FeConfig {
   METHOD_COLOR?: ObjectType<string>
   MENU?: Menu
   API_DETAIL_TABS?: string[]
+  API_TABLE_PROPS?: ObjectType<any>
   DEBUG_EVENTS?: ObjectType<(value: string) => any>
   LOAD_SCRIPTS?: string[]
   MOCK_EXTENDS?: ObjectType<(value: string) => any>

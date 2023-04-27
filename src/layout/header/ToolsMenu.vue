@@ -50,12 +50,17 @@
   import ConfirmModal from '/@/components/ConfirmModal'
   import { DeviceEnum } from '/@/enums/appEnum'
   import showCodeTemplateModal from '/@/components/CodeTemplate'
+
   const appStore = useAppStore()
+
   const { t } = useI18n()
+
+  const emit = defineEmits<{
+    (event: 'reloadMenu'): void
+  }>()
 
   const handleMenuClick = (e: MenuInfo) => {
     const { keyPath, key } = e
-    console.log(e)
 
     if (!(keyPath && keyPath.length)) {
       return
@@ -66,7 +71,8 @@
       showGeneratorModal({
         generatorIndex: index,
         onSuccess: () => {
-          console.log('success')
+          // console.log('success')
+          emit('reloadMenu')
         },
       })
     } else if (key == 'cancelAllCache') {
