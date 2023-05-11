@@ -46,7 +46,7 @@
   import { ApiMenusResult } from '/@/api/apidocApi/types'
   import type { TreeProps } from 'ant-design-vue'
   import { CopyrightCircleOutlined, FolderOutlined } from '@ant-design/icons-vue'
-
+  import { cloneDeep } from 'lodash-es'
   const appStore = useAppStore()
 
   interface Props {
@@ -66,10 +66,12 @@
   const state = reactive<{
     appKey: string
     apiTreeData: any
+    apiResData: any
     keyword: string
     currentSelectedKeys: string[]
   }>({
     appKey: appStore.appKey,
+    apiResData: [],
     apiTreeData: [],
     keyword: '',
     currentSelectedKeys: [],
@@ -82,6 +84,7 @@
 
   const onSearch = (key: string) => {
     state.keyword = key
+    state.apiTreeData = filterApiData(cloneDeep(state.apiResData))
   }
   const onAppChange = async (appKey: string): Promise<any> => {
     state.appKey = appKey
@@ -93,6 +96,7 @@
         appKey: state.appKey,
       })
       .then((res: IResponse<ApiMenusResult>) => {
+        state.apiResData = res.data.data
         if (props.selectMode == 'controller') {
           state.apiTreeData = filterApiData(res.data.data)
         } else {
@@ -114,8 +118,18 @@
         if (props.selectMode == 'controller' && p.url) {
           return ''
         }
+        if (
+          state.keyword &&
+          p.title.indexOf(state.keyword) < 0 &&
+          !(p.children && p.children.length)
+        ) {
+          return ''
+        }
         if (p.children && p.children.length) {
           p.children = filterApiData(p.children)
+          if (state.keyword && !(p.children && p.children.length)) {
+            return ''
+          }
         }
         return p
       })
