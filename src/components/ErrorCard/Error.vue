@@ -41,7 +41,11 @@
   })
   const errorIframeUrl = computed(() => {
     const error = props.error
-    if (error.config && error.response && error.response.status == 500) {
+    if (
+      error.config &&
+      error.response &&
+      (error.response.status == 500 || error.message == 'Network Error')
+    ) {
       let urlParams = ''
       if (error.config.method == 'post' && error.config.data) {
         const data = JSON.parse(error.config.data)

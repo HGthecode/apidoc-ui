@@ -14,18 +14,31 @@ import {
   VerifyAuthResult,
   CodeTemplateParams,
   CodeTemplateResult,
+  GetAllApiMenusResult,
+  ApiShareListItem,
+  GetApiShareDetailParams,
+  GetApiShareListParams,
+  ApiShareListResult,
+  HandleApiShareActionParams,
 } from './types'
 
 export enum URL {
-  apiMenus = '/apidoc/apiMenus',
-  apiDetail = '/apidoc/apiDetail',
-  docMenus = '/apidoc/docMenus',
-  docDetail = '/apidoc/docDetail',
-  generator = '/apidoc/generator',
-  verifyAuth = '/apidoc/verifyAuth',
-  cancelAllCache = '/apidoc/cancelAllCache',
-  createAllCache = '/apidoc/createAllCache',
-  renderCodeTemplate = '/apidoc/renderCodeTemplate',
+  apiMenus = '/apiMenus',
+  apiDetail = '/apiDetail',
+  docMenus = '/docMenus',
+  docDetail = '/docDetail',
+  generator = '/generator',
+  verifyAuth = '/verifyAuth',
+  cancelAllCache = '/cancelAllCache',
+  createAllCache = '/createAllCache',
+  renderCodeTemplate = '/renderCodeTemplate',
+  allApiMenus = '/allApiMenus',
+  addApiShare = '/addApiShare',
+  getApiShareList = '/getApiShareList',
+  getApiShareDetail = '/getApiShareDetail',
+  deleteApiShare = '/deleteApiShare',
+  getShareApiMenus = '/getShareApiMenus',
+  handleApiShareAction = '/handleApiShareAction',
 }
 
 export default class globalApi {
@@ -53,4 +66,19 @@ export default class globalApi {
 
   static renderCodeTemplate = async (data: CodeTemplateParams) =>
     post<CodeTemplateResult>({ url: URL.renderCodeTemplate, data })
+
+  static getAllApiMenus = async () => post<GetAllApiMenusResult>({ url: URL.allApiMenus })
+  static addApiShare = async (data: any) => post<CodeTemplateResult>({ url: URL.addApiShare, data })
+
+  static getApiShareList = async (data: GetApiShareListParams) =>
+    post<ApiShareListResult>({ url: URL.getApiShareList, data })
+
+  static getApiShareDetail = async (data: GetApiShareDetailParams) =>
+    post<ApiShareListItem>({ url: URL.getApiShareDetail, data })
+  static deleteApiShare = async (data: GetApiShareDetailParams) =>
+    post<ApiShareListItem>({ url: URL.deleteApiShare, data })
+  static getShareApiMenus = async (data: ApiMenusParams) =>
+    post<ApiMenusResult>({ url: URL.getShareApiMenus, data })
+  static handleApiShareAction = async (data: HandleApiShareActionParams) =>
+    post<any>({ url: URL.handleApiShareAction, data })
 }

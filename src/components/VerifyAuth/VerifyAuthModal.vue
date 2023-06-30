@@ -29,6 +29,7 @@
   import apidocApi from '/@/api/apidocApi'
   import { message } from 'ant-design-vue'
   import md5 from 'js-md5'
+  import { VerifyAuthParams } from '/@/api/apidocApi/types'
 
   const appStore = useAppStore()
 
@@ -69,19 +70,23 @@
       return
     }
     const password = md5(state.password)
+    let json: VerifyAuthParams = {
+      appKey: appStore.appKey,
+      password,
+    }
+    if (appStore.shareKey) {
+      json.shareKey = appStore.shareKey as string
+    }
     apidocApi
-      .verifyAuth({
-        appKey: appStore.appKey,
-        password,
-      })
+      .verifyAuth(json)
       .then((res) => {
         if (res.code !== 0 || !(res.data && res.data.token)) {
           res.message && message.error(res.message)
           return false
         }
         const token = res.data.token
-        appStore.setAppAuth(appStore.appKey, token)
-
+        const key = appStore.shareKey ? 'shareKey_' + appStore.shareKey : appStore.appKey
+        appStore.setAppAuth(key, token)
         props.onSuccess && props.onSuccess()
         state.visible = false
       })

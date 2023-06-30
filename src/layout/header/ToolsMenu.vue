@@ -2,7 +2,8 @@
   <a-dropdown
     v-if="
       (appStore.serverConfig.generator && appStore.serverConfig.generator.length) ||
-      (appStore.serverConfig.cache && appStore.serverConfig.cache.enable)
+      (appStore.serverConfig.cache && appStore.serverConfig.cache.enable) ||
+      (appStore.serverConfig.share && appStore.serverConfig.share.enable)
     "
   >
     <template #overlay>
@@ -29,6 +30,9 @@
           key="codeTemplate"
           >{{ t('codeTemplate.title') }}</a-menu-item
         >
+        <a-menu-item v-if="appStore.serverConfig.share?.enable" key="apiShare">{{
+          t('apiShare.title')
+        }}</a-menu-item>
       </a-menu>
     </template>
     <a-button>
@@ -50,6 +54,7 @@
   import ConfirmModal from '/@/components/ConfirmModal'
   import { DeviceEnum } from '/@/enums/appEnum'
   import showCodeTemplateModal from '/@/components/CodeTemplate'
+  import showApiShareModal from '/@/components/ApiShare'
 
   const appStore = useAppStore()
 
@@ -67,7 +72,6 @@
     }
     if (keyPath[0] == 'generator') {
       const index = Number(keyPath[1])
-
       showGeneratorModal({
         generatorIndex: index,
         onSuccess: () => {
@@ -103,6 +107,8 @@
       })
     } else if (key == 'codeTemplate') {
       showCodeTemplateModal({})
+    } else if (key == 'apiShare') {
+      showApiShareModal({})
     }
   }
 </script>

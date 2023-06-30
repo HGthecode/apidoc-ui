@@ -26,6 +26,7 @@ export interface AppState {
   appObject: ObjectType<AppObject>
   keepPages: any
   apidocHost: string
+  shareKey?: string
   [key: string]: unknown
 }
 
@@ -65,6 +66,7 @@ interface Http {
   TIMEOUT?: number
   WITHCREDENTIALS?: boolean
   ENCODEURICOMPONENT?: boolean
+  API_PREFIX?: string
 }
 
 export interface HostItem {

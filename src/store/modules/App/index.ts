@@ -49,6 +49,7 @@ export const useAppStore = defineStore('app', {
     },
     keepPages: [],
     apidocHost: 'http://localhost:6999',
+    shareKey: '',
   }),
   getters: {},
   actions: {
@@ -160,6 +161,9 @@ export const useAppStore = defineStore('app', {
     },
     addKeepPages(page) {
       this.keepPages.push(page)
+    },
+    setShareKey(key) {
+      this.shareKey = key
     },
   },
 })

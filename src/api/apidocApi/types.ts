@@ -4,6 +4,7 @@ export interface ApiMenusParams {
   lang?: string
   appKey?: string
   token?: string
+  shareKey?: string
 }
 
 export interface ApiMenusResult {
@@ -27,6 +28,7 @@ export interface ApiMenuItem {
   author?: string
   type?: string
   path?: string
+  appKey?: string
 }
 
 interface GroupItem {
@@ -127,6 +129,7 @@ export interface GeneratorResult {
 export interface VerifyAuthParams {
   appKey: string
   password: string
+  shareKey?: string
 }
 
 export interface VerifyAuthResult {
@@ -142,4 +145,34 @@ export interface CodeTemplateParams {
 
 export interface CodeTemplateResult {
   code: string
+}
+
+export interface GetAllApiMenusResult extends AppItem {
+  children: ApiMenuItem[]
+}
+
+export interface GetApiShareDetailParams {
+  key: string
+}
+export interface GetApiShareListParams {
+  pageIndex: number
+}
+
+export interface ApiShareListResult {
+  total: number
+  data: ApiShareListItem[]
+}
+
+export interface ApiShareListItem {
+  key: string
+  name: string
+  type: string
+  create_time: string
+  appKeys?: string[]
+  apiKeys?: string[]
+}
+
+export interface HandleApiShareActionParams {
+  key: string
+  index: number
 }

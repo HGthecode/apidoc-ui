@@ -79,7 +79,7 @@
   import Search from './Search.vue'
   import { useI18n } from '/@/hooks/useI18n'
   import { useRouter, useRoute, onBeforeRouteUpdate, RouteLocationNormalized } from 'vue-router'
-
+  import { ApiMenusParams } from '/@/api/apidocApi/types'
   const appStore = useAppStore()
   const apidocStore = useApidocStore()
   const router = useRouter()
@@ -126,9 +126,13 @@
     filterTags.value = keys
   }
   const onAppChange = async (appKey: string): Promise<any> => {
-    const params = {
+    const params: ApiMenusParams = {
       appKey: appKey,
       lang: route.query.lang ? (route.query.lang as string) : appStore.lang,
+    }
+    if (route.query.shareKey) {
+      params.shareKey = route.query.shareKey as string
+      appStore.setShareKey(route.query.shareKey)
     }
     appStore.setAppKey(appKey)
     await apidocStore.fetchApiMenus(params)
@@ -154,14 +158,19 @@
     if (!e.item.url) {
       return
     }
+    const qurey = {
+      appKey: appStore.appKey,
+      key: e.key,
+      title: encodeURIComponent(e.item.title),
+      shareKey: appStore.shareKey as string,
+    }
+    if (appStore.shareKey) {
+      qurey.shareKey = appStore.shareKey
+    }
 
     router.push({
       name: `ApiDetail`,
-      query: {
-        appKey: appStore.appKey,
-        key: e.key,
-        title: encodeURIComponent(e.item.title),
-      },
+      query: qurey,
     })
   }
   const onMdMenuSelect = (e: any) => {

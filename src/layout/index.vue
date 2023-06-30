@@ -23,7 +23,7 @@
   import LoadingCard from '/@/components/LoadingCard'
   import useDevice from '/@/hooks/useDevice'
   import useWebsiteService from '/@/hooks/useWebsiteService'
-
+  import { ApiMenusParams } from '/@/api/apidocApi/types'
   import { useRoute } from 'vue-router'
   const route = useRoute()
   const sider = ref()
@@ -45,9 +45,13 @@
     errorIframeUrl: '',
   })
 
-  const params = {
+  const params: ApiMenusParams = {
     appKey: route.query.appKey ? (route.query.appKey as string) : appStore.appKey,
     lang: route.query.lang ? (route.query.lang as string) : appStore.lang,
+  }
+  if (route.query.shareKey) {
+    params.shareKey = route.query.shareKey as string
+    appStore.setShareKey(route.query.shareKey)
   }
 
   appStore
@@ -71,8 +75,6 @@
     })
 
   const onReloadMenu = () => {
-    console.log('6666')
-
     sider.value.onReload()
   }
 </script>

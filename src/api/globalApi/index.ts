@@ -1,7 +1,7 @@
 import { get } from '/@/utils/http/axios'
 import { ConfigParams, ConfigResult } from './types'
 export enum URL {
-  config = '/apidoc/config',
+  config = '/config',
 }
 
 export default class globalApi {

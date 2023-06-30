@@ -58,6 +58,7 @@ export function handleApidocHttpError(error: any): Promise<any> {
       } else if (code != 0) {
         const appStore = useAppOutsideStore()
         appStore.setGlobalError(error)
+        resolve(false)
       } else {
         // 返回false表示不需处理的
         resolve(false)

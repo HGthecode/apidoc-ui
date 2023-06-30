@@ -11,6 +11,7 @@
       :key="item.field"
       :style="renderFormItemStyle(item)"
       :class="['data-form-item', item.class]"
+      :name="item.field"
     >
       <template #label>
         <div :class="['data-form-item_title', { colon: item.colon !== false }]">{{
@@ -24,6 +25,12 @@
             v-bind="item.props"
             v-model:value="state.formData[item.field]"
             @change="onValueChange($event, item)"
+          />
+          <a-radio-group
+            v-else-if="item.type == FormInputType.RADIOGROUP"
+            v-bind="item.props"
+            v-model:value="state.formData[item.field]"
+            @change="onInputChange($event, item)"
           />
           <a-tree-select
             v-else-if="item.type == FormInputType.GROUPSELECT"
@@ -164,6 +171,7 @@
   }
   const itemsRules = handleFormRules(props.items)
   state.formRules = { ...props.rules, ...itemsRules }
+  console.log(state.formRules)
 
   const onSubmit = () => {
     return new Promise((resolve, reject) => {

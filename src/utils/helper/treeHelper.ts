@@ -13,6 +13,19 @@ export function getFirstNode<T = any>(tree: T[], childrenField = 'children'): T[
   return temp
 }
 
+export function treeToList<T = any>(tree: T[], childrenField = 'children') {
+  const res: T[] = [] // 用于存储递归结果（扁平数据）
+  // 递归函数
+  const fn = (source: T[]) => {
+    source.forEach((el) => {
+      res.push(el)
+      el[childrenField] && el[childrenField].length > 0 ? fn(el[childrenField]) : '' // 子级递归
+    })
+  }
+  fn(tree)
+  return res
+}
+
 export function filterTree<T = any>(
   tree: T[],
   func: (n: T) => boolean,

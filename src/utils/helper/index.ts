@@ -272,3 +272,14 @@ export const replaceAppConfigKeys = (app: AppObject, str: string): string => {
   }
   return text
 }
+
+export const downloadFile = (url: string, fileName = 'downloadFile') => {
+  const a = document.createElement('a')
+  a.style.display = 'none'
+  a.setAttribute('target', '_blank')
+  a.setAttribute('download', fileName)
+  a.href = url
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+}

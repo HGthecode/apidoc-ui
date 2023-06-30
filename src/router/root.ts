@@ -1,4 +1,5 @@
 import BasicLayout from '../layout/index.vue'
+
 import KeepPage from '../layout/KeepPage.vue'
 
 export default [

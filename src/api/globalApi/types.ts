@@ -15,8 +15,17 @@ export interface ConfigResult {
   responses?: ConfigResponsesParams
   generator?: ConfigGeneratorItem[]
   code_template?: ConfigCodeTemplateItem[]
+  share?: ConfigShare
 }
 
+export interface ConfigShare {
+  enable?: boolean
+  actions?: ConfigShareActionItem
+}
+export interface ConfigShareActionItem {
+  name: string
+  click: any
+}
 export interface ConfigResponsesParams {
   success: ConfigGlobalResponsesParamItem[]
   error: ConfigGlobalParamItem[]

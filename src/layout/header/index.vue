@@ -19,7 +19,7 @@
         >
         <host-select />
         <lang-select />
-        <tools-menu @reload-menu="onReloadMenu" />
+        <tools-menu v-if="!appStore.shareKey" @reload-menu="onReloadMenu" />
         <!-- <user-menu /> -->
 
         <!-- <global-params />

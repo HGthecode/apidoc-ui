@@ -24,6 +24,7 @@ export enum FormInputType {
   GROUPSELECT = 'group-select',
   NUMBER = 'number',
   CHECKBOX = 'checkbox',
+  RADIOGROUP = 'radioGroup',
 }
 
 export type FormItemTypes =
@@ -33,3 +34,4 @@ export type FormItemTypes =
   | FormInputType.GROUPSELECT
   | FormInputType.NUMBER
   | FormInputType.CHECKBOX
+  | FormInputType.RADIOGROUP

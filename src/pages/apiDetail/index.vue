@@ -123,16 +123,6 @@
     ? appStore.feConfig.API_DETAIL_TABS
     : ['table', 'json', 'ts', 'debug']
 
-  // const error: AxiosError = {
-  //       config: {},
-  //       isAxiosError: false,
-  //       toJSON: () => {
-  //         return {};
-  //       },
-  //       name: "",
-  //       message: "",
-  //     };
-
   const state = reactive<{
     detail: ApiDetailResult
     currentMethod: string
@@ -194,6 +184,7 @@
         appKey: query.appKey ? (query.appKey as string) : appStore.appKey,
         path: query.key as string,
         lang: query.lang ? (query.lang as string) : appStore.lang,
+        shareKey: query.shareKey ? (query.shareKey as string) : appStore.shareKey,
       })
       .then((res: IResponse<ApiDetailResult>) => {
         // if (res.code != 0) {
@@ -276,27 +267,7 @@
         border-top-left-radius: 4px;
         border-bottom-left-radius: 4px;
       }
-      // .api-url-method {
-      //   &.GET {
-      //     background-color: var(--color-green);
-      //     color: var(--text-color-light);
-      //   }
-      //   &.POST {
-      //     background-color: var(--color-blue);
-      //     color: var(--text-color-light);
-      //   }
-      //   &.PUT {
-      //     background-color: var(--color-orange);
-      //     color: var(--text-color-light);
-      //   }
-      //   &.DELETE {
-      //     background-color: var(--color-red);
-      //     color: var(--text-color-light);
-      //   }
-      //   &.dark {
-      //     color: var(--text-color-light);
-      //   }
-      // }
+
       .api-method-select {
         width: 105px;
         background: @select-multiple-disabled-background;
@@ -356,9 +327,7 @@
     &:deep(.ant-tabs-tab .anticon) {
       margin-right: 3px;
     }
-    // &:deep(.ant-tabs-top > .ant-tabs-nav) {
-    //   margin: 0;
-    // }
+
     .button-reload {
       position: absolute;
       top: 10px;
