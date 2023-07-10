@@ -36,6 +36,7 @@
         :option="item"
         :index="index"
         :fieldTypes="state.currentGenerator.table?.field_types"
+        :appKey="state.currentAppKey"
       />
     </div>
     <template #footer>

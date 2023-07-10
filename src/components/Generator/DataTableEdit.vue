@@ -3,7 +3,9 @@
     <div class="table-title">
       <b>{{ props.option.title }}</b>
       <span>{{ t('generator.model.name') }}：</span>
-      <span>{{ props.option.path }}\</span>
+      <!-- <span>{{ props.option.path }}\</span> -->
+      <span>{{ replaceAppConfigKeys(appStore.appObject[props.appKey], props.option.path), }}\</span>
+
       <a-input v-model:value="state.modelName" style="width: 160px" @change="onModelNameChange" />
       ，
       <span>{{ t('generator.table.name') }}：</span>
@@ -33,15 +35,22 @@
   import EditTable from '/@/components/EditTable'
   import { cloneDeep, trim, isArray } from 'lodash-es'
   import { useI18n } from '/@/hooks/useI18n'
-  import { camelToUnderline, checkStringRules, createRandKey } from '/@/utils/helper'
+  import {
+    camelToUnderline,
+    checkStringRules,
+    createRandKey,
+    replaceAppConfigKeys,
+  } from '/@/utils/helper'
   import { ObjectType } from '/#/index'
   import { ColumnItem } from '../EditTable/types'
   import { InputRuleItem } from '/@/api/globalApi/types'
+  import { useAppStore } from '/@/store/modules/app'
 
   const { t } = useI18n()
-
+  const appStore = useAppStore()
   const props = withDefaults(
     defineProps<{
+      appKey: string
       option: any
       data: any
       fieldTypes: string[]
