@@ -4,7 +4,7 @@
       <b>{{ props.option.title }}</b>
       <span>{{ t('generator.model.name') }}：</span>
       <!-- <span>{{ props.option.path }}\</span> -->
-      <span>{{ replaceAppConfigKeys(appStore.appObject[props.appKey], props.option.path), }}\</span>
+      <span>{{ replaceAppConfigKeys(appStore.appObject[props.appKey], props.option.path) }}\</span>
 
       <a-input v-model:value="state.modelName" style="width: 160px" @change="onModelNameChange" />
       ，
