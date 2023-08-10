@@ -21,12 +21,14 @@
           "
           :items="state.formItems"
           :data="state.formData"
+          @change="onFormChange"
         />
       </div>
       <files-editor
         ref="filesRef"
         :files="state.currentGenerator.files"
         :appKey="state.currentAppKey"
+        :formData="state.formData"
       />
       <data-table-edit
         v-for="(item, index) in state.tableItems"
@@ -185,7 +187,6 @@
             })
           }
         })
-      console.log(json)
     } catch (error) {
       state.loading = false
     }
@@ -237,6 +238,11 @@
         }
       }
     }
+  }
+
+  function onFormChange(value, item) {
+    state.formData[item.field] = value
+    filesRef.value.reloadPath(state.formData)
   }
 
   function init(key: number) {

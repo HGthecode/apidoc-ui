@@ -237,7 +237,6 @@
     // const { tableName, modelName } = state;
     const tableName = trim(state.tableName)
     const modelName = trim(state.modelName)
-
     //验证模型名规则
     let model_rules: InputRuleItem[] = [
       { required: true, message: t('generator.model.name.placeholder') },
@@ -293,6 +292,9 @@
       if (isHandleItemData) {
         for (const key in item) {
           const val = item[key]
+          if (!columnsObj[key]) {
+            break
+          }
           const column = columnsObj[key]
           // 下拉框返回所选的参数对象
           if (

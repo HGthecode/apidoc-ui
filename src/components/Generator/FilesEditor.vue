@@ -24,7 +24,7 @@
   import { useI18n } from '/@/hooks/useI18n'
   import { ConfigGeneratorItemFilesItem } from '/@/api/globalApi/types'
   import { ObjectType } from '/#/index'
-  import { checkStringRules, replaceAppConfigKeys } from '/@/utils/helper'
+  import { checkStringRules, replaceAppConfigKeys, replaceStringByParam } from '/@/utils/helper'
   import { useAppStore } from '/@/store/modules/app'
 
   const { t } = useI18n()
@@ -34,6 +34,7 @@
     defineProps<{
       appKey: string
       files: ConfigGeneratorItemFilesItem[]
+      formData: ObjectType<any>
     }>(),
     {},
   )
@@ -84,7 +85,30 @@
     return state.fileDatas
   }
 
+  function replacePathParam(path: string): string {
+    let newPath = replaceAppConfigKeys(appStore.appObject[props.appKey], path)
+    newPath = replaceStringByParam(newPath, props.formData)
+    return newPath
+  }
+
   watchEffect(() => {
+    // let data: any = []
+    if (props.files && props.files.length) {
+      // for (let i = 0; i < props.files.length; i++) {
+      //   const item: ConfigGeneratorItemFilesItem = props.files[i]
+      //   data.push({
+      //     name: item.name,
+      //     value: '',
+      //     path: replacePathParam(item.path),
+      //   })
+      // }
+      reloadPath()
+    } else {
+      state.fileDatas = []
+    }
+  })
+
+  function reloadPath() {
     let data: any = []
     if (props.files && props.files.length) {
       for (let i = 0; i < props.files.length; i++) {
@@ -92,15 +116,16 @@
         data.push({
           name: item.name,
           value: '',
-          path: replaceAppConfigKeys(appStore.appObject[props.appKey], item.path),
+          path: replacePathParam(item.path),
         })
       }
     }
     state.fileDatas = data
-  })
+  }
 
   defineExpose({
     getData,
+    reloadPath,
   })
 </script>
 

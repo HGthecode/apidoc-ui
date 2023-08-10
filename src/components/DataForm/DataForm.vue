@@ -93,6 +93,10 @@
     },
   )
 
+  const emit = defineEmits<{
+    (event: 'change', value: any, item: FormItemType): void
+  }>()
+
   const formStyle = computed(() => {
     if (props.layout === 'grid') {
       let formColnumStyle = ''
@@ -128,18 +132,26 @@
   const onAppChange = (value: string, item: FormItemType) => {
     state.formData[item.field] = value
     item.onChange && item.onChange(value)
+    onChange(value, item)
   }
   const onValueChange = (value: string, item: FormItemType) => {
     state.formData[item.field] = value
     item.onChange && item.onChange(value)
+    onChange(value, item)
   }
   const onCheckboxValueChange = (e: any, item: FormItemType) => {
     state.formData[item.field] = e.target.checked
     item.onChange && item.onChange(e.target.checked)
+    onChange(e.target.checked, item)
   }
   const onInputChange = (e: any, item: FormItemType) => {
     state.formData[item.field] = e.target.value
     item.onChange && item.onChange(e.target.value)
+    onChange(e.target.value, item)
+  }
+
+  const onChange = (value: any, item: FormItemType) => {
+    emit('change', value, item)
   }
 
   const renderFormItemStyle = (item: FormItemType) => {
@@ -171,8 +183,6 @@
   }
   const itemsRules = handleFormRules(props.items)
   state.formRules = { ...props.rules, ...itemsRules }
-  console.log(state.formRules)
-
   const onSubmit = () => {
     return new Promise((resolve, reject) => {
       formRef.value

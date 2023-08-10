@@ -273,6 +273,25 @@ export const replaceAppConfigKeys = (app: AppObject, str: string): string => {
   return text
 }
 
+/**
+ * 字符串替换变量
+ * @param text 字符串
+ * @param param 参数
+ * @returns
+ */
+export const replaceStringByParam = (text: string, param: ObjectType<any>): string => {
+  for (const key in param) {
+    const value = param[key]
+    const keyStr = `\${form.${key}}`
+    if (text.indexOf(keyStr) > -1) {
+      const reg = RegExpEscape(keyStr)
+      const exp = new RegExp(reg, 'g')
+      text = text.replace(exp, value)
+    }
+  }
+  return text
+}
+
 export const downloadFile = (url: string, fileName = 'downloadFile') => {
   const a = document.createElement('a')
   a.style.display = 'none'
