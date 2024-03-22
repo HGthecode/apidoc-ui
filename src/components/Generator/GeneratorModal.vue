@@ -39,6 +39,7 @@
         :index="index"
         :fieldTypes="state.currentGenerator.table?.field_types"
         :appKey="state.currentAppKey"
+        :formData="state.formData"
       />
     </div>
     <template #footer>
@@ -160,7 +161,6 @@
         files: fileDatas,
         tables: tables,
       }
-
       apidocApi
         .generator(json)
         .then(() => {

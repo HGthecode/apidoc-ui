@@ -13,7 +13,7 @@ export const VITE_PORT = 6969
 export const ANALYSIS = true
 
 // 代码压缩
-export const COMPRESSION = true
+export const COMPRESSION = false
 
 // 打包时删除 console
 export const VITE_DROP_CONSOLE = true

@@ -88,7 +88,11 @@ export default (): Types => {
   }
   function renderBodyData(apiDetail: ApiDetailResult, renderType = '') {
     const params = apiDetail?.param as ApiDetailParamItem[]
-    if (apiDetail?.paramType === 'formdata' || renderType === 'array') {
+    if (
+      apiDetail?.paramType === 'formdata' ||
+      apiDetail?.paramType === 'form-data' ||
+      renderType === 'array'
+    ) {
       return renderData(params, 'body', apidocStore.globalParams, apiDetail.appKey)
     } else {
       return formatJsonCode(
@@ -157,7 +161,7 @@ export default (): Types => {
       )
       if (apiDetail.contentType) {
         params.header['content-type'] = apiDetail.contentType
-      } else if (apiDetail.paramType === 'formdata') {
+      } else if (apiDetail.paramType === 'formdata' || apiDetail.paramType === 'form-data') {
         params.header['content-type'] = 'application/x-www-form-urlencoded'
       }
       const appConfig = appStore.appObject[apiDetail.appKey as string]
@@ -249,7 +253,7 @@ export default (): Types => {
       json.header = renderCodeJsonByParams(paramsData.header)
       json.query = renderCodeJsonByParams(paramsData.query)
       // 处理body
-      if (apiDetail.paramType == 'formdata') {
+      if (apiDetail.paramType == 'formdata' || apiDetail.paramType === 'form-data') {
         const formData = new FormData()
         json.body.forEach((item) => {
           if (item.type === 'file') {

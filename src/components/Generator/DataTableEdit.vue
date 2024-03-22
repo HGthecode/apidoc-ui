@@ -4,7 +4,7 @@
       <b>{{ props.option.title }}</b>
       <span>{{ t('generator.model.name') }}：</span>
       <!-- <span>{{ props.option.path }}\</span> -->
-      <span>{{ replaceAppConfigKeys(appStore.appObject[props.appKey], props.option.path) }}\</span>
+      <span>{{ replacePathParam(props.option.path) }}\</span>
 
       <a-input v-model:value="state.modelName" style="width: 160px" @change="onModelNameChange" />
       ，
@@ -40,6 +40,7 @@
     checkStringRules,
     createRandKey,
     replaceAppConfigKeys,
+    replaceStringByParam,
   } from '/@/utils/helper'
   import { ObjectType } from '/#/index'
   import { ColumnItem } from '../EditTable/types'
@@ -54,6 +55,7 @@
       option: any
       data: any
       fieldTypes: string[]
+      formData: ObjectType<any>
     }>(),
     {},
   )
@@ -208,6 +210,12 @@
 
   renderTableColumns()
 
+  function replacePathParam(path: string): string {
+    let newPath = replaceAppConfigKeys(appStore.appObject[props.appKey], path)
+    newPath = replaceStringByParam(newPath, props.formData)
+    return newPath
+  }
+
   function onModelNameChange(e: any) {
     const { value } = e.target
     if (value) {
@@ -343,8 +351,9 @@
       table_name: tableName,
       model_name: modelName,
       table_comment: state.tableComment,
-      namespace: props.option && props.option.namespace ? props.option.namespace : '',
-      model_path: props.option && props.option.path ? props.option.path : '',
+      namespace:
+        props.option && props.option.namespace ? replacePathParam(props.option.namespace) : '',
+      model_path: props.option && props.option.path ? replacePathParam(props.option.path) : '',
       template: props.option && props.option.template ? props.option.template : '',
       datas: datas,
     }

@@ -1,6 +1,6 @@
 {
   "name": "apidoc-ui",
-  "version": "3.1.1",
+  "version": "3.1.2",
   "author": "HG-CODE",
   "scripts": {
     "dev": "vite --mode development",
