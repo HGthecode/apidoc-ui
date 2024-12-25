@@ -12,10 +12,6 @@ import { AxiosRequestHeaders } from 'axios'
  * @param appKey
  * @returns
  */
-// interface Json {
-//   header:AxiosRequestHeaders,
-
-// }
 export const mergeGlobalParams = (
   json: ObjectType<AxiosRequestHeaders>,
   globalParams: ConfigGlobalParams,

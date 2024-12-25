@@ -62,6 +62,17 @@
             :tableProps="{ scroll: state.tableScroll }"
           />
         </a-tab-pane>
+        <a-tab-pane
+          v-if="props.detail.responseStatus && props.detail.responseStatus.length"
+          key="status"
+          :tab="t('apiPage.responsesStatus')"
+        >
+          <table-card
+            :columns="state.responseStatusColumns"
+            :data="props.detail.responseStatus"
+            :tableProps="{ scroll: state.tableScroll }"
+          />
+        </a-tab-pane>
       </a-tabs>
     </div>
   </div>
@@ -77,7 +88,6 @@
   import { useAppStore } from '/@/store'
 
   const appStore = useAppStore()
-  // import { CheckOutlined } from '@ant-design/icons-vue'
 
   const { t } = useI18n()
   const props = withDefaults(
@@ -124,6 +134,22 @@
   const state = reactive({
     paramsColumns: paramsColumns,
     returnColumns: returnColumns,
+    responseStatusColumns: [
+      {
+        title: t('apiPage.responsesStatus.name'),
+        dataIndex: 'name',
+        width: 100,
+      },
+      {
+        title: t('apiPage.responsesStatus.contentType'),
+        dataIndex: 'contentType',
+        width: 180,
+      },
+      {
+        title: t('apiPage.common.desc'),
+        dataIndex: 'desc',
+      },
+    ],
     tableScroll: {
       x: '700px',
       y: '100%',

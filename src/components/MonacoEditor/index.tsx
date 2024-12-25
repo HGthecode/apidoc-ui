@@ -11,7 +11,7 @@ export default defineComponent({
       required: true,
     },
     onChange: {
-      type: Function as PropType<(value: string) => void>,
+      type: Function as PropType<(value: string, e: any) => void>,
     },
     height: {
       type: String as PropType<string>,

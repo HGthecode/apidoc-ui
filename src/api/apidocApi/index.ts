@@ -20,6 +20,7 @@ import {
   GetApiShareListParams,
   ApiShareListResult,
   HandleApiShareActionParams,
+  ExportSwaggerParams,
 } from './types'
 
 export enum URL {
@@ -39,6 +40,7 @@ export enum URL {
   deleteApiShare = '/deleteApiShare',
   getShareApiMenus = '/getShareApiMenus',
   handleApiShareAction = '/handleApiShareAction',
+  exportSwagger = '/exportSwagger',
 }
 
 export default class globalApi {
@@ -81,4 +83,6 @@ export default class globalApi {
     post<ApiMenusResult>({ url: URL.getShareApiMenus, data })
   static handleApiShareAction = async (data: HandleApiShareActionParams) =>
     post<any>({ url: URL.handleApiShareAction, data })
+  static exportSwagger = async (data: ExportSwaggerParams) =>
+    post<any>({ url: URL.exportSwagger, data })
 }

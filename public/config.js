@@ -9,12 +9,7 @@ window.apidocFeConfig = {
   },
   HTTP: {
     // 接口请求地址
-    HOSTS:[
-      {
-        title:"tp6",
-        host:"http://tp6.apidoc-demo.com"
-      }
-    ],
+    HOSTS:[],
     // 请求前缀地址
     // API_PREFIX:"/apidoc",
     // 接口响应超时时间
@@ -80,9 +75,22 @@ window.apidocFeConfig = {
         }
       })
     },
+    // 自定义设置token到全局请求参数
+    setToken(param){
+      return new Promise((resolve, reject) => {
+        const token=`Bearer ${param.value}`
+        this.setGlobalHeader({
+          ...param,
+          value:token
+        })
+        .then(()=>resolve(param))
+        .catch(err=>reject(err))
+      })
+    }
   },
   // （选配）自定义mock规则
-  MOCK_EXTENDS:{},
+  MOCK_EXTENDS:{
+  },
   // （选配）自定义方法
   CUSTOM_METHODS:{},
   // 多语言
@@ -113,6 +121,9 @@ window.apidocFeConfig = {
         "common.copy": "复制",
         "common.copySuccess": "复制成功",
         "common.copyUrl": "复制链接",
+        "common.exportSwaggerJson": "导出Swagger.json",
+        "common.exportSuccess": "导出成功",
+        "common.exportError": "导出失败：{message}",
         "common.actionSuccess": "操作成功",
         "common.page.404": "404-未知页面",
         "common.notdata": "暂无数据",
@@ -151,8 +162,12 @@ window.apidocFeConfig = {
         "apiPage.routeParam.title": "路由参数Route",
         "apiPage.title.responses": "响应结果",
         "apiPage.responses": "响应结果",
-        "apiPage.responses.success": "成功响应",
-        "apiPage.responses.error": "错误响应",
+        "apiPage.responses.success": "成功响应体",
+        "apiPage.responses.error": "错误响应体",
+        "apiPage.responsesStatus": "响应状态码",
+        "apiPage.responsesStatus.name": "状态码",
+        "apiPage.responsesStatus.contentType": "Content-Type",
+
         "apiPage.mdDetail.title": "{name} 字段的说明",
         "apiPage.debug.param.reload": "重置参数",
         "apiPage.debug.header": "Header",
@@ -164,6 +179,7 @@ window.apidocFeConfig = {
         "apiPage.debug.reloadParamsAndExcute": "重置所有参数并执行",
         "apiPage.debug.selectFile": "Select File",
         "apiPage.debug.selectFiles": "Select Files",
+        "apiPage.debug.useGlobalParams": "使用全局参数",
 
         "apiPage.common.field": "字段名",
         "apiPage.common.value": "字段值",

@@ -42,6 +42,16 @@
                 <div>
                   <a @click="onCopyLink(item)">{{ t(`common.copyUrl`) }}</a>
                   <a
+                    v-if="
+                      appStore.serverConfig &&
+                      appStore.serverConfig.export_config &&
+                      appStore.serverConfig.export_config.enable
+                    "
+                    @click="onExportSwaggerJson(item)"
+                    >{{ t(`common.exportSwaggerJson`) }}</a
+                  >
+
+                  <a
                     v-for="(action, actionIndex) in appStore.serverConfig.share?.actions"
                     :key="actionIndex"
                     @click="onItemActionClick(item, actionIndex)"
@@ -180,6 +190,24 @@
           eval(res.data)
         }
       })
+  }
+  const onExportSwaggerJson = (item) => {
+    apidocApi.exportSwagger({ key: item.key }).then((res) => {
+      try {
+        const jsonString = JSON.stringify(res.data, null, 2)
+        const blob = new Blob([jsonString], { type: 'application/json' })
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `swagger-${item.name}.json`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        window.URL.revokeObjectURL(url)
+      } catch (error) {
+        message.error(t('common.exportError', { message: error }))
+      }
+    })
   }
 </script>
 

@@ -126,7 +126,7 @@
         </a-col>
       </a-row>
       <div v-if="appStore.feConfig.SHOW_VERSION !== false" class="footer-version"
-        >Version：{{ APP_VERSION }}</div
+        >Ui Version：{{ APP_VERSION }}</div
       >
     </div>
   </div>

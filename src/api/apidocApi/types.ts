@@ -61,6 +61,12 @@ export interface ApiDetailResult extends ApiMenuItem {
   responseSuccessMd?: string
   responseErrorMd?: string
   appKey?: string
+  responseStatus?: ResponseStatusItem[]
+}
+
+export interface ResponseStatusItem {
+  name: string
+  desc: string
 }
 
 export interface ApiDetailParamItem {
@@ -175,4 +181,8 @@ export interface ApiShareListItem {
 export interface HandleApiShareActionParams {
   key: string
   index: number
+}
+
+export interface ExportSwaggerParams {
+  key: string
 }

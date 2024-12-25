@@ -16,6 +16,11 @@ export interface ConfigResult {
   generator?: ConfigGeneratorItem[]
   code_template?: ConfigCodeTemplateItem[]
   share?: ConfigShare
+  export_config?: ExportConfig
+}
+
+export interface ExportConfig {
+  enable: boolean
 }
 
 export interface ConfigShare {
