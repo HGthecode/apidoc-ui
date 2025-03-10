@@ -31,7 +31,7 @@
     "pinia": "^2.0.14",
     "vite-plugin-monaco-editor": "1.1.0",
     "vue": "^3.2.36",
-    "vue-i18n": "^9.1.10",
+    "vue-i18n": "^9.14.3",
     "vue-router": "^4.0.15"
   },
   "devDependencies": {
